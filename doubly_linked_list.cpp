@@ -76,6 +76,7 @@ public:
                 pos--;
             }
             temp->prev->next = newNode;
+            temp->prev = newNode;
             newNode->prev = temp->prev;
             newNode->next = temp;
         }
