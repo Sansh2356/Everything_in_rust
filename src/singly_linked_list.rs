@@ -35,6 +35,30 @@ where
     tail: Option<NonNull<Node<T>>>,
     len: usize,
 }
+pub trait Sorter<T>
+where
+    T: Ord,
+{
+    fn sort(slice: &mut [T]);
+}
+pub struct BubbleSort;
+
+impl<T> Sorter<T> for BubbleSort
+where
+    T: Ord,
+{
+    fn sort(slice: &mut [T]) {}
+}
+pub fn random_external_sorter<T: Ord, S: Sorter<T>>(slice: &mut [T]) {
+    S::sort(slice);
+}
+#[test]
+fn random_sort_test() {
+    let mut test_slice = vec![1, 2, 5, 3];
+    random_external_sorter::<i32, BubbleSort>(&mut test_slice);
+    BubbleSort::sort(&mut test_slice);
+    assert_eq!(test_slice, [1, 2, 3, 5]);
+}
 
 impl<T> LinkedList<T>
 where
@@ -246,7 +270,6 @@ where
         self.iter()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
