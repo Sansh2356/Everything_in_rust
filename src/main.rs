@@ -8,7 +8,6 @@ fn solve(stdin: Stdin) {
         }
     };
     let input = buffer.trim();
-
     let mut n = input.parse::<usize>().unwrap();
     let mut words: Vec<String> = Vec::with_capacity(n);
     for line in stdin.lines() {
@@ -16,11 +15,11 @@ fn solve(stdin: Stdin) {
             words.push(word);
         }
         n -= 1;
-        if n <= 0 {
+        if n == 0 {
             break;
         }
     }
-    for word in words {
+for word in words {
         if word.len() > 10 {
             let first_char = word.chars().next().unwrap();
             let second_char = &word[word.len() - 1..];
