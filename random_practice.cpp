@@ -6,31 +6,118 @@
 #include <unordered_map>
 #include <map>
 #include <queue>
+#include <deque>
+#include <stack>
 #include <algorithm>
 #include <iostream>
 #include <vector>
+typedef long long ll;
 using namespace std;
 
-// const int MOD = 1e9 + 7;
-// const int MOD = 998244353;
 const int MOD = 1e9 + 7;
+
+#define debarr(a, n)            \
+    cout << #a << " : ";        \
+    for (int i = 0; i < n; i++) \
+        cerr << a[i] << " ";    \
+    cerr << endl;
+#define debmat(mat, row, col)         \
+    cout << #mat << " :\n";           \
+    for (int i = 0; i < row; i++)     \
+    {                                 \
+        for (int j = 0; j < col; j++) \
+            cerr << mat[i][j] << " "; \
+        cerr << endl;                 \
+    }
+#define pr(...) dbs(#__VA_ARGS__, __VA_ARGS__)
+template <class S, class T>
+ostream &operator<<(ostream &os, const pair<S, T> &p) { return os << "(" << p.first << ", " << p.second << ")"; }
+template <class T>
+ostream &operator<<(ostream &os, const vector<T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class T>
+ostream &operator<<(ostream &os, const unordered_set<T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class S, class T>
+ostream &operator<<(ostream &os, const unordered_map<S, T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class T>
+ostream &operator<<(ostream &os, const set<T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class T>
+ostream &operator<<(ostream &os, const multiset<T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class S, class T>
+ostream &operator<<(ostream &os, const map<S, T> &p)
+{
+    os << "[ ";
+    for (auto &it : p)
+        os << it << " ";
+    return os << "]";
+}
+template <class T>
+void dbs(string str, T t) { cerr << str << " : " << t << "\n"; }
+template <class T, class... S>
+void dbs(string str, T t, S... s)
+{
+    int idx = str.find(',');
+    cerr << str.substr(0, idx) << " : " << t << ",";
+    dbs(str.substr(idx + 1), s...);
+}
+template <class T>
+void prc(T a, T b)
+{
+    cerr << "[";
+    for (T i = a; i != b; ++i)
+    {
+        if (i != a)
+            cerr << ", ";
+        cerr << *i;
+    }
+    cerr << "]\n";
+}
 
 // Assuming a < b, log (min(a,b))
 // With the help of if a <= b/2 then a % b < b/2 else if a > b/2 then a % b  = (a-b)
-long long gcd(long long a, long long b)
+ll gcd(ll a, ll b)
 {
     if (a == 0)
         return b;
     return gcd(b % a, a);
 }
-long long lcm(long long a, long long b)
+ll lcm(ll a, ll b)
 {
     return (a * b) / gcd(a, b);
 }
 // O(root(n)) for all num <= 1e12
-bool is_prime(long long num)
+bool is_prime(ll num)
 {
-    for (long long x = 2; x * x <= num; x++)
+    for (ll x = 2; x * x <= num; x++)
     {
         if (num % x == 0)
             return false;
@@ -38,10 +125,10 @@ bool is_prime(long long num)
     return true;
 }
 // n <= 1e12
-vector<long long> single_divisor(long long n)
+vector<ll> single_divisor(ll n)
 {
-    vector<long long> ans;
-    for (long long x = 1; x * x <= n; x++)
+    vector<ll> ans;
+    for (ll x = 1; x * x <= n; x++)
     {
         if (n % x == 0)
         {
@@ -55,10 +142,10 @@ vector<long long> single_divisor(long long n)
     return ans;
 }
 
-set<long long> cream_puff(long long n)
+set<ll> cream_puff(ll n)
 {
-    set<long long> ans;
-    for (long long x = 1; x * x <= n; x++)
+    set<ll> ans;
+    for (ll x = 1; x * x <= n; x++)
     {
         if (n % x == 0)
         {
@@ -71,7 +158,7 @@ set<long long> cream_puff(long long n)
     }
     return ans;
 }
-long long binpow(long long base, long long exponent, long long prime = MOD)
+ll binpow(ll base, ll exponent, ll prime = MOD)
 {
     if (exponent == 0)
         return 1;
@@ -81,11 +168,11 @@ long long binpow(long long base, long long exponent, long long prime = MOD)
     }
     else
     {
-        long long temp = binpow(base, exponent / 2, prime);
+        ll temp = binpow(base, exponent / 2, prime);
         return ((temp % prime) * (temp % prime)) % prime;
     }
 }
-long long binadd(long long base, long long exponent, long long prime = MOD)
+ll binadd(ll base, ll exponent, ll prime = MOD)
 {
     if (exponent == 0)
         return 0;
@@ -95,11 +182,11 @@ long long binadd(long long base, long long exponent, long long prime = MOD)
     }
     else
     {
-        long long temp = binadd(base, exponent / 2, prime);
+        ll temp = binadd(base, exponent / 2, prime);
         return ((temp % prime) + (temp % prime)) % prime;
     }
 }
-long long binpow_no_mod(long long base, long long exponent)
+ll binpow_no_mod(ll base, ll exponent)
 {
     if (exponent == 0)
         return 1;
@@ -109,66 +196,66 @@ long long binpow_no_mod(long long base, long long exponent)
     }
     else
     {
-        long long temp = binpow(base, exponent / 2);
+        ll temp = binpow(base, exponent / 2);
         return ((temp) * (temp));
     }
 }
-long long inverse(long long base, long long prime)
+ll inverse(ll base, ll prime)
 {
     return binpow(base, prime - 2, prime);
 }
-const long long inverse_2 = inverse(2, MOD);
-long long add(long long a, long long b, long long prime)
+const ll inverse_2 = inverse(2, MOD);
+ll add(ll a, ll b, ll prime)
 {
     return ((a % prime) + (b % prime)) % prime;
 }
-long long divide(long long a, long long b, long long prime)
+ll divide(ll a, ll b, ll prime)
 {
-    long long inv = inverse(b, prime);
+    ll inv = inverse(b, prime);
     return ((a % prime) * (inv % prime)) % prime;
 }
-long long mul(long long a, long long b, long long prime)
+ll mul(ll a, ll b, ll prime)
 {
     return ((a % prime) * (b % prime)) % prime;
 }
-long long subtract(long long a, long long b, long long prime)
+ll subtract(ll a, ll b, ll prime)
 {
     return (((a % prime) - (b % prime)) + prime) % prime;
 }
 
-long long fact[1000100];
-long long inv_arr[1000100];
-void factorial(long long prime)
+ll fact[1000100];
+ll inv_arr[1000100];
+void factorial(ll prime)
 {
     fact[0] = 1;
-    for (long long i = 1; i <= 1000000; i++)
+    for (ll i = 1; i <= 1000000; i++)
     {
         fact[i] = (fact[i - 1] * i) % prime;
     }
     inv_arr[1000000] = inverse(fact[1000000], prime);
-    for (long long x = 1000000; x >= 1; x--)
+    for (ll x = 1000000; x >= 1; x--)
     {
         inv_arr[x - 1] = (inv_arr[x] * x) % prime;
     }
 }
 // valide n<= 1e6
-long long ncr(long long n, long long r, long long prime)
+ll ncr(ll n, ll r, ll prime)
 {
-    long long numerator = fact[n];
-    long long a = inv_arr[n - r];
-    long long b = inv_arr[r];
-    long long c = (a * b) % prime;
+    ll numerator = fact[n];
+    ll a = inv_arr[n - r];
+    ll b = inv_arr[r];
+    ll c = (a * b) % prime;
     return (numerator * c) % prime;
 }
-long long slower_ncr(long long n, long long r, long long prime)
+ll slower_ncr(ll n, ll r, ll prime)
 {
-    long long numerator = fact[n];
-    long long denominator = ((fact[n - r] % prime) * (fact[r] % prime)) % prime;
+    ll numerator = fact[n];
+    ll denominator = ((fact[n - r] % prime) * (fact[r] % prime)) % prime;
     return ((numerator % prime) * (inverse(denominator, prime) % prime)) % prime;
 }
-long long table[1001][1001];
+ll table[1001][1001];
 // valid for n<=1000
-long long ncr_table(long long n, long long r, long long prime)
+ll ncr_table(ll n, ll r, ll prime)
 {
     // ncr = n-1cr-1 + n-1cr
     table[0][0] = 1;
@@ -199,28 +286,28 @@ int single_ncr(int n, int r)
     }
     return (num * inverse(den, MOD)) % MOD;
 }
-long long dearrange[1000001];
+ll dearrange[1000001];
 // 10e6 O(N)
-void dearrangement(long long n)
+void dearrangement(ll n)
 {
     dearrange[1] = 0;
     dearrange[2] = 1;
 
-    for (long long x = 3; x <= n; x++)
+    for (ll x = 3; x <= n; x++)
     {
         dearrange[x] = ((x - 1) * (dearrange[x - 1] + dearrange[x - 2])) % MOD;
     }
 }
-long long npr(long long a, long long b, long long prime)
+ll npr(ll a, ll b, ll prime)
 {
-    long long n = fact[a];
-    long long r = fact[(a - b)];
-    long long dinv = inverse(r, prime);
+    ll n = fact[a];
+    ll r = fact[(a - b)];
+    ll dinv = inverse(r, prime);
     return (n * dinv) % MOD;
 }
-vector<vector<long long>> ncr_table_2(long long n, long long r, long long prime)
+vector<vector<ll>> ncr_table_2(ll n, ll r, ll prime)
 {
-    vector<vector<long long>> local(31, vector<long long>(31, 0));
+    vector<vector<ll>> local(31, vector<ll>(31, 0));
     // ncr = n-1cr-1 + n-1cr
     local[0][0] = 1;
     for (int x = 1; x <= n; x++)
@@ -240,7 +327,7 @@ vector<vector<long long>> ncr_table_2(long long n, long long r, long long prime)
     return local;
 }
 
-bool cmp(pair<long long, long long> &p1, pair<long long, long long> &p2)
+bool cmp(pair<ll, ll> &p1, pair<ll, ll> &p2)
 {
     if (p1.first == p2.first)
     {
@@ -254,16 +341,16 @@ bool primes_arr[10000001];
 //  n<=10e7
 void compute_primes()
 {
-    for (long long x = 2; x <= 10000000; x++)
+    for (ll x = 2; x <= 10000000; x++)
     {
         primes_arr[x] = true;
     }
     primes_arr[1] = false;
-    for (long long x = 2; x <= 10000000; x++)
+    for (ll x = 2; x <= 10000000; x++)
     {
         if (primes_arr[x] == true)
         {
-            for (long long y = x * x; y <= 10000000; y += x)
+            for (ll y = x * x; y <= 10000000; y += x)
             {
                 primes_arr[y] = false;
             }
@@ -272,16 +359,16 @@ void compute_primes()
 }
 void slow_compute_primes()
 {
-    for (long long x = 2; x <= 1000; x++)
+    for (ll x = 2; x <= 1000; x++)
     {
         primes_arr[x] = true;
     }
     primes_arr[1] = false;
-    for (long long x = 2; x <= 1000; x++)
+    for (ll x = 2; x <= 1000; x++)
     {
         if (primes_arr[x] == true)
         {
-            for (long long y = 2 * x; y <= 1000; y += x)
+            for (ll y = 2 * x; y <= 1000; y += x)
             {
                 primes_arr[y] = false;
             }
@@ -290,12 +377,12 @@ void slow_compute_primes()
 }
 // b>a and finding primes within the range [a,b]
 // finding in a complexity of O((b-a)log log b)
-vector<long long> segmeneted_sieve(long long a, long long b)
+vector<ll> segmeneted_sieve(ll a, ll b)
 {
     // Finding primes within the range of [1,root(b)] using normal sieve
     // giving out time complexity of O(root(b)log(log(root(b))))
-    vector<long long> local_sieve;
-    for (long long x = 1; x * x <= b; x++)
+    vector<ll> local_sieve;
+    for (ll x = 1; x * x <= b; x++)
     {
         if (primes_arr[x] == true)
         {
@@ -311,19 +398,19 @@ vector<long long> segmeneted_sieve(long long a, long long b)
     // Then for each prime in range of [1,root(b)] we can compute
     // all its multiples and those will be composite except if the
     // number within the range if equal to prime itself.
-    for (long long x = 0; x < local_sieve.size(); x++)
+    for (ll x = 0; x < local_sieve.size(); x++)
     {
-        long long curr_prime = local_sieve[x];
+        ll curr_prime = local_sieve[x];
         // First multiple of prime > a
-        long long rem = a % curr_prime;
-        long long first_multiple = -1;
+        ll rem = a % curr_prime;
+        ll first_multiple = -1;
         if (rem == 0)
         {
             first_multiple = a;
         }
         else
         {
-            long long temp = (a - rem) + curr_prime;
+            ll temp = (a - rem) + curr_prime;
             first_multiple = temp;
         }
         while (first_multiple <= b)
@@ -338,8 +425,8 @@ vector<long long> segmeneted_sieve(long long a, long long b)
             first_multiple += curr_prime;
         }
     }
-    vector<long long> v;
-    for (long long x = 0; x < res.size(); x++)
+    vector<ll> v;
+    for (ll x = 0; x < res.size(); x++)
     {
         if (res[x] == true)
         {
@@ -349,10 +436,10 @@ vector<long long> segmeneted_sieve(long long a, long long b)
     return v;
 }
 
-long long factors[1000001];
+ll factors[1000001];
 // log n factors n<=10e7
 
-void build_spf(long long n)
+void build_spf(ll n)
 {
     for (int x = 2; x <= n; x++)
     {
@@ -375,9 +462,9 @@ void build_spf(long long n)
     }
 }
 // O(log n) n<=10e7
-unordered_map<long long, long long> compute_factors(long long num)
+unordered_map<ll, ll> compute_factors(ll num)
 {
-    unordered_map<long long, long long> ans;
+    unordered_map<ll, ll> ans;
     while (num >= 2 && factors[num] != num)
     {
         ans[factors[num]]++;
@@ -390,10 +477,10 @@ unordered_map<long long, long long> compute_factors(long long num)
     return ans;
 }
 // n<=10e12
-vector<pair<long long, long long>> Factors(long long x)
+vector<pair<ll, ll>> Factors(ll x)
 {
-    vector<pair<long long, long long>> ans;
-    for (long long i = 2; i * i <= x; i++)
+    vector<pair<ll, ll>> ans;
+    for (ll i = 2; i * i <= x; i++)
     {
         if (x % i == 0)
         {
@@ -410,10 +497,10 @@ vector<pair<long long, long long>> Factors(long long x)
         ans.push_back({x, 1});
     return ans;
 }
-unordered_map<long long, long long> factors_mapping(long long x)
+unordered_map<ll, ll> factors_mapping(ll x)
 {
-    unordered_map<long long, long long> ans;
-    for (long long i = 2; i * i <= x; i++)
+    unordered_map<ll, ll> ans;
+    for (ll i = 2; i * i <= x; i++)
     {
         if (x % i == 0)
         {
@@ -431,7 +518,7 @@ unordered_map<long long, long long> factors_mapping(long long x)
     return ans;
 }
 // Sum of divisors and number of divisors and euler totient function
-long long euler_arr[10000001];
+ll euler_arr[10000001];
 /*
     co primes within the range of [1,x]
     will follow the closed relation as x*(1-1/p1)*(1-1/p2)....(1-1/pk)
@@ -449,15 +536,15 @@ long long euler_arr[10000001];
 */
 void compute_co_prime()
 {
-    for (long long x = 1; x <= 10000000; x++)
+    for (ll x = 1; x <= 10000000; x++)
     {
         euler_arr[x] = x;
     }
-    for (long long x = 2; x <= 10000000; x++)
+    for (ll x = 2; x <= 10000000; x++)
     {
         if (primes_arr[x] == true)
         {
-            for (long long y = x; y <= 10000000; y += x)
+            for (ll y = x; y <= 10000000; y += x)
             {
                 euler_arr[y] -= euler_arr[y] / x;
             }
@@ -465,10 +552,10 @@ void compute_co_prime()
     }
 }
 // n<=10e7
-long long number_of_divisors(long long num)
+ll number_of_divisors(ll num)
 {
-    unordered_map<long long, long long> freq = compute_factors(num);
-    long long prod = 1;
+    unordered_map<ll, ll> freq = compute_factors(num);
+    ll prod = 1;
     for (auto it : freq)
     {
         prod = (prod * (it.second + 1));
@@ -479,43 +566,43 @@ long long number_of_divisors(long long num)
     a^x mod(m) = (a^(x%totient(m)))%m where x and m are co-prime the given is euler's theorem
     n<=10e7
 */
-long long sum_of_divisors(long long num)
+ll sum_of_divisors(ll num)
 {
     /*
         sum(n) = p1^ax+1-1/p-1+.....
     */
-    long long ans = 1;
-    unordered_map<long long, long long> m = compute_factors(num);
+    ll ans = 1;
+    unordered_map<ll, ll> m = compute_factors(num);
     for (auto it : m)
     {
-        long long factor = it.first;
-        long long power = it.second;
-        long long numerator = ((binpow(factor, power + 1, MOD) - 1) + MOD) % MOD;
-        long long denominator = ((factor - 1) + MOD) % MOD;
-        long long dinv = inverse(denominator, MOD);
+        ll factor = it.first;
+        ll power = it.second;
+        ll numerator = ((binpow(factor, power + 1, MOD) - 1) + MOD) % MOD;
+        ll denominator = ((factor - 1) + MOD) % MOD;
+        ll dinv = inverse(denominator, MOD);
         ans = ((ans % MOD) * ((numerator * dinv) % MOD)) % MOD;
     }
     return ans;
 }
 // n<=10e7
-long long product_of_divisors(long long num)
+ll product_of_divisors(ll num)
 {
     /*
         Product of divisors = product(pi^(ai*(number of divisors)/2))
     */
-    long long ans = 1;
-    unordered_map<long long, long long> m = compute_factors(num);
-    long long num_divisors = number_of_divisors(num);
+    ll ans = 1;
+    unordered_map<ll, ll> m = compute_factors(num);
+    ll num_divisors = number_of_divisors(num);
     for (auto it : m)
     {
-        long long power = (it.second * num_divisors) / 2;
-        long long val = binpow(it.first, power, MOD);
+        ll power = (it.second * num_divisors) / 2;
+        ll val = binpow(it.first, power, MOD);
         ans = (ans * val) % MOD;
     }
     return ans;
 }
 
-void rec(string &s, long long idx, vector<string> &ans)
+void rec(string &s, ll idx, vector<string> &ans)
 {
     if (idx >= s.length())
     {
@@ -545,19 +632,19 @@ void rec(string &s, long long idx, vector<string> &ans)
     O(root(x)+log(x)*log(n))
 */
 // for x <=10e18
-long long maximum_power(long long x, long long factorial_value)
+ll maximum_power(ll x, ll factorial_value)
 {
     // O(root(X))
-    vector<pair<long long, long long>> factors = Factors(x);
+    vector<pair<ll, ll>> factors = Factors(x);
     // O(log(X))
-    long long ans = INT_MAX;
+    ll ans = INT_MAX;
     for (auto factor : factors)
     {
-        long long fact = factor.first;
-        long long max_power = factor.second;
-        long long power_counter = 1;
-        long long initial_value = floor(factorial_value / binpow(fact, power_counter, MOD));
-        long long running_sum = initial_value;
+        ll fact = factor.first;
+        ll max_power = factor.second;
+        ll power_counter = 1;
+        ll initial_value = floor(factorial_value / binpow(fact, power_counter, MOD));
+        ll running_sum = initial_value;
         while (1)
         {
             power_counter++;
@@ -568,31 +655,31 @@ long long maximum_power(long long x, long long factorial_value)
                 break;
             running_sum += initial_value;
         }
-        ans = min(ans, (long long)floor(running_sum / max_power));
+        ans = min(ans, (ll)floor(running_sum / max_power));
     }
     return ans;
 }
-long long GET(long long n, long long m)
+ll GET(ll n, ll m)
 {
-    long long q = n / m;
-    long long r = n % m;
+    ll q = n / m;
+    ll r = n % m;
 
-    long long cycle = (((m % MOD) * ((m - 1) % MOD)) % MOD * inverse(2, MOD)) % MOD;
-    long long rem = (((r % MOD) * ((r + 1) % MOD)) % MOD * inverse(2, MOD)) % MOD;
+    ll cycle = (((m % MOD) * ((m - 1) % MOD)) % MOD * inverse(2, MOD)) % MOD;
+    ll rem = (((r % MOD) * ((r + 1) % MOD)) % MOD * inverse(2, MOD)) % MOD;
 
     return (((q % MOD) * cycle) % MOD + rem) % MOD;
 }
 // Harmonic lemma,from which: O(root(n))
-long long harmonic_lemma_value(long long n, long long m)
+ll harmonic_lemma_value(ll n, ll m)
 {
 
-    long long last_item_in_range = -1;
-    long long ans = 0;
-    for (long long x = 1; x <= n; x = last_item_in_range + 1)
+    ll last_item_in_range = -1;
+    ll ans = 0;
+    for (ll x = 1; x <= n; x = last_item_in_range + 1)
     {
-        long long deno = (n / x);
+        ll deno = (n / x);
         last_item_in_range = (n / deno);
-        long long total_items = (last_item_in_range - x + 1);
+        ll total_items = (last_item_in_range - x + 1);
         cout << last_item_in_range << " " << total_items << endl;
         cout << "X value " << x << endl;
         ans = (ans + (((total_items % MOD) * (binpow(deno, m, MOD) % MOD)) % MOD)) % MOD;
@@ -600,33 +687,33 @@ long long harmonic_lemma_value(long long n, long long m)
     return ans % MOD;
 }
 // Sum of sum of divisors within range [1,n] having tc of O(root(n)) due to harmonic lemma.
-long long sum_of_divisors(long long n, long long m)
+ll sum_of_divisors(ll n, ll m)
 {
 
-    long long last_item_in_range = -1;
-    long long ans = 0;
-    for (long long x = 1; x <= n; x = last_item_in_range + 1)
+    ll last_item_in_range = -1;
+    ll ans = 0;
+    for (ll x = 1; x <= n; x = last_item_in_range + 1)
     {
-        long long deno = (n / x);
+        ll deno = (n / x);
         last_item_in_range = (n / deno);
 
-        long long total_items = (last_item_in_range - x + 1);
-        long long sum_1 = ((((((x - 1) + MOD) % MOD) * (x % MOD)) % MOD) * inverse_2) % MOD;
-        long long sum_2 = ((((last_item_in_range % MOD) * ((last_item_in_range + 1) % MOD)) % MOD) * inverse_2) % MOD;
-        long long total_sum = ((sum_2 - sum_1) + MOD) % MOD;
+        ll total_items = (last_item_in_range - x + 1);
+        ll sum_1 = ((((((x - 1) + MOD) % MOD) * (x % MOD)) % MOD) * inverse_2) % MOD;
+        ll sum_2 = ((((last_item_in_range % MOD) * ((last_item_in_range + 1) % MOD)) % MOD) * inverse_2) % MOD;
+        ll total_sum = ((sum_2 - sum_1) + MOD) % MOD;
 
         ans = (ans + (((deno * total_sum) % MOD)) % MOD) % MOD;
     }
     return ans % MOD;
 }
-long long atc_144(long long num)
+ll atc_144(ll num)
 {
-    long long mini = 1e12;
-    for (long long x = 1; x * x <= num; x++)
+    ll mini = 1e12;
+    for (ll x = 1; x * x <= num; x++)
     {
         if (num % x == 0)
         {
-            long long local = 0;
+            ll local = 0;
             local += (x - 1);
             if (num / x != x)
             {
@@ -646,10 +733,10 @@ int maxProfit(vector<int> &inventory, int orders)
 {
     return -1;
 }
-long long basic_ncr(long long n, long long r)
+ll basic_ncr(ll n, ll r)
 {
-    long long ans = 1;
-    for (long long i = 1; i <= r; i++)
+    ll ans = 1;
+    for (ll i = 1; i <= r; i++)
     {
         ans = ans * (n - i + 1);
         ans = ans / i;
@@ -659,20 +746,20 @@ long long basic_ncr(long long n, long long r)
 class RandomClass
 {
 public:
-    multiset<long long> m1;
-    multiset<long long> rest;
-    long long curr_sum;
-    long long capacity;
-    RandomClass(long long cap)
+    multiset<ll> m1;
+    multiset<ll> rest;
+    ll curr_sum;
+    ll capacity;
+    RandomClass(ll cap)
     {
         this->curr_sum = 0;
         this->capacity = cap;
     }
-    void add(long long num)
+    void add(ll num)
     {
         if (m1.size() >= capacity)
         {
-            long long smallest = *(m1.begin());
+            ll smallest = *(m1.begin());
             if (smallest < num)
             {
                 m1.erase(m1.begin());
@@ -693,7 +780,7 @@ public:
             curr_sum += num;
         }
     }
-    void remove(long long x)
+    void remove(ll x)
     {
         if (m1.count(x))
         {
@@ -701,7 +788,7 @@ public:
             curr_sum -= x;
             if (rest.size() >= 1)
             {
-                long long next_replacement = *(rest.rend());
+                ll next_replacement = *(rest.rend());
                 rest.erase(rest.find(next_replacement));
                 m1.insert(next_replacement);
                 curr_sum += next_replacement;
@@ -712,7 +799,7 @@ public:
             rest.erase(rest.find(x));
         }
     }
-    long long query()
+    ll query()
     {
         return curr_sum;
     }
@@ -720,11 +807,11 @@ public:
 /*
     n+k-1ck-1
 */
-bool check(long long sum, long long a, long long b)
+bool check(ll sum, ll a, ll b)
 {
     while (sum >= 1)
     {
-        long long rem = sum % 10;
+        ll rem = sum % 10;
         if (rem != a && rem != b)
         {
             return false;
@@ -733,13 +820,13 @@ bool check(long long sum, long long a, long long b)
     }
     return true;
 }
-long long expr_val(string expr_3)
+ll expr_val(string expr_3)
 {
     if (expr_3 == "")
         return 0;
-    long long expr_3_val = 0;
-    vector<long long> nums;
-    long long start_idx = -1;
+    ll expr_3_val = 0;
+    vector<ll> nums;
+    ll start_idx = -1;
     if (expr_3[0] == '-')
     {
         string local = "";
@@ -839,15 +926,15 @@ long long expr_val(string expr_3)
     }
     return expr_3_val;
 }
-long long maxSum(vector<int> &nums, int k, int mul)
+ll maxSum(vector<int> &nums, int k, int mul)
 {
     sort(nums.begin(), nums.end());
-    long long ans = 0;
+    ll ans = 0;
     for (int x = nums.size() - 1; x >= 0 && k >= 0; x--)
     {
         if (mul >= 1)
         {
-            ans += (long long)nums[x] * (long long)mul;
+            ans += (ll)nums[x] * (ll)mul;
             mul--;
         }
         else
@@ -901,53 +988,635 @@ void compute_prime_factors(int num, set<int> &st)
         st.insert(num);
     }
 }
-// int divisibleGame_tle(vector<int> &nums)
-// {
-//     int n = INT_MAX;
-//     int ans = INT_MIN;
-//     set<int> st;
-//     for (auto num : nums)
-//     {
-//         compute_prime_factors(num, st);
-//     }
-//     for (auto factor : st)
-//     {
-//         for (int x = 0; x < nums.size(); x++)
-//         {
-//             for (int y = x + 1; y < nums.size(); y++)
-//             {
-//                 int bob_score = 0;
-//                 int alice_score = 0;
-//                 for (int z = x; z <= y; z++)
-//                 {
-//                     if (nums[z] % factor == 0)
-//                     {
-//                         alice_score += nums[z];
-//                     }
-//                     else
-//                     {
-//                         bob_score += nums[z];
-//                     }
-//                 }
-//                 if ((alice_score - bob_score) > ans)
-//                 {
-//                     n = factor;
-//                     ans = (alice_score - bob_score);
-//                 }
-//                 else if ((alice_score - bob_score) == ans)
-//                 {
-//                     n = min(n, factor);
-//                 }
-//             }
-//         }
-//     }
-//     return ans;
-// }
-// int divisibleGame(vector<int> &nums)
-// {
-// }
+int divisibleGame_tle(vector<int> &nums)
+{
+    int n = INT_MAX;
+    int ans = INT_MIN;
+    set<int> st;
+    for (auto num : nums)
+    {
+        compute_prime_factors(num, st);
+    }
+    for (auto factor : st)
+    {
+        for (int x = 0; x < nums.size(); x++)
+        {
+            for (int y = x + 1; y < nums.size(); y++)
+            {
+                int bob_score = 0;
+                int alice_score = 0;
+                for (int z = x; z <= y; z++)
+                {
+                    if (nums[z] % factor == 0)
+                    {
+                        alice_score += nums[z];
+                    }
+                    else
+                    {
+                        bob_score += nums[z];
+                    }
+                }
+                if ((alice_score - bob_score) > ans)
+                {
+                    n = factor;
+                    ans = (alice_score - bob_score);
+                }
+                else if ((alice_score - bob_score) == ans)
+                {
+                    n = min(n, factor);
+                }
+            }
+        }
+    }
+    return ans;
+}
+vector<ll> construct_prefix_overflow(vector<ll> nums)
+{
+    vector<ll> pf_arr(nums.size() + 1);
+    pf_arr[0] = 0;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        ll p = (pf_arr[x] % MOD + nums[x] % MOD);
+        if (p < 0)
+        {
+            pf_arr[x + 1] = (p % MOD + MOD) % MOD;
+        }
+        else
+        {
+
+            pf_arr[x + 1] = p % MOD;
+        }
+    }
+    return pf_arr;
+}
+vector<ll> construct_prefix_2(vector<ll> nums, ll k)
+{
+    vector<ll> pf_arr(nums.size() + 1);
+    pf_arr[0] = 0;
+    vector<ll> bin_arr(pf_arr.size(), 0);
+    for (int x = 0; x < nums.size(); x++)
+    {
+        ll p = pf_arr[x] + nums[x + 1];
+        if (p >= k)
+        {
+            bin_arr[x + 1] = 1;
+        }
+        pf_arr[x + 1] = (pf_arr[x] + nums[x + 1]);
+    }
+    return bin_arr;
+}
+vector<ll> construct_prefix(vector<ll> nums)
+{
+    vector<ll> pf_arr(nums.size() + 1);
+    pf_arr[0] = 0;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        pf_arr[x + 1] = (pf_arr[x] + nums[x + 1]);
+    }
+    return pf_arr;
+}
+vector<ll> partial_sum(vector<vector<ll>> &queries, ll n)
+{
+    vector<ll> diff_arr(n, 0);
+    for (int x = 0; x < queries.size(); x++)
+    {
+        ll l = queries[x][0];
+        ll r = queries[x][1];
+        ll num = queries[x][2];
+        diff_arr[l] += num;
+        if ((r + 1) < diff_arr.size())
+            diff_arr[r + 1] -= num;
+    }
+    vector<ll> after_arr = construct_prefix(diff_arr);
+    return after_arr;
+}
+vector<ll> partial_sum_2(vector<vector<ll>> &queries, ll n, ll k)
+{
+    vector<ll> diff_arr(n, 0);
+    for (int x = 0; x < queries.size(); x++)
+    {
+        ll l = queries[x][0];
+        ll r = queries[x][1];
+        ll num = queries[x][2];
+        diff_arr[l] += num;
+        if ((r + 1) < diff_arr.size())
+            diff_arr[r + 1] -= num;
+    }
+    vector<ll> after_arr = construct_prefix_2(diff_arr, k);
+    return after_arr;
+}
+ll appealSum(string s)
+{
+    ll ans = 0;
+    ll total_subarr = (s.length() * (s.length() + 1)) / 2;
+    ll cnt = 0;
+    unordered_map<char, ll> m;
+    for (int x = 0; x < s.length(); x++)
+    {
+        if (m.count(s[x]) == true)
+        {
+            ll prev_idx = m[s[x]];
+            ll curr_idx = x;
+            ll in_between = (curr_idx - prev_idx) - 1;
+            cnt += (in_between * (in_between + 1)) / 2;
+            m[s[x]] = x;
+        }
+        else
+        {
+            cnt += (x * (x + 1)) / 2;
+            m[s[x]] = x;
+        }
+    }
+    for (auto it : m)
+    {
+        ll last_idx = it.second;
+        ll n = (s.length() - last_idx) - 1;
+        cnt += (n * (n + 1)) / 2;
+    }
+    ans += (m.size() * total_subarr);
+    return ans - cnt;
+}
+// This is a subset of distinct so all the cases which do not include distinct will contribute to it
+// but additionally others containing more than 2 distinct will also contribute to this .
+ll appealSum_2(string s)
+{
+    ll total_subarr = (s.length() * (s.length() + 1)) / 2;
+    ll cnt = 0;
+    unordered_map<char, vector<ll>> m;
+    for (int x = 0; x < s.length(); x++)
+    {
+        if (m.count(s[x]))
+        {
+            m[s[x]].push_back(x);
+        }
+        else
+        {
+            m[s[x]].push_back(-1);
+            // if (x != 0)
+            m[s[x]].push_back(x);
+        }
+    }
+    for (auto &it : m)
+    {
+        it.second.push_back(s.length());
+    }
+    for (auto it : m)
+    {
+
+        for (int x = 1; x < it.second.size() - 1; x++)
+        {
+            cnt += (((it.second[x] - it.second[x - 1])) * ((it.second[x + 1] - it.second[x])));
+        }
+    }
+
+    return cnt;
+}
+vector<vector<ll>> prefix_2d(vector<vector<ll>> &arr)
+{
+    vector<vector<ll>> pf(arr.size(), vector<ll>(arr[0].size(), 0));
+    for (ll x = 0; x < arr.size(); x++)
+    {
+        for (ll y = 0; y < arr[0].size(); y++)
+        {
+            pf[x][y] = arr[x][y];
+            if (x > 0)
+                pf[x][y] += pf[x - 1][y];
+            if (y > 0)
+                pf[x][y] += pf[x][y - 1];
+            if (x > 0 && y > 0)
+                pf[x][y] -= pf[x - 1][y - 1];
+        }
+    }
+    return pf;
+}
+vector<vector<ll>> prefix_2d_overflow(vector<vector<ll>> &arr)
+{
+    vector<vector<ll>> pf(arr.size(), vector<ll>(arr[0].size(), 0));
+    for (ll x = 0; x < arr.size(); x++)
+    {
+        for (ll y = 0; y < arr[0].size(); y++)
+        {
+            pf[x][y] = arr[x][y] % MOD;
+            if (x > 0)
+            {
+                ll val = ((pf[x][y] % MOD) + (pf[x - 1][y] % MOD)) % MOD;
+                if (val < 0)
+                {
+                    pf[x][y] = ((val % MOD) + MOD) % MOD;
+                }
+                else
+                {
+                    pf[x][y] = (val % MOD);
+                }
+            }
+            if (y > 0)
+            {
+                ll val = ((pf[x][y] % MOD) + (pf[x][y - 1] % MOD)) % MOD;
+                if (val < 0)
+                {
+                    pf[x][y] = ((val % MOD) + MOD) % MOD;
+                }
+                else
+                {
+                    pf[x][y] = (val % MOD);
+                }
+            }
+            if (x > 0 && y > 0)
+            {
+                ll val = (((pf[x][y] % MOD) - (pf[x - 1][y] % MOD)) + MOD) % MOD;
+                pf[x][y] = val % MOD;
+            }
+        }
+    }
+    return pf;
+}
+vector<vector<ll>> parital_sum_2d(vector<vector<ll>> &queries, ll n, ll m)
+{
+    vector<vector<ll>> partial_sum_arr(n, vector<ll>(m, 0));
+    for (ll i = 0; i < queries.size(); i++)
+    {
+        ll l = queries[i][0];
+        ll r = queries[i][1];
+        ll u = queries[i][2];
+        ll d = queries[i][3];
+        ll x = queries[i][4];
+
+        partial_sum_arr[u][l] += x;
+        if (r + 1 < m)
+            partial_sum_arr[u][r + 1] -= x;
+        if (d + 1 < n)
+            partial_sum_arr[d + 1][l] -= x;
+        if ((d + 1) < m && (r + 1) < n)
+            partial_sum_arr[d + 1][r + 1] += x;
+    }
+    return prefix_2d(partial_sum_arr);
+}
 void solve()
 {
+    ll n, m, q;
+    cin >> n >> m >> q;
+    vector<vector<ll>> arr(n, vector<ll>(m, 0));
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            ll num;
+            cin >> num;
+            arr[x][y] = num;
+        }
+    }
+    vector<vector<ll>> pf_arr = prefix_2d(arr);
+    while (q--)
+    {
+        ll x1, y1, x2, y2;
+        cin >> x1 >> y1 >> x2 >> y2;
+        ll ans = pf_arr[x2][y2] % MOD;
+        if ((y1 - 1) > 0)
+            ans = (((ans % MOD) - (pf_arr[x2][y1 - 1] % MOD)) + MOD) % MOD;
+        if ((x1 - 1) > 0)
+            ans = (((ans % MOD) - (pf_arr[x1 - 1][y2] % MOD)) + MOD) % MOD;
+        if ((x1 - 1) > 0 && (y1 - 1) > 0)
+            ans = ((ans % MOD) + (pf_arr[x1 - 1][y1 - 1] % MOD)) % MOD;
+        cout << ans % MOD << "\n";
+    }
+    // while (q--)
+    // {
+    //     ll l, r, u, d;
+    //     cin >> l >> r >> u >> d;
+    //     ll ans = pf_arr[d][r];
+    //     if ((l - 1) > 0)
+    //         ans = (((ans ) - (pf_arr[d][l - 1] )) ) ;
+    //     if ((u - 1) > 0)
+    //         ans = (((ans ) - (pf_arr[u - 1][r] )) ) ;
+    //     if ((u - 1) > 0 && (l - 1) > 0)
+    //         ans = ((ans ) + (pf_arr[u - 1][l - 1] ));
+    //     cout << ans % MOD << "\n";
+    // }
+
+    // int n;
+    // cin >> n;
+    // vector<int> even;
+    // vector<int> odd;
+    // for (int x = 1; x <= n; x++)
+    //     x % 2 == 0 ? even.push_back(x) : odd.push_back(x);
+    // for (int x = 1; x <= n; x++)
+    // {
+    //     if (x % 2 == 0)
+    //     {
+    //         cout << odd.back() << " ";
+    //         odd.pop_back();
+    //     }
+    //     else
+    //     {
+    //         cout << even.back() << " ";
+    //         even.pop_back();
+    //     }
+    // }
+    // cout << "\n";
+
+    // ll        n;
+    // cin >> n;
+    // string s;
+    // cin >> s;
+    // cout << appealSum_2(s) << "\n";
+
+    // ll        n;
+    // cin >> n;
+    // string s;
+    // cin >> s;
+    // cout << appealSum(s) << "\n";
+
+    // ll        n, k, q;
+    // cin >> n >> k >> q;
+    // vector<vector<ll       >> queries;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        l, r;
+    //     cin >> l >> r;
+    //     queries.push_back({l, r, 1});
+    // }
+    // vector<ll       > bin_arr = partial_sum_2(queries, 1e6, k);
+    // vector<ll       > pf(bin_arr.size(), 0);
+    // for (int x = 1; x < bin_arr.size(); x++)
+    // {
+    //     pf[x] = bin_arr[x] + pf[x - 1];
+    // }
+    // while (q--)
+    // {
+    //     ll        l, r;
+    //     cin >> l >> r;
+    //     cout << pf[r] - pf[l - 1] << "\n";
+    // }
+
+    // ll        n, q;
+    // cin >> n >> q;
+    // vector<ll       > v(n);
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        num;
+    //     cin >> num;
+    //     v[x] = num;
+    // }
+    // ll        ans = 0;
+    // vector<ll       > pf = construct_prefix(v);
+    // while (q--)
+    // {
+    //     ll        l, r;
+    //     cin >> l >> r;
+    //     ll        sum_1 = pf[r] % MOD;
+    //     ll        sum_2 = pf[l - 1] % MOD;
+    //     ans = (((sum_1 % MOD + MOD)) - (sum_2 % MOD)) % MOD;
+    //     cout << ans << "\n";
+    // }
+
+    // ll        n, q;
+    // cin >> n >> q;
+    // vector<vector<ll       >> queries;
+    // while (q--)
+    // {
+    //     ll        l, r, x;
+    //     cin >> l >> r >> x;
+    //     queries.push_back({l, r, x});
+    // }
+    // vector<ll       > p = partial_sum(queries, n);
+    // for (auto i : p)
+    //     cout << i << " ";
+    // cout << "\n";
+
+    // ll        n;
+    // cin >> n;
+    // vector<ll       > v(n);
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        num;
+    //     cin >> num;
+    //     v[x] = num;
+    // }
+    // vector<ll       > pf = construct_prefix(v);
+    // for(auto i:pf){
+    //     cout<<i<<" ";
+    // }
+    // cout<<"\n";
+
+    // ll        n;
+    // cin >> n;
+    // vector<ll       > v(n);
+    // ll        ans = 0;
+    // ll        cum_sum = 0;
+    // ll        total_sum = 0;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        num;
+    //     cin >> num;
+    //     v[x] = num;
+    //     total_sum += num;
+    // }
+    // sort(v.begin(), v.end());
+    // for (ll        x = 0; x < n; x++)
+    // {
+    //     cum_sum += v[x];
+    //     ans += abs((total_sum - cum_sum) - ((n - (x + 1)) * v[x]));
+    // }
+    // cout << ans << "\n";
+
+    // ll        n;
+    // cin >> n;
+    // set<int> st;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        num;
+    //     cin >> num;
+    //     st.insert(num);
+    // }
+    // cout<<st.size();
+    // cout<<"\n";
+    // ll        q;
+    // cin >> q;
+    // multimap<string, ll       > m;
+    // while (q--)
+    // {
+    //     string s;
+    //     cin >> s;
+    //     if (s == "add")
+    //     {
+    //         ll        val;
+    //         string key;
+    //         cin >> key >> val;
+    //         m.insert({key, val});
+    //     }
+    //     else if (s == "erase")
+    //     {
+    //         string key;
+    //         cin >> key;
+    //         for (auto it = m.begin(); it != m.end();)
+    //         {
+    //             if (it->first == key)
+    //             {
+    //                 it = m.erase(it);
+    //                 break;
+    //             }
+    //             else
+    //                 ++it;
+    //         }
+    //     }
+    //     else if (s == "eraseall")
+    //     {
+    //         string num;
+    //         cin >> num;
+    //         while (1)
+    //         {
+    //             if (m.count(num))
+    //             {
+    //                 m.erase(num);
+    //             }
+    //             else
+    //             {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     else if (s == "print")
+    //     {
+    //         string x;
+    //         cin >> x;
+    //         if (!m.count(x))
+    //             cout << 0 << "\n";
+    //         else
+    //         {
+    //             cout << (m.find(x))->first << "\n";
+    //         }
+    //     }
+    // }
+    // ll        n;
+    // cin >> n;
+    // vector<int> v(n);
+    // for (int x = 0; x < n; x++)
+    // {
+    //     v[x] = (x + 1);
+    // }
+    // do
+    // {
+
+    //     for (int x = 0; x < n; x++)
+    //     {
+    //         cout << v[x] << " ";
+    //     }
+    //     cout << endl;
+    // } while (next_permutation(v.begin(), v.end()));
+    // ll        n, m;
+    // cin >> n >> m;
+
+    // vector<ll       > v(n);
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll        num;
+    //     cin >> num;
+    //     v[x] = num;
+    // }
+    // sort(v.begin(), v.end());
+    // ll        ans = 0;
+    // for (auto i : v)
+    // {
+    //     if (m < i)
+    //         break;
+    //     m -= i;
+    //     ans++;
+    // }
+    // cout << ans << endl;
+
+    // ll        q;
+    // cin >> q;
+    // vector<ll       > v;
+    // while (q--)
+    // {
+    //     string query;
+    //     cin >> query;
+    //     if (query == "add")
+    //     {
+    //         ll        num;
+    //         cin >> num;
+    //         v.push_back(num);
+    //     }
+    //     else if (query == "clear")
+    //     {
+    //         v.clear();
+    //     }
+    //     else if (query == "remove")
+    //     {
+    //         if (!v.empty())
+    //             v.pop_back();
+    //     }
+    //     else
+    //     {
+    //         ll        num;
+    //         cin >> num;
+    //         if (v.size() > num)
+    //         {
+    //             cout << v[num] << endl;
+    //         }
+    //         else
+    //         {
+    //             cout << 0 << endl;
+    //         }
+    //     }
+    // }
+    // ll        n;
+    // cin>>n;
+    // vector<ll       > v(n);
+    // ll        prod = 1;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     int num;
+    //     cin >> num;
+    //     v[x] = num;
+    //     prod = ((num % MOD) * (prod % MOD)) % MOD;
+    // }
+    // cout << prod << '\n';
+
+    // ll        n;
+    // cin >> n;
+    // vector<ll       > v(n);
+    // unordered_map<ll       , ll       > m;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     int num;
+    //     cin >> num;
+    //     v[x] = num;
+    //     m[v[x]]++;
+    // }
+    // unordered_map<ll       , ll       > m2;
+    // for (int x = 0; x < v.size() - 2; x++)
+    // {
+    //     m2[v[x]]++;
+    //     ll        freq_1 = m2[1];
+    //     ll        freq_2 = m2[2];
+    //     ll        freq_3 = m2[3];
+
+    //     {
+    //         if (freq_1 >= (freq_2 + freq_3))
+    //         {
+    //             ll        rem_freq1 = m[1] - freq_1;
+    //             ll        rem_freq2 = m[2] - freq_2;
+    //             ll        rem_freq3 = m[3] - freq_3;
+    //             ll        last_idx = v[v.size() - 1];
+    //             if (last_idx == 1)
+    //                 rem_freq1--;
+    //             else if (last_idx == 2)
+    //                 rem_freq2--;
+    //             else
+    //             {
+    //                 rem_freq3--;
+    //             }
+    //             if ((rem_freq1 + rem_freq2) >= rem_freq3)
+    //             {
+    //                 cout << "YES" << endl;
+    //                 return;
+    //             }
+    //         }
+    //     }
+    // }
+    // cout << "NO" << endl;
+
     // int k;
     // cin >> k;
     // vector<int> v(k);
@@ -976,22 +1645,22 @@ void solve()
     //     return;
     // }
     // cout << "NO" << endl;
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
+    // vector<ll       > v(n);
 
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
     // }
 
-    // long long n;
+    // ll        n;
     // cin >> n;
     // cout << sum_of_divisors(n, 1) % MOD << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
 
     // for (int x = 2; x <= 55555; x++)
@@ -1004,19 +1673,19 @@ void solve()
     //     if (n == 0)
     //         break;
     // }
-    // vector<pair<long long, long long>> factors = Factors(n);
-    // long long ans = 0;
-    // priority_queue<long long, vector<long long>, greater<long long>> pq;
+    // vector<pair<ll       , ll       >> factors = Factors(n);
+    // ll        ans = 0;
+    // priority_queue<ll       , vector<ll       >, greater<ll       >> pq;
     // for (auto p : factors)
     // {
-    //     long long temp = p.second;
+    //     ll        temp = p.second;
     //     while (temp >= 1)
     //     {
     //         pq.push(pow(p.first, temp));
     //         temp--;
     //     }
     // }
-    // unordered_set<long long> st;
+    // unordered_set<ll       > st;
     // while (pq.empty() != true && pq.top() <= n)
     // {
     //     if (n % pq.top() == 0 && st.count(pq.top()) == false)
@@ -1029,20 +1698,20 @@ void solve()
     // }
     // cout << ans << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
-    // long long numerator = 0;
+    // vector<ll       > v(n);
+    // ll        numerator = 0;
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num = 0;
+    //     ll        num = 0;
     //     cin >> num;
     //     v[x] = num;
     //     numerator += num;
     // }
     // sort(v.begin(), v.end());
-    // vector<long long> prefix_sum(n, 0);
-    // vector<long long> suffix_sum(n, 0);
+    // vector<ll       > prefix_sum(n, 0);
+    // vector<ll       > suffix_sum(n, 0);
     // prefix_sum[0] = v[0];
     // suffix_sum[0] = v[v.size() - 1];
     // for (int x = 1; x < n; x++)
@@ -1054,16 +1723,16 @@ void solve()
     //     prefix_sum[x] = prefix_sum[x - 1] + v[x];
     // }
     // reverse(suffix_sum.begin(), suffix_sum.end());
-    // long long cum_sum = 0;
+    // ll        cum_sum = 0;
     // for (int x = 0; x < v.size(); x++)
     // {
-    //     long long left_sum = abs((prefix_sum[x] - v[x]) - (x * v[x]));
-    //     long long right_sum = abs((suffix_sum[x] - v[x]) - ((n - x - 1) * v[x]));
+    //     ll        left_sum = abs((prefix_sum[x] - v[x]) - (x * v[x]));
+    //     ll        right_sum = abs((suffix_sum[x] - v[x]) - ((n - x - 1) * v[x]));
     //     cum_sum += (left_sum + right_sum);
     // }
     // numerator += (cum_sum );
-    // long long deno = n;
-    // long long gcd_value = gcd(numerator, deno);
+    // ll        deno = n;
+    // ll        gcd_value = gcd(numerator, deno);
     // while (gcd_value > 1)
     // {
     //     numerator /= gcd_value;
@@ -1072,18 +1741,18 @@ void solve()
     // }
     // cout << numerator << " " << deno << endl;
 
-    // long long ans = ((r - l) + 1) * ((r - l) + 1);
+    // ll        ans = ((r - l) + 1) * ((r - l) + 1);
     // ans -= ((r - l) + 1);
-    // vector<long long> primes = segmeneted_sieve(l, r);
-    // long long non_primes = (((r - l) + 1) - primes.size());
+    // vector<ll       > primes = segmeneted_sieve(l, r);
+    // ll        non_primes = (((r - l) + 1) - primes.size());
     // cout << non_primes << endl;
     // ans -= (non_primes * primes.size());
     // ans -= (r - l) * primes.size();
     // cout << ans << endl;
 
-    // long long x;
+    // ll        x;
     // cin >> x;
-    // long long len = 0;
+    // ll        len = 0;
     // while (x >= 1)
     // {
     //     x /= 10;
@@ -1091,7 +1760,7 @@ void solve()
     // }
     // cout << binpow(10,len) + 1 << endl;
 
-    // long long x, y;
+    // ll        x, y;
     // cin >> x >> y;
     // if (y > x)
     // {
@@ -1116,21 +1785,21 @@ void solve()
     //     }
     // }
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
-    // unordered_map<long long, long long> factor_freq;
-    // long long ans = 0;
+    // vector<ll       > v(n);
+    // unordered_map<ll       , ll       > factor_freq;
+    // ll        ans = 0;
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
-    //     unordered_map<long long, long long> factors = factors_mapping(num);
+    //     unordered_map<ll       , ll       > factors = factors_mapping(num);
     //     for (auto it : factors)
     //     {
-    //         long long factor = it.first;
-    //         long long power = it.second;
+    //         ll        factor = it.first;
+    //         ll        power = it.second;
     //         factor_freq[factor]++;
     //     }
     //     if (x == 0)
@@ -1143,28 +1812,28 @@ void solve()
     //     }
     // }
 
-    // long long l, r;
+    // ll        l, r;
     // cin >> l >> r;
-    // long long rem = l % 2019;
+    // ll        rem = l % 2019;
     // if (rem == 0)
     // {
     //     cout << 0 << endl;
     // }
     // else
     // {
-    //     long long temp = (l - rem) + 2019;
+    //     ll        temp = (l - rem) + 2019;
     //     if (temp >= l && temp <= r)
     //     {
     //         cout << 0 << endl;
     //         return;
     //     }
-    //     long long ans = INT_MAX;
-    //     for (long long x = l; x <= r; x++)
+    //     ll        ans = INT_MAX;
+    //     for (ll        x = l; x <= r; x++)
     //     {
-    //         for (long long y = (x + 1); y <= r; y++)
+    //         for (ll        y = (x + 1); y <= r; y++)
     //         {
-    //             long long prod = x * y;
-    //             long long rem = prod % 2019;
+    //             ll        prod = x * y;
+    //             ll        rem = prod % 2019;
     //             if (rem < ans)
     //             {
     //                 ans = rem;
@@ -1174,12 +1843,12 @@ void solve()
     //     cout << ans << endl;
     // }
 
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
 
-    // set<long long> divs_a = cream_puff(a);
-    // set<long long> divs_b = cream_puff(b);
-    // map<long long, bool> combined;
+    // set<ll       > divs_a = cream_puff(a);
+    // set<ll       > divs_b = cream_puff(b);
+    // map<ll       , bool> combined;
 
     // for (auto it : divs_a)
     // {
@@ -1190,12 +1859,12 @@ void solve()
     // }
 
     // auto it = combined.begin();
-    // long long ans = 1;
-    // long long maxi = (*(combined.rbegin())).first;
+    // ll        ans = 1;
+    // ll        maxi = (*(combined.rbegin())).first;
 
     // while (it != combined.end())
     // {
-    //     long long divisor = (*(it)).first;
+    //     ll        divisor = (*(it)).first;
     //     if (divisor == 1)
     //     {
     //         it++;
@@ -1204,7 +1873,7 @@ void solve()
     //     if (is_prime(divisor))
     //     {
     //         ans++;
-    //         // for (long long x = 2 * divisor; x <= maxi; x += divisor)
+    //         // for (ll        x = 2 * divisor; x <= maxi; x += divisor)
     //         // {
     //         //     if (combined.count(x))
     //         //     {
@@ -1215,36 +1884,36 @@ void solve()
     //     it++;
     // }
     // cout << ans << endl;
-    // long long maxi = max(a, b);
-    // long long mini = min(a, b);
+    // ll        maxi = max(a, b);
+    // ll        mini = min(a, b);
 
-    // long long rem = maxi % mini;
-    // long long ans = 0;
+    // ll        rem = maxi % mini;
+    // ll        ans = 0;
 
     // ans += (rem * mini);
     // ans += ((maxi - rem) / mini);
 
     // cout << ans << endl;
 
-    // long long n, m, k;
+    // ll        n, m, k;
     // cin >> n >> m >> k;
-    // long long ans = 0;
+    // ll        ans = 0;
 
-    // for (long long x = 0; x <= k; x++)
+    // for (ll        x = 0; x <= k; x++)
     // {
     //     // All the remaining blocks cannot get the same color alloted to other blocks
     //     // because that will lead to increasing the exactly k pair count leading to false cases as well.
-    //     long long comp_1 = binpow((m - 1), (n - x - 1), MOD);
-    //     long long comp_2 = m;
-    //     long long comp_3 = (comp_1 * comp_2) % MOD;
-    //     long long comp_4 = ncr((n - 1), x, MOD);
-    //     long long comp_5 = (comp_4 * comp_3) % MOD;
+    //     ll        comp_1 = binpow((m - 1), (n - x - 1), MOD);
+    //     ll        comp_2 = m;
+    //     ll        comp_3 = (comp_1 * comp_2) % MOD;
+    //     ll        comp_4 = ncr((n - 1), x, MOD);
+    //     ll        comp_5 = (comp_4 * comp_3) % MOD;
 
     //     ans = (ans + comp_5) % MOD;
     // }
     // cout << ans << endl;
 
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
     // if (a == b)
     // {
@@ -1258,8 +1927,8 @@ void solve()
     // }
     // else
     // {
-    //     vector<long long> divs = single_divisor(a - b);
-    //     long long ans = 0;
+    //     vector<ll       > divs = single_divisor(a - b);
+    //     ll        ans = 0;
     //     for (auto div : divs)
     //     {
     //         if (div > b)
@@ -1271,46 +1940,46 @@ void solve()
     //     cout << ans << endl;
     // }
 
-    // long long total_cases = binpow(m, n, MOD);
-    // long long invalid_cases = 0;
-    // long long total_pairs = n - 1;
-    // for (long long x = (k + 1); x <= total_pairs; x++)
+    // ll        total_cases = binpow(m, n, MOD);
+    // ll        invalid_cases = 0;
+    // ll        total_pairs = n - 1;
+    // for (ll        x = (k + 1); x <= total_pairs; x++)
     // {
     //     invalid_cases = (invalid_cases % MOD + ((ncr(total_pairs, x, MOD) * m) % MOD)) % MOD;
     // }
     // cout << ((total_cases - invalid_cases) + MOD) % MOD << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long ans = 0;
+    // ll        ans = 0;
 
     // // a and b are multiples of b to satisfy the given identity
-    // for (long long x = 1; x <= n; x++)
+    // for (ll        x = 1; x <= n; x++)
     // {
-    //     long long num_multiples = floor(n / x);
+    //     ll        num_multiples = floor(n / x);
     //     ans += (num_multiples * num_multiples);
     // }
     // cout << ans << endl;
 
-    // long long n, c;
+    // ll        n, c;
     // cin >> n >> c;
-    // vector<long long> a(n);
-    // vector<long long> b(n);
+    // vector<ll       > a(n);
+    // vector<ll       > b(n);
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     a[x] = num;
     // }
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     b[x] = num;
     // }
-    // long long ans = INT_MAX;
-    // long long cnt_1 = 0;
-    // long long cnt_2 = 0;
+    // ll        ans = INT_MAX;
+    // ll        cnt_1 = 0;
+    // ll        cnt_2 = 0;
     // for (int x = 0; x < n; x++)
     // {
     //     if (b[x] > a[x])
@@ -1348,9 +2017,9 @@ void solve()
     //     cout << ans << endl;
     // }
 
-    // long long a, b, n;
+    // ll        a, b, n;
     // cin >> a >> b >> n;
-    // long long ans = 0;
+    // ll        ans = 0;
     // if (n == 1)
     // {
     //     cout << 2 << "\n";
@@ -1375,7 +2044,7 @@ void solve()
     // for (int x = 0; x <= n; x++)
     // {
     //     // Setting frequency of A's to x.
-    //     long long sum = ((a * x) + (n - x) * b);
+    //     ll        sum = ((a * x) + (n - x) * b);
     //     if (check(sum, a, b) == true)
     //     {
     //         ans = (ans + ncr(n, x, MOD))%MOD;
@@ -1383,40 +2052,40 @@ void solve()
     // }
     // cout << ans % MOD << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long ans = 0;
-    // unordered_map<long long, long long> m = compute_factors(n);
+    // ll        ans = 0;
+    // unordered_map<ll       , ll       > m = compute_factors(n);
     // // At most log(n) factors
     // for (auto it : m)
     // {
-    //     long long factor = it.first;
-    //     long long factor_freq = it.second;
+    //     ll        factor = it.first;
+    //     ll        factor_freq = it.second;
     //     ans += (factor_freq);
     // }
     // cout << (ans + m.size() - 1) << endl;
 
-    // long long n, m, p;
+    // ll        n, m, p;
     // cin >> n >> m >> p;
     // cout << basic_ncr(n + m, p) - basic_ncr(n, p) - basic_ncr(m, p) - basic_ncr(n, 1) * basic_ncr(m, p - 1) - basic_ncr(n, 2) * basic_ncr(m, p - 2) - basic_ncr(n, 3) * basic_ncr(m, p - 3);
 
-    // long long n, m;
+    // ll        n, m;
     // cin >> n >> m;
-    // unordered_map<long long, pair<long long, long long>> col_freq;
-    // unordered_map<long long, pair<long long, long long>> row_freq;
-    // vector<vector<long long>> v(n, vector<long long>(m, 0));
+    // unordered_map<ll       , pair<ll       , ll       >> col_freq;
+    // unordered_map<ll       , pair<ll       , ll       >> row_freq;
+    // vector<vector<ll       >> v(n, vector<ll       >(m, 0));
     // for (int x = 0; x < v.size(); x++)
     // {
     //     for (int y = 0; y < v[0].size(); y++)
     //     {
-    //         long long num;
+    //         ll        num;
     //         cin >> num;
     //         v[x][y] = num;
     //     }
     // }
     // for (int x = 0; x < v.size(); x++)
     // {
-    //     long long freq = 0;
+    //     ll        freq = 0;
     //     for (int y = 0; y < v[0].size(); y++)
     //     {
     //         if (v[x][y] == 0)
@@ -1426,7 +2095,7 @@ void solve()
     // }
     // for (int x = 0; x < v[0].size(); x++)
     // {
-    //     long long freq = 0;
+    //     ll        freq = 0;
     //     for (int y = 0; y < v.size(); y++)
     //     {
     //         if (v[y][x] == 0)
@@ -1434,42 +2103,42 @@ void solve()
     //     }
     //     col_freq[x] = {freq, n - freq};
     // }
-    // long long ans = (m * n);
+    // ll        ans = (m * n);
     // for (auto it : row_freq)
     // {
-    //     long long freq_1 = it.second.second;
-    //     long long freq_0 = it.second.first;
+    //     ll        freq_1 = it.second.second;
+    //     ll        freq_0 = it.second.first;
     //     ans += ((1LL << freq_0) - (1 + freq_0));
     //     ans += ((1LL << freq_1) - (1 + freq_1));
     // }
     // for (auto it : col_freq)
     // {
-    //     long long freq_1 = it.second.second;
-    //     long long freq_0 = it.second.first;
+    //     ll        freq_1 = it.second.second;
+    //     ll        freq_0 = it.second.first;
     //     ans += ((1LL << freq_0) - (1 + freq_0));
     //     ans += ((1LL << freq_1) - (1 + freq_1));
     // }
     // cout << ans << endl;
 
-    // long long n, k, q;
+    // ll        n, k, q;
     // cin >> n >> k >> q;
-    // vector<long long> v(n);
+    // vector<ll       > v(n);
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
     // }
-    // long long l = 0;
-    // long long r = 0;
-    // long long ans = 0;
+    // ll        l = 0;
+    // ll        r = 0;
+    // ll        ans = 0;
     // while (l <= r && r < v.size())
     // {
     //     if (v[r] > q)
     //     {
     //         if (((r - 1) - l) + 1 >= k)
     //         {
-    //             long long val = (((r - 1) - l + 1) - k + 1);
+    //             ll        val = (((r - 1) - l + 1) - k + 1);
     //             ans += (val * (val + 1)) / 2;
     //         }
     //         r++;
@@ -1482,19 +2151,19 @@ void solve()
     // }
     // if ((r - l) + 1 >= k)
     // {
-    //     long long val = (((r - 1) - l + 1) - k + 1);
+    //     ll        val = (((r - 1) - l + 1) - k + 1);
     //     ans += (val * (val + 1)) / 2;
     // }
     // cout << ans << endl;
 
-    // long long x;
+    // ll        x;
     // cin>>x;
     // cout<<1<<" "<<(x-1)<<endl;
 
     // string s;
     // cin >> s;
-    // long long x_pos = -1;
-    // long long equal_pos = -1;
+    // ll        x_pos = -1;
+    // ll        equal_pos = -1;
     // char x_coeff = ' ';
     // for (int x = 0; x < s.size(); x++)
     // {
@@ -1556,12 +2225,12 @@ void solve()
     //         expr_3.push_back(s[x]);
     //     }
     // }
-    // long long expr1_val = expr_val(expr_1);
-    // long long expr2_val = expr_val(expr_2);
-    // long long expr3_val = expr_val(expr_3);
+    // ll        expr1_val = expr_val(expr_1);
+    // ll        expr2_val = expr_val(expr_2);
+    // ll        expr3_val = expr_val(expr_3);
 
-    // long long expr_cum = expr1_val + expr2_val;
-    // long long expr_total = expr3_val + (-1 * expr_cum);
+    // ll        expr_cum = expr1_val + expr2_val;
+    // ll        expr_total = expr3_val + (-1 * expr_cum);
 
     // if (x_coeff == '-')
     // {
@@ -1573,7 +2242,7 @@ void solve()
     // cout << "Coefficient of x - " << x_coeff << endl;
     // cout << "FINAL ANS " << expr_total << endl;
     // cout << expr_total << endl;
-    // long long n, m;
+    // ll        n, m;
     // cin >> n >> m;
     // if (m < n)
     // {
@@ -1581,50 +2250,50 @@ void solve()
     //     return;
     // }
     // m -= n;
-    // long long num = (m + n - 1);
-    // long long r = n - 1;
+    // ll        num = (m + n - 1);
+    // ll        r = n - 1;
 
     // cout << ncr(num, r, MOD)%MOD << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long a = binpow(26, n, MOD);
-    // long long b = binpow(5, n, MOD);
-    // long long c = binpow(21, n, MOD);
+    // ll        a = binpow(26, n, MOD);
+    // ll        b = binpow(5, n, MOD);
+    // ll        c = binpow(21, n, MOD);
     // cout << (((((a - b) + MOD) % MOD) - c) + MOD) % MOD << endl;
-    // long long a, b, c, d, e, f, g, h;
+    // ll        a, b, c, d, e, f, g, h;
     // cin >> a >> b >> c >> d >> e >> f >> g >> h;
 
-    // long long val_1 = (binpow(a, b, MOD));
-    // long long val_2 = c;
-    // long long val_2_1 = ((((val_1 - val_2) + MOD) % MOD) * e) % MOD;
-    // long long val_3 = d;
-    // long long val_4_first = (g * h) %( MOD-1);
-    // long long val_4_second = binpow(f, val_4_first, MOD);
-    // long long val_4 = (val_4_second * e) % MOD;
+    // ll        val_1 = (binpow(a, b, MOD));
+    // ll        val_2 = c;
+    // ll        val_2_1 = ((((val_1 - val_2) + MOD) % MOD) * e) % MOD;
+    // ll        val_3 = d;
+    // ll        val_4_first = (g * h) %( MOD-1);
+    // ll        val_4_second = binpow(f, val_4_first, MOD);
+    // ll        val_4 = (val_4_second * e) % MOD;
 
-    // long long p_first = ((val_2_1 - d) + MOD) % MOD;
-    // long long p = (p_first + val_4) % MOD;
+    // ll        p_first = ((val_2_1 - d) + MOD) % MOD;
+    // ll        p = (p_first + val_4) % MOD;
 
-    // long long q = e;
-    // long long q_inverse = inverse(q, MOD);
-    // long long ans = (p * q_inverse) % MOD;
+    // ll        q = e;
+    // ll        q_inverse = inverse(q, MOD);
+    // ll        ans = (p * q_inverse) % MOD;
     // cout << ans << endl;
 
-    // long long n, k;
+    // ll        n, k;
     // cin >> n >> k;
-    // long long a = binpow(k - 1, n-1, MOD);
-    // long long ans = (k * a) % MOD;
+    // ll        a = binpow(k - 1, n-1, MOD);
+    // ll        ans = (k * a) % MOD;
     // cout << ans << endl;
     // cout<<(n*(n+1))/2<<endl;
-    // long long q, k;
+    // ll        q, k;
     // cin >> q >> k;
 
     // RandomClass *obj = new RandomClass(k);
     // while (q--)
     // {
-    //     long long q_type;
-    //     long long num;
+    //     ll        q_type;
+    //     ll        num;
     //     cin >> q_type;
     //     if (q_type == 1)
     //     {
@@ -1640,23 +2309,23 @@ void solve()
     //     {
     //         char ch;
     //         cin >> ch;
-    //         long long query_ans = obj->query();
+    //         ll        query_ans = obj->query();
     //         cout << query_ans << endl;
     //     }
     // }
 
-    // unordered_map<long long, long long> m;
-    // long long n;
+    // unordered_map<ll       , ll       > m;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
+    // vector<ll       > v(n);
     // bool flag = true;
-    // long long gcd_total = -1;
+    // ll        gcd_total = -1;
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
-    //     unordered_map<long long, long long> facts = compute_factors(num);
+    //     unordered_map<ll       , ll       > facts = compute_factors(num);
     //     for (auto it : facts)
     //     {
     //         if (m.count(it.first) == true)
@@ -1687,37 +2356,37 @@ void solve()
     //     cout << "not coprime" << endl;
     // }
 
-    // long long n, m;
+    // ll        n, m;
     // cin >> n >> m;
-    // vector<long long> v(1e6);
+    // vector<ll       > v(1e6);
     // for (int x = 1; x <= m; x++)
     // {
     //     v[x] = x;
     // }
-    // vector<long long> v2(n);
+    // vector<ll       > v2(n);
     // for (int x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v2[x] = num;
     // }
     // for (int x = 0; x < n; x++)
     // {
-    //     unordered_map<long long, long long> m2 = compute_factors(v2[x]);
+    //     unordered_map<ll       , ll       > m2 = compute_factors(v2[x]);
     //     for (auto factor : m2)
     //     {
     //         if (v[factor.first] != -1)
     //         {
 
-    //             for (long long y = factor.first; y <= m; y += factor.first)
+    //             for (ll        y = factor.first; y <= m; y += factor.first)
     //             {
     //                 v[y] = -1;
     //             }
     //         }
     //     }
     // }
-    // long long cnt = 0;
-    // for (long long x = 1; x <= m; x++)
+    // ll        cnt = 0;
+    // for (ll        x = 1; x <= m; x++)
     // {
     //     if (v[x] != -1)
     //     {
@@ -1725,7 +2394,7 @@ void solve()
     //     }
     // }
     // cout << cnt << endl;
-    // for (long long x = 1; x <= m; x++)
+    // for (ll        x = 1; x <= m; x++)
     // {
     //     if (v[x] != -1)
     //     {
@@ -1733,22 +2402,22 @@ void solve()
     //     }
     // }
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
-    // unordered_map<long long, unordered_set<long long>> st;
-    // for (long long x = 0; x < n; x++)
+    // vector<ll       > v(n);
+    // unordered_map<ll       , unordered_set<ll       >> st;
+    // for (ll        x = 0; x < n; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
     //     st[num].insert(x);
     // }
-    // long long cnt = 0;
-    // for (long long x = 0; x < n; x++)
+    // ll        cnt = 0;
+    // for (ll        x = 0; x < n; x++)
     // {
-    //     long long num = v[x];
-    //     vector<long long> divs = single_divisor(num);
+    //     ll        num = v[x];
+    //     vector<ll       > divs = single_divisor(num);
 
     //     for (auto divisor : divs)
     //     {
@@ -1769,25 +2438,25 @@ void solve()
     // }
     // cout << n-cnt << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
     // cout << atc_144(n) << endl;
 
     // N^2*10^d
     // N*10d
-    // long long n, d;
+    // ll        n, d;
     // cin >> n >> d;
-    // vector<pair<long long, long long>> fact = Factors(n);
-    // unordered_map<long long, long long> m;
+    // vector<pair<ll       , ll       >> fact = Factors(n);
+    // unordered_map<ll       , ll       > m;
     // for (auto it : fact)
     // {
-    //     long long base = it.first;
-    //     long long exponent = it.second;
+    //     ll        base = it.first;
+    //     ll        exponent = it.second;
     //     m[base] = 2 * exponent;
     // }
     // m[2] += 2 * d;
     // m[5] += 2 * d;
-    // long long ans = 1;
+    // ll        ans = 1;
     // bool flag = true;
     // for (auto it : m)
     // {
@@ -1807,15 +2476,15 @@ void solve()
     //     cout << ans % MOD << endl;
     // }
 
-    // long long l, r, m;
+    // ll        l, r, m;
     // cin >> l >> r >> m;
-    // long long value_1 = GET(l - 1, m);
-    // long long value_2 = GET(r, m);
+    // ll        value_1 = GET(l - 1, m);
+    // ll        value_2 = GET(r, m);
     // cout << ((value_2 - value_1) + MOD) % MOD << endl;
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<pair<long long, long long>> factors = Factors(n);
-    // long long ans = n;
+    // vector<pair<ll       , ll       >> factors = Factors(n);
+    // ll        ans = n;
     // // 1-1/p = p-1*(p-2)* .....
     // // denom = p1*p2*p3 ......
 
@@ -1826,12 +2495,12 @@ void solve()
     // }
     // cout << ans << endl;
 
-    // vector<long long> input(n);
+    // vector<ll       > input(n);
     // for (int x = 0; x < n; x++)
     // {
     //     cin >> input[x];
-    //     long long root = sqrtl(input[x]);
-    //     long long mul = (root * root);
+    //     ll        root = sqrtl(input[x]);
+    //     ll        mul = (root * root);
     //     if (mul != input[x])
     //     {
     //         cout<<"NO"<<endl;
@@ -1849,28 +2518,28 @@ void solve()
     //     }
     // }
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> ans = compute_factors(n);
+    // vector<ll       > ans = compute_factors(n);
     // for (auto num : ans)
     // {
     //     cout << num << " ";
     // }
     // cout << endl;
 
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
-    // vector<long long> v = segmeneted_sieve(a, b);
+    // vector<ll       > v = segmeneted_sieve(a, b);
     // cout << v.size() << endl;
-    // for (long long x = 0; x < v.size(); x++)
+    // for (ll        x = 0; x < v.size(); x++)
     // {
     //     cout << v[x] << " ";
     // }
 
     // string s1, s2;
     // cin >> s1 >> s2;
-    // long long f_plus = 0;
-    // long long f_minus = 0;
+    // ll        f_plus = 0;
+    // ll        f_minus = 0;
     // for (auto ch : s1)
     // {
     //     if (ch == '+')
@@ -1897,12 +2566,12 @@ void solve()
     //         cnt++;
     // }
     // cout << fixed << setprecision(12) << (cnt / (long double)ans.size()) << endl;
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> a(n, 0);
+    // vector<ll       > a(n, 0);
     // for (int x = 0; x < n; x++)
     // {
-    //     long long i;
+    //     ll        i;
     //     cin >> i;
     //     a[x] = i;
     // }
@@ -1911,7 +2580,7 @@ void solve()
     //     cout << "YES" << endl;
     //     return;
     // }
-    // long long initial_gcd = gcd(a[0], a[1]);
+    // ll        initial_gcd = gcd(a[0], a[1]);
     // for (int x = 2; x < n; x++)
     // {
     //     initial_gcd = gcd(initial_gcd, a[x]);
@@ -1924,9 +2593,9 @@ void solve()
     // {
     //     cout << "NO" << endl;
     // }
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> divs = single_divisor(n);
+    // vector<ll       > divs = single_divisor(n);
     // cout<<divs.size()<<endl;
     // if (is_prime(n))
     // {
@@ -1936,29 +2605,29 @@ void solve()
     // {
     //     cout << "NO" << endl;
     // }
-    // long long m;
+    // ll        m;
     // cin >> m;
-    // vector<long long> a(m);
-    // vector<pair<long long, long long>> v;
-    // for (long long x = 0; x < m; x++)
+    // vector<ll       > a(m);
+    // vector<pair<ll       , ll       >> v;
+    // for (ll        x = 0; x < m; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     a[x] = num;
     // }
-    // for (long long x = 0; x < m; x++)
+    // for (ll        x = 0; x < m; x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v.push_back({num, x});
     // }
     // sort(a.begin(), a.end());
     // sort(v.begin(), v.end(),cmp);
-    // long long cnt = 0;
-    // vector<long long> ans(m, 0);
+    // ll        cnt = 0;
+    // vector<ll       > ans(m, 0);
     // for (auto pair : v)
     // {
-    //     long long idx = pair.second;
+    //     ll        idx = pair.second;
     //     ans[idx] = a[cnt];
     //     cnt++;
     // }
@@ -1968,7 +2637,7 @@ void solve()
     // }
     // cout << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
     // string s = "";
     // cin >> s;
@@ -2012,8 +2681,8 @@ void solve()
     // }
     // if (prefix == suffix && prefix.size() == suffix.size() && prefix.size() == n)
     // {
-    //     long long a = (n * (n + 1)) % MOD;
-    //     long long b = inverse(2, MOD);
+    //     ll        a = (n * (n + 1)) % MOD;
+    //     ll        b = inverse(2, MOD);
     //     cout << (((a * b) % MOD)) << endl;
     // }
     // else
@@ -2027,14 +2696,14 @@ void solve()
     //         cout << ((prefix.size() + 1) * (suffix.size() + 1)) % MOD << endl;
     //     }
     // }
-    // long long k;
+    // ll        k;
     // cin >> k;
     // // 4^2^k-2
-    // long long b = binpow(2, k, MOD - 1);
-    // long long c = binpow(4, b - 2, MOD);
+    // ll        b = binpow(2, k, MOD - 1);
+    // ll        c = binpow(4, b - 2, MOD);
     // cout << (6 * c) % MOD << endl;
 
-    // long long a;
+    // ll        a;
     // cin >> a;
     // if (a == 1)
     // {
@@ -2042,27 +2711,27 @@ void solve()
     //     return;
     // }
     // cout << ((6 * a * (a - 1)) + 1) << endl;
-    // long long x1, y1, x2, y2;
+    // ll        x1, y1, x2, y2;
     // cin >> x1 >> y1 >> x2 >> y2;
 
-    // long long a = abs(x2 - x1);
-    // long long b = abs(y2 - y1);
+    // ll        a = abs(x2 - x1);
+    // ll        b = abs(y2 - y1);
 
-    // long long c = a * a;
-    // long long d = b * b;
+    // ll        c = a * a;
+    // ll        d = b * b;
 
     // cout << setprecision(10) << sqrtl(c + d) << endl;
-    // long long l, r, m;
+    // ll        l, r, m;
     // cin >> l >> r >> m;
-    // long long ans = binadd(l, l + 1, m);
+    // ll        ans = binadd(l, l + 1, m);
     // for (int x = l + 2; x <= r; x += 1)
     // {
     //     ans = binadd(ans, x, m);
     // }
     // cout << ans << endl;
-    // long long n;
+    // ll        n;
     // cin>>n;
-    // vector<vector<long long>> v = ncr_table_2(30, 30, MOD);
+    // vector<vector<ll       >> v = ncr_table_2(30, 30, MOD);
     // for (auto arr : v)
     // {
     //     if(n <=0)break;
@@ -2079,34 +2748,34 @@ void solve()
     //     cout << endl;
     //     n--;
     // }
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
     // cout << ncr(a, b, MOD) << " " << npr(a, b, MOD) << endl;
 
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
-    // long long lc = lcm(a, b);
-    // long long gd = gcd(a, b);
+    // ll        lc = lcm(a, b);
+    // ll        gd = gcd(a, b);
     // cout << gd << " " << lc << endl;
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v = single_divisor(n);
-    // long long ans = 0;
+    // vector<ll       > v = single_divisor(n);
+    // ll        ans = 0;
     // for (auto num : v)
     // {
     //     ans += num;
     // }
     // cout << ans << endl;
-    //  long long n, m;
+    //  ll        n, m;
     //     cin >> n >> m;
 
-    //     long long kmax = -1;
-    //     long long kmin = INT_MAX;
+    //     ll        kmax = -1;
+    //     ll        kmin = INT_MAX;
 
     //     kmax = ((n - m) * (n - m + 1)) / 2;
 
-    //     long long rem = n % m;
-    //     long long a = (n - rem) / m;
+    //     ll        rem = n % m;
+    //     ll        a = (n - rem) / m;
 
     //     if (rem == 0)
     //     {
@@ -2116,7 +2785,7 @@ void solve()
     //     {
     //         kmin = (m - rem) * ((a * (a - 1)) / 2);
 
-    //         long long extraGroupPairs = ((a + 1) * a) / 2;
+    //         ll        extraGroupPairs = ((a + 1) * a) / 2;
     //         kmin += rem * extraGroupPairs;
     //     }
 
@@ -2132,7 +2801,7 @@ void solve()
     //     cin >> c;
     //     st.insert(c);
     // }
-    // long long count = 0;
+    // ll        count = 0;
     // int l = 0, r = 0;
     // while (r < n)
     // {
@@ -2142,29 +2811,29 @@ void solve()
     //     }
     //     else
     //     {
-    //         long long len = r - l;
+    //         ll        len = r - l;
     //         count += len * (len + 1) / 2;
     //         r++;
     //         l = r;
     //     }
     // }
-    // long long len = r - l;
+    // ll        len = r - l;
     // count += len * (len + 1) / 2;
     // cout << count << endl;
-    // long long n;
+    // ll        n;
     // cin >> n;
     // n--;
-    // long long num1, num2, num3;
-    // long long n1 = floor(n / 3);
-    // long long n2 = floor(n / 5);
-    // long long n3 = floor(n / 15);
+    // ll        num1, num2, num3;
+    // ll        n1 = floor(n / 3);
+    // ll        n2 = floor(n / 5);
+    // ll        n3 = floor(n / 15);
 
-    // long long sum1 = 3 * ((n1 * (n1 + 1)) / 2);
-    // long long sum2 = 5 * ((n2 * (n2 + 1)) / 2);
-    // long long sum3 = 15 * ((n3 * (n3 + 1)) / 2);
+    // ll        sum1 = 3 * ((n1 * (n1 + 1)) / 2);
+    // ll        sum2 = 5 * ((n2 * (n2 + 1)) / 2);
+    // ll        sum3 = 15 * ((n3 * (n3 + 1)) / 2);
     // cout << ((sum1 + sum2) - sum3) << endl;
 
-    // long long n, k;
+    // ll        n, k;
     // cin >> n >> k;
     // // n-2 a and 2 b
     // string ans = "";
@@ -2172,73 +2841,73 @@ void solve()
     // {
     //     ans.push_back('a');
     // }
-    // long long total = 0;
+    // ll        total = 0;
     // for (int x = (n - 2); x >= 0; x--)
     // {
     //     // (n-2) which is the maximums rightmost postion of leftmost 'b'
     //     // then the right most positions can contribute to atmost  (n-(x+1)) types of different strings
     //     // then we can say that if k is the kth smalles lexicographical string then k <= count of strings till now .
     //     // then fix the position of the leftmost b str[x]='b', then we have to find the rightmost position of 'b'.
-    //     long long curr_contribution = 0;
+    //     ll        curr_contribution = 0;
     //     curr_contribution = (n - (x + 1));
     //     // 3
-    //     long long temp = total;
+    //     ll        temp = total;
     //     // 6
     //     total += curr_contribution;
     //     if (total >= k)
     //     {
     //         ans[x] = 'b';
-    //         long long idx = (n - (k - temp));
+    //         ll        idx = (n - (k - temp));
     //         ans[idx] = 'b';
     //         cout << ans << endl;
     //         return;
     //     }
     // }
-    // long long n;
+    // ll        n;
     // cin >> n;
     // // 3^3n-7^n
-    // long long component = (3 * n) % MOD;
-    // long long pow_1 = binpow(3, component, MOD);
-    // long long pow_2 = binpow(7, n, MOD);
+    // ll        component = (3 * n) % MOD;
+    // ll        pow_1 = binpow(3, component, MOD);
+    // ll        pow_2 = binpow(7, n, MOD);
 
-    // long long ans = (((pow_1 % MOD) - (pow_2 % MOD)) + MOD) % MOD;
+    // ll        ans = (((pow_1 % MOD) - (pow_2 % MOD)) + MOD) % MOD;
     // cout << ans << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long ans = binpow(2, n, MOD);
+    // ll        ans = binpow(2, n, MOD);
     // cout << (ans % MOD) << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long ans = 0;
-    // for (long long x = 1; x <= n; x++)
+    // ll        ans = 0;
+    // for (ll        x = 1; x <= n; x++)
     // {
     //     ans = (ans + binpow(2, x)) % MOD;
     // }
     // cout << ans << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // vector<long long> v(n);
-    // unordered_map<long long, long long> m;
-    // for (long long x = 0; x < v.size(); x++)
+    // vector<ll       > v(n);
+    // unordered_map<ll       , ll       > m;
+    // for (ll        x = 0; x < v.size(); x++)
     // {
-    //     long long num;
+    //     ll        num;
     //     cin >> num;
     //     v[x] = num;
     //     m[num]++;
     // }
     // sort(v.begin(), v.end());
-    // long long diff = v[v.size() - 1] - v[0];
-    // long long n1 = m[v[v.size() - 1]];
+    // ll        diff = v[v.size() - 1] - v[0];
+    // ll        n1 = m[v[v.size() - 1]];
     // if (diff == 0)
     // {
     //     cout << diff << " " << (n * (n - 1)) / 2 << endl;
     //     return;
     // }
-    // long long n2 = m[v[0]];
-    // long long ans = n1 * n2;
+    // ll        n2 = m[v[0]];
+    // ll        ans = n1 * n2;
     // cout << diff << " " << ans << endl;
     // string s;
     // cin >> s;
@@ -2257,26 +2926,26 @@ void solve()
     //     rank = offset + num2;
     // }
     // cout << rank << endl;
-    // long long n, m;
+    // ll        n, m;
     // cin >> n >> m;
-    // long long final = ncr((n + m), n, MOD);
+    // ll        final = ncr((n + m), n, MOD);
     // cout << final << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
-    // long long num1 = (n * (n - 1)) % MOD;
-    // long long num2 = (num1 * (n - 2)) % MOD;
-    // long long num3 = (num3 * (n - 3)) % MOD;
-    // long long deno = 24;
-    // long long dinv = inverse(deno, MOD);
-    // long long ans = (num3 * dinv) % MOD;
-    // long long n;
+    // ll        num1 = (n * (n - 1)) % MOD;
+    // ll        num2 = (num1 * (n - 2)) % MOD;
+    // ll        num3 = (num3 * (n - 3)) % MOD;
+    // ll        deno = 24;
+    // ll        dinv = inverse(deno, MOD);
+    // ll        ans = (num3 * dinv) % MOD;
+    // ll        n;
     // cin >> n;
     // dearrangement(n);
-    // long long ans = dearrange[n];
+    // ll        ans = dearrange[n];
     // cout << ans % MOD << endl;
 
-    // long long n;
+    // ll        n;
     // cin >> n;
     // for (int x = 1; x <= 32; x++)
     // {
@@ -2288,28 +2957,28 @@ void solve()
     // }
     // cout << "NO" << endl;
 
-    //     long long x1, y1, x2, y2, x3, y3, x4, y4;
+    //     ll        x1, y1, x2, y2, x3, y3, x4, y4;
     //     cin >> x1 >> y1 >> x2 >> y2;
     //     cin >> x3 >> y3 >> x4 >> y4;
 
-    //     long long center_1_x = (x1 + x2) * 2;
-    //     long long center_1_y = (y1 + y2) * 2;
+    //     ll        center_1_x = (x1 + x2) * 2;
+    //     ll        center_1_y = (y1 + y2) * 2;
 
-    //     pair<long long, long long> center1 = {center_1_x, center_1_y};
+    //     pair<ll       , ll       > center1 = {center_1_x, center_1_y};
 
-    //     long long center_2_x = (x3 + x4) * 2;
-    //     long long center_2_y = (y3 + y4) * 2;
+    //     ll        center_2_x = (x3 + x4) * 2;
+    //     ll        center_2_y = (y3 + y4) * 2;
 
-    //     pair<long long, long long> center2 = {center_2_x, center_2_y};
+    //     pair<ll       , ll       > center2 = {center_2_x, center_2_y};
 
-    //     long long dist_1 = (((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
-    //     long long dist_2 = (((x3 - x4) * (x3 - x4)) + ((y3 - y4) * (y3 - y4)));
+    //     ll        dist_1 = (((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+    //     ll        dist_2 = (((x3 - x4) * (x3 - x4)) + ((y3 - y4) * (y3 - y4)));
 
-    //     long long dist = (((center1.first - center2.first) * (center1.first - center2.first)) + ((center1.second - center2.second) * (center1.second - center2.second)));
+    //     ll        dist = (((center1.first - center2.first) * (center1.first - center2.first)) + ((center1.second - center2.second) * (center1.second - center2.second)));
     //     dist = sqrt(dist);
 
-    //     long long radius_1 = sqrt(dist_1) * 2;
-    //     long long radius_2 = sqrt(dist_2) * 2;
+    //     ll        radius_1 = sqrt(dist_1) * 2;
+    //     ll        radius_2 = sqrt(dist_2) * 2;
     // cout << "center_1_x = " << center_1_x << '\n';
     // cout << "center_1_y = " << center_1_y << '\n';
     // cout << "center_2_x = " << center_2_x << '\n';
@@ -2342,36 +3011,36 @@ void solve()
     //     }
     //     cout << "YES" << endl;
 
-    // long long a, b;
+    // ll        a, b;
     // cin >> a >> b;
-    // long long mini = min(a,b);
-    // long long maxi = max(a,b);
+    // ll        mini = min(a,b);
+    // ll        maxi = max(a,b);
     // a = mini;
     // b = maxi;
-    // long long total_sum = ((b * (b + 1)) ) / 2;
-    // long long total_even_numbers = b / 2;
-    // long long total_odd_numbers = b - total_even_numbers;
+    // ll        total_sum = ((b * (b + 1)) ) / 2;
+    // ll        total_even_numbers = b / 2;
+    // ll        total_odd_numbers = b - total_even_numbers;
 
-    // long long prev = ((a - 1) * (a) ) / 2;
+    // ll        prev = ((a - 1) * (a) ) / 2;
 
-    // long long inclusive_sum = ((total_sum - prev) ) ;
+    // ll        inclusive_sum = ((total_sum - prev) ) ;
 
-    // long long even_sum = 0;
-    // long long odd_sum = 0;
+    // ll        even_sum = 0;
+    // ll        odd_sum = 0;
 
-    // long long s = (a - 1) / 2;
-    // long long e = (s * (s + 1)) ;
-    // long long e_total = (total_even_numbers * (total_even_numbers + 1)) ;
+    // ll        s = (a - 1) / 2;
+    // ll        e = (s * (s + 1)) ;
+    // ll        e_total = (total_even_numbers * (total_even_numbers + 1)) ;
     // even_sum = ((e_total - e) ) ;
 
     // odd_sum = ((inclusive_sum - even_sum) ) ;
     // cout << inclusive_sum << endl;
     // cout << even_sum << endl;
     // cout << odd_sum << endl;
-    // long long a, b, q;
+    // ll        a, b, q;
     // cin >> a>>b>>q;
-    // long long c = a ^ b;
-    // long long rem = q % 3;
+    // ll        c = a ^ b;
+    // ll        rem = q % 3;
     // if (q == 1)
     // {
     //     cout << a << endl;
@@ -2397,16 +3066,27 @@ void solve()
     //     cout << b << endl;
     // }
 
-    // long long n;
+    // ll        n;
     // cin >> n;
     // // n2+n <= 2*n
     // // n2+n-2*n<=0
     // //-1+-1-8n/2
-    // long long r = sqrt(1 + (8 * n));
-    // long long root = (-1 + r) / 2;
+    // ll        r = sqrt(1 + (8 * n));
+    // ll        root = (-1 + r) / 2;
     // cout << root << endl;
 }
-
+// Solving via contribution framework of type extended ends .
+int maxSubArray(vector<int> &nums)
+{
+    int ans = INT_MIN;
+    int prev = 0;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        prev = max(prev + nums[x], nums[x]);
+        ans = max(ans, prev);
+    }
+    return ans;
+}
 int main()
 {
     // O(N)
@@ -2416,12 +3096,30 @@ int main()
     //  compute_co_prime();
     // O(log log p)
     // build_spf(1000000);
+    ios_base::sync_with_stdio(false);
     cin.tie(0);
+    cout.tie(0);
     int t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
     }
 }
+
+/*
+    Contribution technique.
+    inverting the relation if possible.
+        i)Atomic item contribution.
+        ii)Contribution on pivot first form extended ends .
+        iii)Cumulative data structures.
+    1) Number of subarrays.
+    2) Sum of subarrays by extended means as well.
+    3) Sum of all triplets.
+    4) (i,j) arr[i] > arr[j] i < j finding sum of inversions over all subarrays.
+    5) Products of all subarrays.
+    6) Kadanes algorithm or maximum subarray sum.
+    7) Prefix sums and contribution technique 3rd form that is cumulative datas structures.
+
+*/

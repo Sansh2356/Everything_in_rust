@@ -136,6 +136,7 @@ public:
 };
 int main()
 {
+    string name = "Hello world"
     DoublyLinkedList *newList = new DoublyLinkedList();
     newList->insert_at_head(1);
     newList->insert_at_head(2);

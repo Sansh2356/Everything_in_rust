@@ -19,6 +19,8 @@ fn solve(stdin: Stdin) {
             break;
         }
     }
+let my_boy = String::from("Hello world");
+
 for word in words {
         if word.len() > 10 {
             let first_char = word.chars().next().unwrap();
@@ -26,7 +28,7 @@ for word in words {
             let l = word.len() - 2;
             let l_str = l.to_string();
             println!("{first_char}{l_str}{second_char}");
-        } else {
+        } else{ 
             println!("{word}");
         }
     }
