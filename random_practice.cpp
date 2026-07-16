@@ -1067,11 +1067,11 @@ vector<ll> construct_prefix_2(vector<ll> nums, ll k)
 }
 vector<ll> construct_prefix(vector<ll> nums)
 {
-    vector<ll> pf_arr(nums.size() + 1);
-    pf_arr[0] = 0;
-    for (int x = 0; x < nums.size(); x++)
+    vector<ll> pf_arr(nums.size());
+    pf_arr[0] = nums[0];
+    for (int x = 1; x < nums.size(); x++)
     {
-        pf_arr[x + 1] = (pf_arr[x] + nums[x + 1]);
+        pf_arr[x] = (pf_arr[x - 1] + nums[x]);
     }
     return pf_arr;
 }
@@ -1174,9 +1174,9 @@ ll appealSum_2(string s)
 vector<vector<ll>> prefix_2d(vector<vector<ll>> &arr)
 {
     vector<vector<ll>> pf(arr.size(), vector<ll>(arr[0].size(), 0));
-    for (ll x = 0; x < arr.size(); x++)
+    for (ll x = 1; x < pf.size(); x++)
     {
-        for (ll y = 0; y < arr[0].size(); y++)
+        for (ll y = 1; y < pf[0].size(); y++)
         {
             pf[x][y] = arr[x][y];
             if (x > 0)
@@ -1192,9 +1192,9 @@ vector<vector<ll>> prefix_2d(vector<vector<ll>> &arr)
 vector<vector<ll>> prefix_2d_overflow(vector<vector<ll>> &arr)
 {
     vector<vector<ll>> pf(arr.size(), vector<ll>(arr[0].size(), 0));
-    for (ll x = 0; x < arr.size(); x++)
+    for (ll x = 1; x < arr.size(); x++)
     {
-        for (ll y = 0; y < arr[0].size(); y++)
+        for (ll y = 1; y < arr[0].size(); y++)
         {
             pf[x][y] = arr[x][y] % MOD;
             if (x > 0)
@@ -1230,7 +1230,7 @@ vector<vector<ll>> prefix_2d_overflow(vector<vector<ll>> &arr)
     }
     return pf;
 }
-vector<vector<ll>> parital_sum_2d(vector<vector<ll>> &queries, ll n, ll m)
+vector<vector<ll>> partial_sum_2d(vector<vector<ll>> &queries, ll n, ll m)
 {
     vector<vector<ll>> partial_sum_arr(n, vector<ll>(m, 0));
     for (ll i = 0; i < queries.size(); i++)
@@ -1251,1734 +1251,2126 @@ vector<vector<ll>> parital_sum_2d(vector<vector<ll>> &queries, ll n, ll m)
     }
     return prefix_2d(partial_sum_arr);
 }
-void solve()
+void solve_range_freq_kth_query()
 {
     ll n, m, q;
     cin >> n >> m >> q;
-    vector<vector<ll>> arr(n, vector<ll>(m, 0));
+    vector<ll> v(n);
     for (int x = 0; x < n; x++)
     {
-        for (int y = 0; y < m; y++)
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    vector<vector<ll>> queries;
+    while (m--)
+    {
+        ll l, r;
+        cin >> l >> r;
+        l--;
+        r--;
+        queries.push_back({l, r, 1});
+    }
+    vector<ll> freq_arr = partial_sum(queries, n);
+
+    map<ll, ll> mapping;
+    map<ll, ll> mapping_indices;
+
+    for (ll x = 0; x < freq_arr.size(); x++)
+    {
+        if (freq_arr[x] != 0)
+        {
+            mapping[v[x]] += freq_arr[x];
+        }
+    }
+    vector<ll> pf_arr(mapping.size());
+    pf_arr[0] = mapping.begin()->second;
+    mapping_indices[pf_arr[0]] = mapping.begin()->first;
+    int idx = 1;
+    for (auto it : mapping)
+    {
+        if (it.first != mapping.begin()->first)
+        {
+            pf_arr[idx] = pf_arr[idx - 1] + it.second;
+            mapping_indices[pf_arr[idx]] = it.first;
+            idx++;
+        }
+    }
+    while (q--)
+    {
+        ll k;
+        cin >> k;
+        auto it = lower_bound(pf_arr.begin(), pf_arr.end(), k);
+        if (it != pf_arr.end())
+        {
+            cout << mapping_indices[*it] << " ";
+        }
+        else
+        {
+            cout << -1 << " ";
+        }
+    }
+    cout << "\n";
+}
+
+void solve_grid_max_overlap()
+{
+    ll n, m, q;
+
+    cin >> n >> m >> q;
+    vector<vector<ll>> queries;
+    while (q--)
+    {
+        ll x1, x2, y1, y2, c;
+        cin >> x1 >> y1 >> x2 >> y2 >> c;
+        queries.push_back({y1, y2, x1, x2, c});
+    }
+    vector<vector<ll>> diff_arr = partial_sum_2d(queries, 1e3 + 1, 1e3 + 1);
+    ll val = INT_MIN;
+    ll cnt = 0;
+    for (int x = 1; x <= n; x++)
+    {
+        for (int y = 1; y <= m; y++)
+        {
+            if (diff_arr[x][y] > val)
+            {
+                cnt = 1;
+                val = diff_arr[x][y];
+            }
+            else if (diff_arr[x][y] == val)
+            {
+                cnt++;
+            }
+        }
+    }
+    cout << val << " " << cnt << "\n";
+}
+
+void solve_rect_sum_queries()
+{
+    ll n, m, q;
+    cin >> n >> m >> q;
+    vector<vector<ll>> arr(n + 1, vector<ll>(m + 1, 0));
+    for (int x = 1; x <= n; x++)
+    {
+        for (int y = 1; y <= m; y++)
         {
             ll num;
             cin >> num;
             arr[x][y] = num;
         }
     }
-    vector<vector<ll>> pf_arr = prefix_2d(arr);
+    vector<vector<ll>> pf_arr = prefix_2d_overflow(arr);
+    // for(auto i:pf_arr){
+    //     for(auto j:pf_arr){
+    //         cout<<j<<" ";
+    //     }
+    //     cout<<"\n";
+    // }
     while (q--)
     {
         ll x1, y1, x2, y2;
         cin >> x1 >> y1 >> x2 >> y2;
-        ll ans = pf_arr[x2][y2] % MOD;
+        ll ans = pf_arr[x2][y2];
         if ((y1 - 1) > 0)
-            ans = (((ans % MOD) - (pf_arr[x2][y1 - 1] % MOD)) + MOD) % MOD;
+            ans = (((ans) - (pf_arr[x2][y1 - 1])));
         if ((x1 - 1) > 0)
-            ans = (((ans % MOD) - (pf_arr[x1 - 1][y2] % MOD)) + MOD) % MOD;
+            ans = (((ans) - (pf_arr[x1 - 1][y2])));
         if ((x1 - 1) > 0 && (y1 - 1) > 0)
-            ans = ((ans % MOD) + (pf_arr[x1 - 1][y1 - 1] % MOD)) % MOD;
-        cout << ans % MOD << "\n";
+            ans = ((ans) + (pf_arr[x1 - 1][y1 - 1]));
+        ans = ans % MOD;
+        if (ans < 0)
+            ans += MOD;
+        cout << ans << "\n";
     }
     // while (q--)
     // {
-    //     ll l, r, u, d;
-    //     cin >> l >> r >> u >> d;
-    //     ll ans = pf_arr[d][r];
-    //     if ((l - 1) > 0)
-    //         ans = (((ans ) - (pf_arr[d][l - 1] )) ) ;
-    //     if ((u - 1) > 0)
-    //         ans = (((ans ) - (pf_arr[u - 1][r] )) ) ;
-    //     if ((u - 1) > 0 && (l - 1) > 0)
-    //         ans = ((ans ) + (pf_arr[u - 1][l - 1] ));
+    //     ll x1, y1, x2, y2;
+    //     cin >> x1 >> y1 >> x2 >> y2;
+    //     ll ans = pf_arr[x2][y2] % MOD;
+    //     if ((y1 - 1) > 0)
+    //         ans = (((ans % MOD) - (pf_arr[x2][y1 - 1] % MOD)) + MOD) % MOD;
+    //     if ((x1 - 1) > 0)
+    //         ans = (((ans % MOD) - (pf_arr[x1 - 1][y2] % MOD)) + MOD) % MOD;
+    //     if ((x1 - 1) > 0 && (y1 - 1) > 0)
+    //         ans = ((ans % MOD) + (pf_arr[x1 - 1][y1 - 1] % MOD)) % MOD;
     //     cout << ans % MOD << "\n";
     // }
+}
 
-    // int n;
-    // cin >> n;
-    // vector<int> even;
-    // vector<int> odd;
-    // for (int x = 1; x <= n; x++)
-    //     x % 2 == 0 ? even.push_back(x) : odd.push_back(x);
-    // for (int x = 1; x <= n; x++)
-    // {
-    //     if (x % 2 == 0)
-    //     {
-    //         cout << odd.back() << " ";
-    //         odd.pop_back();
-    //     }
-    //     else
-    //     {
-    //         cout << even.back() << " ";
-    //         even.pop_back();
-    //     }
-    // }
-    // cout << "\n";
+void solve_alternating_permutation()
+{
+    int n;
+    cin >> n;
+    vector<int> even;
+    vector<int> odd;
+    for (int x = 1; x <= n; x++)
+        x % 2 == 0 ? even.push_back(x) : odd.push_back(x);
+    for (int x = 1; x <= n; x++)
+    {
+        if (x % 2 == 0)
+        {
+            cout << odd.back() << " ";
+            odd.pop_back();
+        }
+        else
+        {
+            cout << even.back() << " ";
+            even.pop_back();
+        }
+    }
+    cout << "\n";
+}
 
-    // ll        n;
-    // cin >> n;
-    // string s;
-    // cin >> s;
-    // cout << appealSum_2(s) << "\n";
+void solve_appeal_sum_2()
+{
+    ll n;
+    cin >> n;
+    string s;
+    cin >> s;
+    cout << appealSum_2(s) << "\n";
+}
 
-    // ll        n;
-    // cin >> n;
-    // string s;
-    // cin >> s;
-    // cout << appealSum(s) << "\n";
+void solve_appeal_sum()
+{
+    ll n;
+    cin >> n;
+    string s;
+    cin >> s;
+    cout << appealSum(s) << "\n";
+}
 
-    // ll        n, k, q;
-    // cin >> n >> k >> q;
-    // vector<vector<ll       >> queries;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        l, r;
-    //     cin >> l >> r;
-    //     queries.push_back({l, r, 1});
-    // }
-    // vector<ll       > bin_arr = partial_sum_2(queries, 1e6, k);
-    // vector<ll       > pf(bin_arr.size(), 0);
-    // for (int x = 1; x < bin_arr.size(); x++)
-    // {
-    //     pf[x] = bin_arr[x] + pf[x - 1];
-    // }
-    // while (q--)
-    // {
-    //     ll        l, r;
-    //     cin >> l >> r;
-    //     cout << pf[r] - pf[l - 1] << "\n";
-    // }
+void solve_covered_count_queries()
+{
+    ll n, k, q;
+    cin >> n >> k >> q;
+    vector<vector<ll>> queries;
+    for (int x = 0; x < n; x++)
+    {
+        ll l, r;
+        cin >> l >> r;
+        queries.push_back({l, r, 1});
+    }
+    vector<ll> bin_arr = partial_sum_2(queries, 1e6, k);
+    vector<ll> pf(bin_arr.size(), 0);
+    for (int x = 1; x < bin_arr.size(); x++)
+    {
+        pf[x] = bin_arr[x] + pf[x - 1];
+    }
+    while (q--)
+    {
+        ll l, r;
+        cin >> l >> r;
+        cout << pf[r] - pf[l - 1] << "\n";
+    }
+}
 
-    // ll        n, q;
-    // cin >> n >> q;
-    // vector<ll       > v(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
-    // ll        ans = 0;
-    // vector<ll       > pf = construct_prefix(v);
-    // while (q--)
-    // {
-    //     ll        l, r;
-    //     cin >> l >> r;
-    //     ll        sum_1 = pf[r] % MOD;
-    //     ll        sum_2 = pf[l - 1] % MOD;
-    //     ans = (((sum_1 % MOD + MOD)) - (sum_2 % MOD)) % MOD;
-    //     cout << ans << "\n";
-    // }
+void solve_range_sum_queries()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    ll ans = 0;
+    vector<ll> pf = construct_prefix(v);
+    while (q--)
+    {
+        ll l, r;
+        cin >> l >> r;
+        ll sum_1 = pf[r] % MOD;
+        ll sum_2 = pf[l - 1] % MOD;
+        ans = (((sum_1 % MOD + MOD)) - (sum_2 % MOD)) % MOD;
+        cout << ans << "\n";
+    }
+}
 
-    // ll        n, q;
-    // cin >> n >> q;
-    // vector<vector<ll       >> queries;
-    // while (q--)
-    // {
-    //     ll        l, r, x;
-    //     cin >> l >> r >> x;
-    //     queries.push_back({l, r, x});
-    // }
-    // vector<ll       > p = partial_sum(queries, n);
-    // for (auto i : p)
-    //     cout << i << " ";
-    // cout << "\n";
+void solve_range_update_print()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<vector<ll>> queries;
+    while (q--)
+    {
+        ll l, r, x;
+        cin >> l >> r >> x;
+        queries.push_back({l, r, x});
+    }
+    vector<ll> p = partial_sum(queries, n);
+    for (auto i : p)
+        cout << i << " ";
+    cout << "\n";
+}
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
-    // vector<ll       > pf = construct_prefix(v);
-    // for(auto i:pf){
-    //     cout<<i<<" ";
-    // }
-    // cout<<"\n";
+void solve_prefix_sum_print()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    vector<ll> pf = construct_prefix(v);
+    for (auto i : pf)
+    {
+        cout << i << " ";
+    }
+    cout << "\n";
+}
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // ll        ans = 0;
-    // ll        cum_sum = 0;
-    // ll        total_sum = 0;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     total_sum += num;
-    // }
-    // sort(v.begin(), v.end());
-    // for (ll        x = 0; x < n; x++)
-    // {
-    //     cum_sum += v[x];
-    //     ans += abs((total_sum - cum_sum) - ((n - (x + 1)) * v[x]));
-    // }
-    // cout << ans << "\n";
+void solve_sum_abs_diff()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll ans = 0;
+    ll cum_sum = 0;
+    ll total_sum = 0;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+        total_sum += num;
+    }
+    sort(v.begin(), v.end());
+    for (ll x = 0; x < n; x++)
+    {
+        cum_sum += v[x];
+        ans += abs((total_sum - cum_sum) - ((n - (x + 1)) * v[x]));
+    }
+    cout << ans << "\n";
+}
 
-    // ll        n;
-    // cin >> n;
-    // set<int> st;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     st.insert(num);
-    // }
-    // cout<<st.size();
-    // cout<<"\n";
-    // ll        q;
-    // cin >> q;
-    // multimap<string, ll       > m;
-    // while (q--)
-    // {
-    //     string s;
-    //     cin >> s;
-    //     if (s == "add")
-    //     {
-    //         ll        val;
-    //         string key;
-    //         cin >> key >> val;
-    //         m.insert({key, val});
-    //     }
-    //     else if (s == "erase")
-    //     {
-    //         string key;
-    //         cin >> key;
-    //         for (auto it = m.begin(); it != m.end();)
-    //         {
-    //             if (it->first == key)
-    //             {
-    //                 it = m.erase(it);
-    //                 break;
-    //             }
-    //             else
-    //                 ++it;
-    //         }
-    //     }
-    //     else if (s == "eraseall")
-    //     {
-    //         string num;
-    //         cin >> num;
-    //         while (1)
-    //         {
-    //             if (m.count(num))
-    //             {
-    //                 m.erase(num);
-    //             }
-    //             else
-    //             {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     else if (s == "print")
-    //     {
-    //         string x;
-    //         cin >> x;
-    //         if (!m.count(x))
-    //             cout << 0 << "\n";
-    //         else
-    //         {
-    //             cout << (m.find(x))->first << "\n";
-    //         }
-    //     }
-    // }
-    // ll        n;
-    // cin >> n;
-    // vector<int> v(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     v[x] = (x + 1);
-    // }
-    // do
-    // {
+void solve_distinct_count()
+{
+    ll n;
+    cin >> n;
+    set<int> st;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        st.insert(num);
+    }
+    cout << st.size();
+    cout << "\n";
+}
 
-    //     for (int x = 0; x < n; x++)
-    //     {
-    //         cout << v[x] << " ";
-    //     }
-    //     cout << endl;
-    // } while (next_permutation(v.begin(), v.end()));
-    // ll        n, m;
-    // cin >> n >> m;
+void solve_multimap_queries()
+{
+    ll q;
+    cin >> q;
+    multimap<string, ll> m;
+    while (q--)
+    {
+        string s;
+        cin >> s;
+        if (s == "add")
+        {
+            ll val;
+            string key;
+            cin >> key >> val;
+            m.insert({key, val});
+        }
+        else if (s == "erase")
+        {
+            string key;
+            cin >> key;
+            for (auto it = m.begin(); it != m.end();)
+            {
+                if (it->first == key)
+                {
+                    it = m.erase(it);
+                    break;
+                }
+                else
+                    ++it;
+            }
+        }
+        else if (s == "eraseall")
+        {
+            string num;
+            cin >> num;
+            while (1)
+            {
+                if (m.count(num))
+                {
+                    m.erase(num);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        else if (s == "print")
+        {
+            string x;
+            cin >> x;
+            if (!m.count(x))
+                cout << 0 << "\n";
+            else
+            {
+                cout << (m.find(x))->first << "\n";
+            }
+        }
+    }
+}
 
-    // vector<ll       > v(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
-    // sort(v.begin(), v.end());
-    // ll        ans = 0;
-    // for (auto i : v)
-    // {
-    //     if (m < i)
-    //         break;
-    //     m -= i;
-    //     ans++;
-    // }
-    // cout << ans << endl;
+void solve_print_permutations()
+{
+    ll n;
+    cin >> n;
+    vector<int> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        v[x] = (x + 1);
+    }
+    do
+    {
 
-    // ll        q;
-    // cin >> q;
-    // vector<ll       > v;
-    // while (q--)
-    // {
-    //     string query;
-    //     cin >> query;
-    //     if (query == "add")
-    //     {
-    //         ll        num;
-    //         cin >> num;
-    //         v.push_back(num);
-    //     }
-    //     else if (query == "clear")
-    //     {
-    //         v.clear();
-    //     }
-    //     else if (query == "remove")
-    //     {
-    //         if (!v.empty())
-    //             v.pop_back();
-    //     }
-    //     else
-    //     {
-    //         ll        num;
-    //         cin >> num;
-    //         if (v.size() > num)
-    //         {
-    //             cout << v[num] << endl;
-    //         }
-    //         else
-    //         {
-    //             cout << 0 << endl;
-    //         }
-    //     }
-    // }
-    // ll        n;
-    // cin>>n;
-    // vector<ll       > v(n);
-    // ll        prod = 1;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     int num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     prod = ((num % MOD) * (prod % MOD)) % MOD;
-    // }
-    // cout << prod << '\n';
+        for (int x = 0; x < n; x++)
+        {
+            cout << v[x] << " ";
+        }
+        cout << endl;
+    } while (next_permutation(v.begin(), v.end()));
+}
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // unordered_map<ll       , ll       > m;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     int num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     m[v[x]]++;
-    // }
-    // unordered_map<ll       , ll       > m2;
-    // for (int x = 0; x < v.size() - 2; x++)
-    // {
-    //     m2[v[x]]++;
-    //     ll        freq_1 = m2[1];
-    //     ll        freq_2 = m2[2];
-    //     ll        freq_3 = m2[3];
+void solve_max_items_budget()
+{
+    ll n, m;
+    cin >> n >> m;
 
-    //     {
-    //         if (freq_1 >= (freq_2 + freq_3))
-    //         {
-    //             ll        rem_freq1 = m[1] - freq_1;
-    //             ll        rem_freq2 = m[2] - freq_2;
-    //             ll        rem_freq3 = m[3] - freq_3;
-    //             ll        last_idx = v[v.size() - 1];
-    //             if (last_idx == 1)
-    //                 rem_freq1--;
-    //             else if (last_idx == 2)
-    //                 rem_freq2--;
-    //             else
-    //             {
-    //                 rem_freq3--;
-    //             }
-    //             if ((rem_freq1 + rem_freq2) >= rem_freq3)
-    //             {
-    //                 cout << "YES" << endl;
-    //                 return;
-    //             }
-    //         }
-    //     }
-    // }
-    // cout << "NO" << endl;
+    vector<ll> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    sort(v.begin(), v.end());
+    ll ans = 0;
+    for (auto i : v)
+    {
+        if (m < i)
+            break;
+        m -= i;
+        ans++;
+    }
+    cout << ans << endl;
+}
 
-    // int k;
-    // cin >> k;
-    // vector<int> v(k);
-    // for (int x = 0; x < k; x++)
-    // {
-    //     int num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
-    // int cnt = 0;
-    // for (auto num : v)
-    // {
-    //     if (num >= 3)
-    //     {
-    //         cout << "YES" << endl;
-    //         return;
-    //     }
-    //     else if (num >= 2)
-    //     {
-    //         cnt++;
-    //     }
-    // }
-    // if (cnt >= 2)
-    // {
-    //     cout << "YES" << endl;
-    //     return;
-    // }
-    // cout << "NO" << endl;
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
+void solve_dynamic_array_queries()
+{
+    ll q;
+    cin >> q;
+    vector<ll> v;
+    while (q--)
+    {
+        string query;
+        cin >> query;
+        if (query == "add")
+        {
+            ll num;
+            cin >> num;
+            v.push_back(num);
+        }
+        else if (query == "clear")
+        {
+            v.clear();
+        }
+        else if (query == "remove")
+        {
+            if (!v.empty())
+                v.pop_back();
+        }
+        else
+        {
+            ll num;
+            cin >> num;
+            if (v.size() > num)
+            {
+                cout << v[num] << endl;
+            }
+            else
+            {
+                cout << 0 << endl;
+            }
+        }
+    }
+}
 
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
+void solve_product_mod()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll prod = 1;
+    for (int x = 0; x < n; x++)
+    {
+        int num;
+        cin >> num;
+        v[x] = num;
+        prod = ((num % MOD) * (prod % MOD)) % MOD;
+    }
+    cout << prod << '\n';
+}
 
-    // ll        n;
-    // cin >> n;
-    // cout << sum_of_divisors(n, 1) % MOD << endl;
+void solve_one_two_three_prefix()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<ll, ll> m;
+    for (int x = 0; x < n; x++)
+    {
+        int num;
+        cin >> num;
+        v[x] = num;
+        m[v[x]]++;
+    }
+    unordered_map<ll, ll> m2;
+    for (int x = 0; x < v.size() - 2; x++)
+    {
+        m2[v[x]]++;
+        ll freq_1 = m2[1];
+        ll freq_2 = m2[2];
+        ll freq_3 = m2[3];
 
-    // ll        n;
-    // cin >> n;
+        {
+            if (freq_1 >= (freq_2 + freq_3))
+            {
+                ll rem_freq1 = m[1] - freq_1;
+                ll rem_freq2 = m[2] - freq_2;
+                ll rem_freq3 = m[3] - freq_3;
+                ll last_idx = v[v.size() - 1];
+                if (last_idx == 1)
+                    rem_freq1--;
+                else if (last_idx == 2)
+                    rem_freq2--;
+                else
+                {
+                    rem_freq3--;
+                }
+                if ((rem_freq1 + rem_freq2) >= rem_freq3)
+                {
+                    cout << "YES" << endl;
+                    return;
+                }
+            }
+        }
+    }
+    cout << "NO" << endl;
+}
 
-    // for (int x = 2; x <= 55555; x++)
-    // {
-    //     if (primes_arr[x] == true && x % 10 == 1)
-    //     {
-    //         n--;
-    //         cout << x << " ";
-    //     }
-    //     if (n == 0)
-    //         break;
-    // }
-    // vector<pair<ll       , ll       >> factors = Factors(n);
-    // ll        ans = 0;
-    // priority_queue<ll       , vector<ll       >, greater<ll       >> pq;
-    // for (auto p : factors)
-    // {
-    //     ll        temp = p.second;
-    //     while (temp >= 1)
-    //     {
-    //         pq.push(pow(p.first, temp));
-    //         temp--;
-    //     }
-    // }
-    // unordered_set<ll       > st;
-    // while (pq.empty() != true && pq.top() <= n)
-    // {
-    //     if (n % pq.top() == 0 && st.count(pq.top()) == false)
-    //     {
-    //         n /= pq.top();
-    //         st.insert(pq.top());
-    //         ans++;
-    //     }
-    //     pq.pop();
-    // }
-    // cout << ans << endl;
+void solve_freq_threshold()
+{
+    int k;
+    cin >> k;
+    vector<int> v(k);
+    for (int x = 0; x < k; x++)
+    {
+        int num;
+        cin >> num;
+        v[x] = num;
+    }
+    int cnt = 0;
+    for (auto num : v)
+    {
+        if (num >= 3)
+        {
+            cout << "YES" << endl;
+            return;
+        }
+        else if (num >= 2)
+        {
+            cnt++;
+        }
+    }
+    if (cnt >= 2)
+    {
+        cout << "YES" << endl;
+        return;
+    }
+    cout << "NO" << endl;
+}
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // ll        numerator = 0;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num = 0;
-    //     cin >> num;
-    //     v[x] = num;
-    //     numerator += num;
-    // }
-    // sort(v.begin(), v.end());
-    // vector<ll       > prefix_sum(n, 0);
-    // vector<ll       > suffix_sum(n, 0);
-    // prefix_sum[0] = v[0];
-    // suffix_sum[0] = v[v.size() - 1];
-    // for (int x = 1; x < n; x++)
-    // {
-    //     suffix_sum[x] = suffix_sum[x - 1] + v[n - x - 1];
-    // }
-    // for (int x = 1; x < v.size(); x++)
-    // {
-    //     prefix_sum[x] = prefix_sum[x - 1] + v[x];
-    // }
-    // reverse(suffix_sum.begin(), suffix_sum.end());
-    // ll        cum_sum = 0;
-    // for (int x = 0; x < v.size(); x++)
-    // {
-    //     ll        left_sum = abs((prefix_sum[x] - v[x]) - (x * v[x]));
-    //     ll        right_sum = abs((suffix_sum[x] - v[x]) - ((n - x - 1) * v[x]));
-    //     cum_sum += (left_sum + right_sum);
-    // }
-    // numerator += (cum_sum );
-    // ll        deno = n;
-    // ll        gcd_value = gcd(numerator, deno);
-    // while (gcd_value > 1)
-    // {
-    //     numerator /= gcd_value;
-    //     deno /= gcd_value;
-    //     gcd_value = gcd(numerator, deno);
-    // }
-    // cout << numerator << " " << deno << endl;
+void solve_read_array_stub()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
 
-    // ll        ans = ((r - l) + 1) * ((r - l) + 1);
-    // ans -= ((r - l) + 1);
-    // vector<ll       > primes = segmeneted_sieve(l, r);
-    // ll        non_primes = (((r - l) + 1) - primes.size());
-    // cout << non_primes << endl;
-    // ans -= (non_primes * primes.size());
-    // ans -= (r - l) * primes.size();
-    // cout << ans << endl;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+}
 
-    // ll        x;
-    // cin >> x;
-    // ll        len = 0;
-    // while (x >= 1)
-    // {
-    //     x /= 10;
-    //     len++;
-    // }
-    // cout << binpow(10,len) + 1 << endl;
+void solve_sum_of_divisors_range()
+{
+    ll n;
+    cin >> n;
+    cout << sum_of_divisors(n, 1) % MOD << endl;
+}
 
-    // ll        x, y;
-    // cin >> x >> y;
-    // if (y > x)
-    // {
-    //     cout << "NO" << endl;
-    // }
-    // else
-    // {
-    //     if (y == x)
-    //     {
-    //         cout << "YES" << endl;
-    //     }
-    //     else
-    //     {
-    //         if (x % y == 0)
-    //         {
-    //             cout << "YES" << endl;
-    //         }
-    //         else
-    //         {
-    //             cout << "NO" << endl;
-    //         }
-    //     }
-    // }
+void solve_primes_ending_in_one()
+{
+    ll n;
+    cin >> n;
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // unordered_map<ll       , ll       > factor_freq;
-    // ll        ans = 0;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     unordered_map<ll       , ll       > factors = factors_mapping(num);
-    //     for (auto it : factors)
-    //     {
-    //         ll        factor = it.first;
-    //         ll        power = it.second;
-    //         factor_freq[factor]++;
-    //     }
-    //     if (x == 0)
-    //     {
-    //         ans = num;
-    //     }
-    //     else if (x != 0)
-    //     {
-    //         ans = gcd(ans, num);
-    //     }
-    // }
+    for (int x = 2; x <= 55555; x++)
+    {
+        if (primes_arr[x] == true && x % 10 == 1)
+        {
+            n--;
+            cout << x << " ";
+        }
+        if (n == 0)
+            break;
+    }
+}
 
-    // ll        l, r;
-    // cin >> l >> r;
-    // ll        rem = l % 2019;
-    // if (rem == 0)
-    // {
-    //     cout << 0 << endl;
-    // }
-    // else
-    // {
-    //     ll        temp = (l - rem) + 2019;
-    //     if (temp >= l && temp <= r)
-    //     {
-    //         cout << 0 << endl;
-    //         return;
-    //     }
-    //     ll        ans = INT_MAX;
-    //     for (ll        x = l; x <= r; x++)
-    //     {
-    //         for (ll        y = (x + 1); y <= r; y++)
-    //         {
-    //             ll        prod = x * y;
-    //             ll        rem = prod % 2019;
-    //             if (rem < ans)
-    //             {
-    //                 ans = rem;
-    //             }
-    //         }
-    //     }
-    //     cout << ans << endl;
-    // }
+void solve_distinct_divisor_chain()
+{
+    ll n;
+    cin >> n;
+    vector<pair<ll, ll>> factors = Factors(n);
+    ll ans = 0;
+    priority_queue<ll, vector<ll>, greater<ll>> pq;
+    for (auto p : factors)
+    {
+        ll temp = p.second;
+        while (temp >= 1)
+        {
+            pq.push(pow(p.first, temp));
+            temp--;
+        }
+    }
+    unordered_set<ll> st;
+    while (pq.empty() != true && pq.top() <= n)
+    {
+        if (n % pq.top() == 0 && st.count(pq.top()) == false)
+        {
+            n /= pq.top();
+            st.insert(pq.top());
+            ans++;
+        }
+        pq.pop();
+    }
+    cout << ans << endl;
+}
 
-    // ll        a, b;
-    // cin >> a >> b;
+void solve_pairwise_distance_avg()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll numerator = 0;
+    for (int x = 0; x < n; x++)
+    {
+        ll num = 0;
+        cin >> num;
+        v[x] = num;
+        numerator += num;
+    }
+    sort(v.begin(), v.end());
+    vector<ll> prefix_sum(n, 0);
+    vector<ll> suffix_sum(n, 0);
+    prefix_sum[0] = v[0];
+    suffix_sum[0] = v[v.size() - 1];
+    for (int x = 1; x < n; x++)
+    {
+        suffix_sum[x] = suffix_sum[x - 1] + v[n - x - 1];
+    }
+    for (int x = 1; x < v.size(); x++)
+    {
+        prefix_sum[x] = prefix_sum[x - 1] + v[x];
+    }
+    reverse(suffix_sum.begin(), suffix_sum.end());
+    ll cum_sum = 0;
+    for (int x = 0; x < v.size(); x++)
+    {
+        ll left_sum = abs((prefix_sum[x] - v[x]) - (x * v[x]));
+        ll right_sum = abs((suffix_sum[x] - v[x]) - ((n - x - 1) * v[x]));
+        cum_sum += (left_sum + right_sum);
+    }
+    numerator += (cum_sum);
+    ll deno = n;
+    ll gcd_value = gcd(numerator, deno);
+    while (gcd_value > 1)
+    {
+        numerator /= gcd_value;
+        deno /= gcd_value;
+        gcd_value = gcd(numerator, deno);
+    }
+    cout << numerator << " " << deno << endl;
+}
 
-    // set<ll       > divs_a = cream_puff(a);
-    // set<ll       > divs_b = cream_puff(b);
-    // map<ll       , bool> combined;
+void solve_primes_in_segment_pairs()
+{
+    ll l, r;
+    cin >> l >> r;
+    ll ans = ((r - l) + 1) * ((r - l) + 1);
+    ans -= ((r - l) + 1);
+    vector<ll> primes = segmeneted_sieve(l, r);
+    ll non_primes = (((r - l) + 1) - primes.size());
+    cout << non_primes << endl;
+    ans -= (non_primes * primes.size());
+    ans -= (r - l) * primes.size();
+    cout << ans << endl;
+}
 
-    // for (auto it : divs_a)
-    // {
-    //     if (divs_b.count(it) == true)
-    //     {
-    //         combined.insert({it, true});
-    //     }
-    // }
+void solve_next_power_of_ten()
+{
+    ll x;
+    cin >> x;
+    ll len = 0;
+    while (x >= 1)
+    {
+        x /= 10;
+        len++;
+    }
+    cout << binpow(10, len) + 1 << endl;
+}
 
-    // auto it = combined.begin();
-    // ll        ans = 1;
-    // ll        maxi = (*(combined.rbegin())).first;
+void solve_divisibility_check()
+{
+    ll x, y;
+    cin >> x >> y;
+    if (y > x)
+    {
+        cout << "NO" << endl;
+    }
+    else
+    {
+        if (y == x)
+        {
+            cout << "YES" << endl;
+        }
+        else
+        {
+            if (x % y == 0)
+            {
+                cout << "YES" << endl;
+            }
+            else
+            {
+                cout << "NO" << endl;
+            }
+        }
+    }
+}
 
-    // while (it != combined.end())
-    // {
-    //     ll        divisor = (*(it)).first;
-    //     if (divisor == 1)
-    //     {
-    //         it++;
-    //         continue;
-    //     }
-    //     if (is_prime(divisor))
-    //     {
-    //         ans++;
-    //         // for (ll        x = 2 * divisor; x <= maxi; x += divisor)
-    //         // {
-    //         //     if (combined.count(x))
-    //         //     {
-    //         //         combined[x] = false;
-    //         //     }
-    //         // }
-    //     }
-    //     it++;
-    // }
-    // cout << ans << endl;
-    // ll        maxi = max(a, b);
-    // ll        mini = min(a, b);
+void solve_gcd_and_factor_freq()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<ll, ll> factor_freq;
+    ll ans = 0;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+        unordered_map<ll, ll> factors = factors_mapping(num);
+        for (auto it : factors)
+        {
+            ll factor = it.first;
+            ll power = it.second;
+            factor_freq[factor]++;
+        }
+        if (x == 0)
+        {
+            ans = num;
+        }
+        else if (x != 0)
+        {
+            ans = gcd(ans, num);
+        }
+    }
+}
 
-    // ll        rem = maxi % mini;
-    // ll        ans = 0;
+void solve_min_product_mod_2019()
+{
+    ll l, r;
+    cin >> l >> r;
+    ll rem = l % 2019;
+    if (rem == 0)
+    {
+        cout << 0 << endl;
+    }
+    else
+    {
+        ll temp = (l - rem) + 2019;
+        if (temp >= l && temp <= r)
+        {
+            cout << 0 << endl;
+            return;
+        }
+        ll ans = INT_MAX;
+        for (ll x = l; x <= r; x++)
+        {
+            for (ll y = (x + 1); y <= r; y++)
+            {
+                ll prod = x * y;
+                ll rem = prod % 2019;
+                if (rem < ans)
+                {
+                    ans = rem;
+                }
+            }
+        }
+        cout << ans << endl;
+    }
+}
 
-    // ans += (rem * mini);
-    // ans += ((maxi - rem) / mini);
+void solve_common_prime_divisors()
+{
+    ll a, b;
+    cin >> a >> b;
 
-    // cout << ans << endl;
+    set<ll> divs_a = cream_puff(a);
+    set<ll> divs_b = cream_puff(b);
+    map<ll, bool> combined;
 
-    // ll        n, m, k;
-    // cin >> n >> m >> k;
-    // ll        ans = 0;
+    for (auto it : divs_a)
+    {
+        if (divs_b.count(it) == true)
+        {
+            combined.insert({it, true});
+        }
+    }
 
-    // for (ll        x = 0; x <= k; x++)
-    // {
-    //     // All the remaining blocks cannot get the same color alloted to other blocks
-    //     // because that will lead to increasing the exactly k pair count leading to false cases as well.
-    //     ll        comp_1 = binpow((m - 1), (n - x - 1), MOD);
-    //     ll        comp_2 = m;
-    //     ll        comp_3 = (comp_1 * comp_2) % MOD;
-    //     ll        comp_4 = ncr((n - 1), x, MOD);
-    //     ll        comp_5 = (comp_4 * comp_3) % MOD;
+    auto it = combined.begin();
+    ll ans = 1;
+    ll maxi = (*(combined.rbegin())).first;
 
-    //     ans = (ans + comp_5) % MOD;
-    // }
-    // cout << ans << endl;
+    while (it != combined.end())
+    {
+        ll divisor = (*(it)).first;
+        if (divisor == 1)
+        {
+            it++;
+            continue;
+        }
+        if (is_prime(divisor))
+        {
+            ans++;
+            // for (ll        x = 2 * divisor; x <= maxi; x += divisor)
+            // {
+            //     if (combined.count(x))
+            //     {
+            //         combined[x] = false;
+            //     }
+            // }
+        }
+        it++;
+    }
+    cout << ans << endl;
+}
 
-    // ll        a, b;
-    // cin >> a >> b;
-    // if (a == b)
-    // {
-    //     cout << "infinity" << endl;
-    //     return;
-    // }
-    // else if (b >= a)
-    // {
-    //     cout << 0 << endl;
-    //     return;
-    // }
-    // else
-    // {
-    //     vector<ll       > divs = single_divisor(a - b);
-    //     ll        ans = 0;
-    //     for (auto div : divs)
-    //     {
-    //         if (div > b)
-    //         {
-    //             ans++;
-    //         }
-    //         else if(div > a)break;
-    //     }
-    //     cout << ans << endl;
-    // }
+void solve_max_mod_split()
+{
+    ll a, b;
+    cin >> a >> b;
+    ll maxi = max(a, b);
+    ll mini = min(a, b);
 
-    // ll        total_cases = binpow(m, n, MOD);
-    // ll        invalid_cases = 0;
-    // ll        total_pairs = n - 1;
-    // for (ll        x = (k + 1); x <= total_pairs; x++)
-    // {
-    //     invalid_cases = (invalid_cases % MOD + ((ncr(total_pairs, x, MOD) * m) % MOD)) % MOD;
-    // }
-    // cout << ((total_cases - invalid_cases) + MOD) % MOD << endl;
+    ll rem = maxi % mini;
+    ll ans = 0;
 
-    // ll        n;
-    // cin >> n;
-    // ll        ans = 0;
+    ans += (rem * mini);
+    ans += ((maxi - rem) / mini);
 
-    // // a and b are multiples of b to satisfy the given identity
-    // for (ll        x = 1; x <= n; x++)
-    // {
-    //     ll        num_multiples = floor(n / x);
-    //     ans += (num_multiples * num_multiples);
-    // }
-    // cout << ans << endl;
+    cout << ans << endl;
+}
 
-    // ll        n, c;
-    // cin >> n >> c;
-    // vector<ll       > a(n);
-    // vector<ll       > b(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     a[x] = num;
-    // }
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     b[x] = num;
-    // }
-    // ll        ans = INT_MAX;
-    // ll        cnt_1 = 0;
-    // ll        cnt_2 = 0;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     if (b[x] > a[x])
-    //     {
-    //         cnt_1 = INT_MAX;
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         cnt_1 += (a[x] - b[x]);
-    //     }
-    // }
-    // sort(a.begin(), a.end());
-    // sort(b.begin(), b.end());
-    // for (int x = 0; x < n; x++)
-    // {
-    //     if (b[x] > a[x])
-    //     {
-    //         cnt_2 = INT_MAX;
-    //         break;
-    //     }
-    //     else
-    //     {
-    //         cnt_2 += (a[x] - b[x]);
-    //     }
-    // }
-    // cnt_2 += c;
-    // ans = min(cnt_2, cnt_1);
-    // if (ans == INT_MAX)
-    // {
-    //     cout << -1 << endl;
-    // }
-    // else
-    // {
-    //     cout << ans << endl;
-    // }
+void solve_exactly_k_equal_adjacent()
+{
+    ll n, m, k;
+    cin >> n >> m >> k;
+    ll ans = 0;
 
-    // ll        a, b, n;
-    // cin >> a >> b >> n;
-    // ll        ans = 0;
-    // if (n == 1)
-    // {
-    //     cout << 2 << "\n";
-    //     return;
-    // }
-    // else if (n == 2)
-    // {
-    //     if (check(a + b, a, b))
-    //     {
-    //         cout << 2 << endl;
-    //         return;
-    //     }
-    //     else
-    //     {
-    //         cout << 0 << endl;
-    //         return;
-    //     }
-    // }
-    // // Iterating over length of n and checking for
-    // // how many bs and as can be accomodated .
-    // // sum of digits can be given as = a*x+(n-x)*b and checking it for all the good number
-    // for (int x = 0; x <= n; x++)
-    // {
-    //     // Setting frequency of A's to x.
-    //     ll        sum = ((a * x) + (n - x) * b);
-    //     if (check(sum, a, b) == true)
-    //     {
-    //         ans = (ans + ncr(n, x, MOD))%MOD;
-    //     }
-    // }
-    // cout << ans % MOD << endl;
+    for (ll x = 0; x <= k; x++)
+    {
+        // All the remaining blocks cannot get the same color alloted to other blocks
+        // because that will lead to increasing the exactly k pair count leading to false cases as well.
+        ll comp_1 = binpow((m - 1), (n - x - 1), MOD);
+        ll comp_2 = m;
+        ll comp_3 = (comp_1 * comp_2) % MOD;
+        ll comp_4 = ncr((n - 1), x, MOD);
+        ll comp_5 = (comp_4 * comp_3) % MOD;
 
-    // ll        n;
-    // cin >> n;
-    // ll        ans = 0;
-    // unordered_map<ll       , ll       > m = compute_factors(n);
-    // // At most log(n) factors
-    // for (auto it : m)
-    // {
-    //     ll        factor = it.first;
-    //     ll        factor_freq = it.second;
-    //     ans += (factor_freq);
-    // }
-    // cout << (ans + m.size() - 1) << endl;
+        ans = (ans + comp_5) % MOD;
+    }
+    cout << ans << endl;
+}
 
-    // ll        n, m, p;
-    // cin >> n >> m >> p;
-    // cout << basic_ncr(n + m, p) - basic_ncr(n, p) - basic_ncr(m, p) - basic_ncr(n, 1) * basic_ncr(m, p - 1) - basic_ncr(n, 2) * basic_ncr(m, p - 2) - basic_ncr(n, 3) * basic_ncr(m, p - 3);
+void solve_divisors_greater_than_b()
+{
+    ll a, b;
+    cin >> a >> b;
+    if (a == b)
+    {
+        cout << "infinity" << endl;
+        return;
+    }
+    else if (b >= a)
+    {
+        cout << 0 << endl;
+        return;
+    }
+    else
+    {
+        vector<ll> divs = single_divisor(a - b);
+        ll ans = 0;
+        for (auto div : divs)
+        {
+            if (div > b)
+            {
+                ans++;
+            }
+            else if (div > a)
+                break;
+        }
+        cout << ans << endl;
+    }
+}
 
-    // ll        n, m;
-    // cin >> n >> m;
-    // unordered_map<ll       , pair<ll       , ll       >> col_freq;
-    // unordered_map<ll       , pair<ll       , ll       >> row_freq;
-    // vector<vector<ll       >> v(n, vector<ll       >(m, 0));
-    // for (int x = 0; x < v.size(); x++)
-    // {
-    //     for (int y = 0; y < v[0].size(); y++)
-    //     {
-    //         ll        num;
-    //         cin >> num;
-    //         v[x][y] = num;
-    //     }
-    // }
-    // for (int x = 0; x < v.size(); x++)
-    // {
-    //     ll        freq = 0;
-    //     for (int y = 0; y < v[0].size(); y++)
-    //     {
-    //         if (v[x][y] == 0)
-    //             freq++;
-    //     }
-    //     row_freq[x] = {freq, m - freq};
-    // }
-    // for (int x = 0; x < v[0].size(); x++)
-    // {
-    //     ll        freq = 0;
-    //     for (int y = 0; y < v.size(); y++)
-    //     {
-    //         if (v[y][x] == 0)
-    //             freq++;
-    //     }
-    //     col_freq[x] = {freq, n - freq};
-    // }
-    // ll        ans = (m * n);
-    // for (auto it : row_freq)
-    // {
-    //     ll        freq_1 = it.second.second;
-    //     ll        freq_0 = it.second.first;
-    //     ans += ((1LL << freq_0) - (1 + freq_0));
-    //     ans += ((1LL << freq_1) - (1 + freq_1));
-    // }
-    // for (auto it : col_freq)
-    // {
-    //     ll        freq_1 = it.second.second;
-    //     ll        freq_0 = it.second.first;
-    //     ans += ((1LL << freq_0) - (1 + freq_0));
-    //     ans += ((1LL << freq_1) - (1 + freq_1));
-    // }
-    // cout << ans << endl;
+void solve_at_most_k_pairs()
+{
+    ll n, m, k;
+    cin >> n >> m >> k;
+    ll total_cases = binpow(m, n, MOD);
+    ll invalid_cases = 0;
+    ll total_pairs = n - 1;
+    for (ll x = (k + 1); x <= total_pairs; x++)
+    {
+        invalid_cases = (invalid_cases % MOD + ((ncr(total_pairs, x, MOD) * m) % MOD)) % MOD;
+    }
+    cout << ((total_cases - invalid_cases) + MOD) % MOD << endl;
+}
 
-    // ll        n, k, q;
-    // cin >> n >> k >> q;
-    // vector<ll       > v(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    // }
-    // ll        l = 0;
-    // ll        r = 0;
-    // ll        ans = 0;
-    // while (l <= r && r < v.size())
-    // {
-    //     if (v[r] > q)
-    //     {
-    //         if (((r - 1) - l) + 1 >= k)
-    //         {
-    //             ll        val = (((r - 1) - l + 1) - k + 1);
-    //             ans += (val * (val + 1)) / 2;
-    //         }
-    //         r++;
-    //         l = r;
-    //     }
-    //     else
-    //     {
-    //         r++;
-    //     }
-    // }
-    // if ((r - l) + 1 >= k)
-    // {
-    //     ll        val = (((r - 1) - l + 1) - k + 1);
-    //     ans += (val * (val + 1)) / 2;
-    // }
-    // cout << ans << endl;
+void solve_multiple_pairs_count()
+{
+    ll n;
+    cin >> n;
+    ll ans = 0;
 
-    // ll        x;
-    // cin>>x;
-    // cout<<1<<" "<<(x-1)<<endl;
+    // a and b are multiples of b to satisfy the given identity
+    for (ll x = 1; x <= n; x++)
+    {
+        ll num_multiples = floor(n / x);
+        ans += (num_multiples * num_multiples);
+    }
+    cout << ans << endl;
+}
 
-    // string s;
-    // cin >> s;
-    // ll        x_pos = -1;
-    // ll        equal_pos = -1;
-    // char x_coeff = ' ';
-    // for (int x = 0; x < s.size(); x++)
-    // {
-    //     if (s[x] == 'X')
-    //         x_pos = x;
-    //     else if (s[x] == '=')
-    //         equal_pos = x;
-    // }
-    // if (x_pos == 0)
-    // {
-    //     x_coeff = '+';
-    // }
-    // else if (s[x_pos - 1] == '=')
-    // {
-    //     x_coeff = '+';
-    // }
-    // else
-    // {
-    //     x_coeff = s[x_pos - 1];
-    // }
-    // string expr_1 = "";
-    // string expr_2 = "";
-    // string expr_3 = "";
-    // if (x_pos > equal_pos)
-    // {
-    //     for (int x = equal_pos + 1; x <= x_pos - 1; x++)
-    //     {
-    //         expr_1.push_back(s[x]);
-    //     }
-    //     if (x_pos != equal_pos + 1)
-    //     {
-    //         expr_1.pop_back();
-    //     }
-    //     for (int x = x_pos + 1; x < s.size(); x++)
-    //     {
-    //         expr_2.push_back(s[x]);
-    //     }
-    //     for (int x = 0; x <= equal_pos - 1; x++)
-    //     {
-    //         expr_3.push_back(s[x]);
-    //     }
-    // }
-    // else
-    // {
-    //     for (int x = 0; x <= x_pos - 1; x++)
-    //     {
-    //         expr_1.push_back(s[x]);
-    //     }
-    //     if (x_pos != 0)
-    //     {
-    //         expr_1.pop_back();
-    //     }
-    //     for (int x = x_pos + 1; x <= equal_pos - 1; x++)
-    //     {
-    //         expr_2.push_back(s[x]);
-    //     }
-    //     for (int x = equal_pos + 1; x < s.size(); x++)
-    //     {
-    //         expr_3.push_back(s[x]);
-    //     }
-    // }
-    // ll        expr1_val = expr_val(expr_1);
-    // ll        expr2_val = expr_val(expr_2);
-    // ll        expr3_val = expr_val(expr_3);
+void solve_min_cost_transform()
+{
+    ll n, c;
+    cin >> n >> c;
+    vector<ll> a(n);
+    vector<ll> b(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        a[x] = num;
+    }
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        b[x] = num;
+    }
+    ll ans = INT_MAX;
+    ll cnt_1 = 0;
+    ll cnt_2 = 0;
+    for (int x = 0; x < n; x++)
+    {
+        if (b[x] > a[x])
+        {
+            cnt_1 = INT_MAX;
+            break;
+        }
+        else
+        {
+            cnt_1 += (a[x] - b[x]);
+        }
+    }
+    sort(a.begin(), a.end());
+    sort(b.begin(), b.end());
+    for (int x = 0; x < n; x++)
+    {
+        if (b[x] > a[x])
+        {
+            cnt_2 = INT_MAX;
+            break;
+        }
+        else
+        {
+            cnt_2 += (a[x] - b[x]);
+        }
+    }
+    cnt_2 += c;
+    ans = min(cnt_2, cnt_1);
+    if (ans == INT_MAX)
+    {
+        cout << -1 << endl;
+    }
+    else
+    {
+        cout << ans << endl;
+    }
+}
 
-    // ll        expr_cum = expr1_val + expr2_val;
-    // ll        expr_total = expr3_val + (-1 * expr_cum);
+void solve_good_digit_numbers()
+{
+    ll a, b, n;
+    cin >> a >> b >> n;
+    ll ans = 0;
+    if (n == 1)
+    {
+        cout << 2 << "\n";
+        return;
+    }
+    else if (n == 2)
+    {
+        if (check(a + b, a, b))
+        {
+            cout << 2 << endl;
+            return;
+        }
+        else
+        {
+            cout << 0 << endl;
+            return;
+        }
+    }
+    // Iterating over length of n and checking for
+    // how many bs and as can be accomodated .
+    // sum of digits can be given as = a*x+(n-x)*b and checking it for all the good number
+    for (int x = 0; x <= n; x++)
+    {
+        // Setting frequency of A's to x.
+        ll sum = ((a * x) + (n - x) * b);
+        if (check(sum, a, b) == true)
+        {
+            ans = (ans + ncr(n, x, MOD)) % MOD;
+        }
+    }
+    cout << ans % MOD << endl;
+}
 
-    // if (x_coeff == '-')
-    // {
-    //     expr_total *= -1;
-    // }
+void solve_factorization_steps()
+{
+    ll n;
+    cin >> n;
+    ll ans = 0;
+    unordered_map<ll, ll> m = compute_factors(n);
+    // At most log(n) factors
+    for (auto it : m)
+    {
+        ll factor = it.first;
+        ll factor_freq = it.second;
+        ans += (factor_freq);
+    }
+    cout << (ans + m.size() - 1) << endl;
+}
+
+void solve_ncr_expression()
+{
+    ll n, m, p;
+    cin >> n >> m >> p;
+    cout << basic_ncr(n + m, p) - basic_ncr(n, p) - basic_ncr(m, p) - basic_ncr(n, 1) * basic_ncr(m, p - 1) - basic_ncr(n, 2) * basic_ncr(m, p - 2) - basic_ncr(n, 3) * basic_ncr(m, p - 3);
+}
+
+void solve_grid_subset_count()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<ll, pair<ll, ll>> col_freq;
+    unordered_map<ll, pair<ll, ll>> row_freq;
+    vector<vector<ll>> v(n, vector<ll>(m, 0));
+    for (int x = 0; x < v.size(); x++)
+    {
+        for (int y = 0; y < v[0].size(); y++)
+        {
+            ll num;
+            cin >> num;
+            v[x][y] = num;
+        }
+    }
+    for (int x = 0; x < v.size(); x++)
+    {
+        ll freq = 0;
+        for (int y = 0; y < v[0].size(); y++)
+        {
+            if (v[x][y] == 0)
+                freq++;
+        }
+        row_freq[x] = {freq, m - freq};
+    }
+    for (int x = 0; x < v[0].size(); x++)
+    {
+        ll freq = 0;
+        for (int y = 0; y < v.size(); y++)
+        {
+            if (v[y][x] == 0)
+                freq++;
+        }
+        col_freq[x] = {freq, n - freq};
+    }
+    ll ans = (m * n);
+    for (auto it : row_freq)
+    {
+        ll freq_1 = it.second.second;
+        ll freq_0 = it.second.first;
+        ans += ((1LL << freq_0) - (1 + freq_0));
+        ans += ((1LL << freq_1) - (1 + freq_1));
+    }
+    for (auto it : col_freq)
+    {
+        ll freq_1 = it.second.second;
+        ll freq_0 = it.second.first;
+        ans += ((1LL << freq_0) - (1 + freq_0));
+        ans += ((1LL << freq_1) - (1 + freq_1));
+    }
+    cout << ans << endl;
+}
+
+void solve_bounded_window_count()
+{
+    ll n, k, q;
+    cin >> n >> k >> q;
+    vector<ll> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    ll l = 0;
+    ll r = 0;
+    ll ans = 0;
+    while (l <= r && r < v.size())
+    {
+        if (v[r] > q)
+        {
+            if (((r - 1) - l) + 1 >= k)
+            {
+                ll val = (((r - 1) - l + 1) - k + 1);
+                ans += (val * (val + 1)) / 2;
+            }
+            r++;
+            l = r;
+        }
+        else
+        {
+            r++;
+        }
+    }
+    if ((r - l) + 1 >= k)
+    {
+        ll val = (((r - 1) - l + 1) - k + 1);
+        ans += (val * (val + 1)) / 2;
+    }
+    cout << ans << endl;
+}
+
+void solve_split_into_two()
+{
+    ll x;
+    cin >> x;
+    cout << 1 << " " << (x - 1) << endl;
+}
+
+void solve_linear_equation()
+{
+    string s;
+    cin >> s;
+    ll x_pos = -1;
+    ll equal_pos = -1;
+    char x_coeff = ' ';
+    for (int x = 0; x < s.size(); x++)
+    {
+        if (s[x] == 'X')
+            x_pos = x;
+        else if (s[x] == '=')
+            equal_pos = x;
+    }
+    if (x_pos == 0)
+    {
+        x_coeff = '+';
+    }
+    else if (s[x_pos - 1] == '=')
+    {
+        x_coeff = '+';
+    }
+    else
+    {
+        x_coeff = s[x_pos - 1];
+    }
+    string expr_1 = "";
+    string expr_2 = "";
+    string expr_3 = "";
+    if (x_pos > equal_pos)
+    {
+        for (int x = equal_pos + 1; x <= x_pos - 1; x++)
+        {
+            expr_1.push_back(s[x]);
+        }
+        if (x_pos != equal_pos + 1)
+        {
+            expr_1.pop_back();
+        }
+        for (int x = x_pos + 1; x < s.size(); x++)
+        {
+            expr_2.push_back(s[x]);
+        }
+        for (int x = 0; x <= equal_pos - 1; x++)
+        {
+            expr_3.push_back(s[x]);
+        }
+    }
+    else
+    {
+        for (int x = 0; x <= x_pos - 1; x++)
+        {
+            expr_1.push_back(s[x]);
+        }
+        if (x_pos != 0)
+        {
+            expr_1.pop_back();
+        }
+        for (int x = x_pos + 1; x <= equal_pos - 1; x++)
+        {
+            expr_2.push_back(s[x]);
+        }
+        for (int x = equal_pos + 1; x < s.size(); x++)
+        {
+            expr_3.push_back(s[x]);
+        }
+    }
+    ll expr1_val = expr_val(expr_1);
+    ll expr2_val = expr_val(expr_2);
+    ll expr3_val = expr_val(expr_3);
+
+    ll expr_cum = expr1_val + expr2_val;
+    ll expr_total = expr3_val + (-1 * expr_cum);
+
+    if (x_coeff == '-')
+    {
+        expr_total *= -1;
+    }
     // cout << "Expr 1 " << expr_1 << " " << expr1_val << endl;
     // cout << "Expr 2 " << expr_2 << " " << expr2_val << endl;
     // cout << "Expr 3 " << expr_3 << " " << expr3_val << endl;
     // cout << "Coefficient of x - " << x_coeff << endl;
     // cout << "FINAL ANS " << expr_total << endl;
-    // cout << expr_total << endl;
-    // ll        n, m;
-    // cin >> n >> m;
-    // if (m < n)
-    // {
-    //     cout << 0 << endl;
-    //     return;
-    // }
-    // m -= n;
-    // ll        num = (m + n - 1);
-    // ll        r = n - 1;
+    cout << expr_total << endl;
+}
 
-    // cout << ncr(num, r, MOD)%MOD << endl;
+void solve_stars_and_bars()
+{
+    ll n, m;
+    cin >> n >> m;
+    if (m < n)
+    {
+        cout << 0 << endl;
+        return;
+    }
+    m -= n;
+    ll num = (m + n - 1);
+    ll r = n - 1;
 
-    // ll        n;
-    // cin >> n;
-    // ll        a = binpow(26, n, MOD);
-    // ll        b = binpow(5, n, MOD);
-    // ll        c = binpow(21, n, MOD);
-    // cout << (((((a - b) + MOD) % MOD) - c) + MOD) % MOD << endl;
-    // ll        a, b, c, d, e, f, g, h;
-    // cin >> a >> b >> c >> d >> e >> f >> g >> h;
+    cout << ncr(num, r, MOD) % MOD << endl;
+}
 
-    // ll        val_1 = (binpow(a, b, MOD));
-    // ll        val_2 = c;
-    // ll        val_2_1 = ((((val_1 - val_2) + MOD) % MOD) * e) % MOD;
-    // ll        val_3 = d;
-    // ll        val_4_first = (g * h) %( MOD-1);
-    // ll        val_4_second = binpow(f, val_4_first, MOD);
-    // ll        val_4 = (val_4_second * e) % MOD;
+void solve_inclusion_exclusion_strings()
+{
+    ll n;
+    cin >> n;
+    ll a = binpow(26, n, MOD);
+    ll b = binpow(5, n, MOD);
+    ll c = binpow(21, n, MOD);
+    cout << (((((a - b) + MOD) % MOD) - c) + MOD) % MOD << endl;
+}
 
-    // ll        p_first = ((val_2_1 - d) + MOD) % MOD;
-    // ll        p = (p_first + val_4) % MOD;
+void solve_modular_expression()
+{
+    ll a, b, c, d, e, f, g, h;
+    cin >> a >> b >> c >> d >> e >> f >> g >> h;
 
-    // ll        q = e;
-    // ll        q_inverse = inverse(q, MOD);
-    // ll        ans = (p * q_inverse) % MOD;
-    // cout << ans << endl;
+    ll val_1 = (binpow(a, b, MOD));
+    ll val_2 = c;
+    ll val_2_1 = ((((val_1 - val_2) + MOD) % MOD) * e) % MOD;
+    ll val_3 = d;
+    ll val_4_first = (g * h) % (MOD - 1);
+    ll val_4_second = binpow(f, val_4_first, MOD);
+    ll val_4 = (val_4_second * e) % MOD;
 
-    // ll        n, k;
-    // cin >> n >> k;
-    // ll        a = binpow(k - 1, n-1, MOD);
-    // ll        ans = (k * a) % MOD;
-    // cout << ans << endl;
+    ll p_first = ((val_2_1 - d) + MOD) % MOD;
+    ll p = (p_first + val_4) % MOD;
+
+    ll q = e;
+    ll q_inverse = inverse(q, MOD);
+    ll ans = (p * q_inverse) % MOD;
+    cout << ans << endl;
+}
+
+void solve_line_coloring()
+{
+    ll n, k;
+    cin >> n >> k;
+    ll a = binpow(k - 1, n - 1, MOD);
+    ll ans = (k * a) % MOD;
+    cout << ans << endl;
     // cout<<(n*(n+1))/2<<endl;
-    // ll        q, k;
-    // cin >> q >> k;
+}
 
-    // RandomClass *obj = new RandomClass(k);
-    // while (q--)
-    // {
-    //     ll        q_type;
-    //     ll        num;
-    //     cin >> q_type;
-    //     if (q_type == 1)
-    //     {
-    //         cin >> num;
-    //         obj->add(num);
-    //     }
-    //     else if (q_type == 2)
-    //     {
-    //         cin >> num;
-    //         obj->remove(num);
-    //     }
-    //     else
-    //     {
-    //         char ch;
-    //         cin >> ch;
-    //         ll        query_ans = obj->query();
-    //         cout << query_ans << endl;
-    //     }
-    // }
+void solve_top_k_multiset_queries()
+{
+    ll q, k;
+    cin >> q >> k;
 
-    // unordered_map<ll       , ll       > m;
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // bool flag = true;
-    // ll        gcd_total = -1;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     unordered_map<ll       , ll       > facts = compute_factors(num);
-    //     for (auto it : facts)
-    //     {
-    //         if (m.count(it.first) == true)
-    //         {
-    //             flag = false;
-    //         }
-    //         m[it.first]++;
-    //     }
-    //     if (x >= 2)
-    //     {
-    //         gcd_total = gcd(gcd_total, v[x]);
-    //     }
-    //     else if (x == 1)
-    //     {
-    //         gcd_total = gcd(v[0], v[1]);
-    //     }
-    // }
-    // if (flag == true)
-    // {
-    //     cout << "pairwise coprime" << endl;
-    // }
-    // else if (gcd_total == 1)
-    // {
-    //     cout << "setwise coprime" << endl;
-    // }
-    // else
-    // {
-    //     cout << "not coprime" << endl;
-    // }
+    RandomClass *obj = new RandomClass(k);
+    while (q--)
+    {
+        ll q_type;
+        ll num;
+        cin >> q_type;
+        if (q_type == 1)
+        {
+            cin >> num;
+            obj->add(num);
+        }
+        else if (q_type == 2)
+        {
+            cin >> num;
+            obj->remove(num);
+        }
+        else
+        {
+            char ch;
+            cin >> ch;
+            ll query_ans = obj->query();
+            cout << query_ans << endl;
+        }
+    }
+}
 
-    // ll        n, m;
-    // cin >> n >> m;
-    // vector<ll       > v(1e6);
-    // for (int x = 1; x <= m; x++)
-    // {
-    //     v[x] = x;
-    // }
-    // vector<ll       > v2(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v2[x] = num;
-    // }
-    // for (int x = 0; x < n; x++)
-    // {
-    //     unordered_map<ll       , ll       > m2 = compute_factors(v2[x]);
-    //     for (auto factor : m2)
-    //     {
-    //         if (v[factor.first] != -1)
-    //         {
+void solve_coprime_classification()
+{
+    unordered_map<ll, ll> m;
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    bool flag = true;
+    ll gcd_total = -1;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+        unordered_map<ll, ll> facts = compute_factors(num);
+        for (auto it : facts)
+        {
+            if (m.count(it.first) == true)
+            {
+                flag = false;
+            }
+            m[it.first]++;
+        }
+        if (x >= 2)
+        {
+            gcd_total = gcd(gcd_total, v[x]);
+        }
+        else if (x == 1)
+        {
+            gcd_total = gcd(v[0], v[1]);
+        }
+    }
+    if (flag == true)
+    {
+        cout << "pairwise coprime" << endl;
+    }
+    else if (gcd_total == 1)
+    {
+        cout << "setwise coprime" << endl;
+    }
+    else
+    {
+        cout << "not coprime" << endl;
+    }
+}
 
-    //             for (ll        y = factor.first; y <= m; y += factor.first)
-    //             {
-    //                 v[y] = -1;
-    //             }
-    //         }
-    //     }
-    // }
-    // ll        cnt = 0;
-    // for (ll        x = 1; x <= m; x++)
-    // {
-    //     if (v[x] != -1)
-    //     {
-    //         cnt++;
-    //     }
-    // }
-    // cout << cnt << endl;
-    // for (ll        x = 1; x <= m; x++)
-    // {
-    //     if (v[x] != -1)
-    //     {
-    //         cout << x << endl;
-    //     }
-    // }
+void solve_multiples_elimination()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> v(1e6);
+    for (int x = 1; x <= m; x++)
+    {
+        v[x] = x;
+    }
+    vector<ll> v2(n);
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v2[x] = num;
+    }
+    for (int x = 0; x < n; x++)
+    {
+        unordered_map<ll, ll> m2 = compute_factors(v2[x]);
+        for (auto factor : m2)
+        {
+            if (v[factor.first] != -1)
+            {
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // unordered_map<ll       , unordered_set<ll       >> st;
-    // for (ll        x = 0; x < n; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     st[num].insert(x);
-    // }
-    // ll        cnt = 0;
-    // for (ll        x = 0; x < n; x++)
-    // {
-    //     ll        num = v[x];
-    //     vector<ll       > divs = single_divisor(num);
+                for (ll y = factor.first; y <= m; y += factor.first)
+                {
+                    v[y] = -1;
+                }
+            }
+        }
+    }
+    ll cnt = 0;
+    for (ll x = 1; x <= m; x++)
+    {
+        if (v[x] != -1)
+        {
+            cnt++;
+        }
+    }
+    cout << cnt << endl;
+    for (ll x = 1; x <= m; x++)
+    {
+        if (v[x] != -1)
+        {
+            cout << x << endl;
+        }
+    }
+}
 
-    //     for (auto divisor : divs)
-    //     {
-    //         if (st.count(divisor) == true && st[divisor].size() > 1)
-    //         {
-    //             cnt++;
-    //             break;
-    //         }
-    //         else if (st.count(divisor) == true && st[divisor].size() == 1)
-    //         {
-    //             if (st[divisor].count(x) == false)
-    //             {
-    //                 cnt++;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    // cout << n-cnt << endl;
+void solve_non_divisible_count()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<ll, unordered_set<ll>> st;
+    for (ll x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+        st[num].insert(x);
+    }
+    ll cnt = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        ll num = v[x];
+        vector<ll> divs = single_divisor(num);
 
-    // ll        n;
-    // cin >> n;
-    // cout << atc_144(n) << endl;
+        for (auto divisor : divs)
+        {
+            if (st.count(divisor) == true && st[divisor].size() > 1)
+            {
+                cnt++;
+                break;
+            }
+            else if (st.count(divisor) == true && st[divisor].size() == 1)
+            {
+                if (st[divisor].count(x) == false)
+                {
+                    cnt++;
+                    break;
+                }
+            }
+        }
+    }
+    cout << n - cnt << endl;
+}
 
+void solve_atc144()
+{
+    ll n;
+    cin >> n;
+    cout << atc_144(n) << endl;
+}
+
+void solve_square_divisors()
+{
     // N^2*10^d
     // N*10d
-    // ll        n, d;
-    // cin >> n >> d;
-    // vector<pair<ll       , ll       >> fact = Factors(n);
-    // unordered_map<ll       , ll       > m;
-    // for (auto it : fact)
-    // {
-    //     ll        base = it.first;
-    //     ll        exponent = it.second;
-    //     m[base] = 2 * exponent;
-    // }
-    // m[2] += 2 * d;
-    // m[5] += 2 * d;
-    // ll        ans = 1;
-    // bool flag = true;
-    // for (auto it : m)
-    // {
-    //     if (it.second % 2 != 0)
-    //     {
-    //         flag = false;
-    //     }
-    //     ans = ((ans % MOD) * (it.second + 1)) % MOD;
-    // }
-    // ans = ans * 2;
-    // if (flag == true)
-    // {
-    //     cout << ((ans - 1) + MOD) % MOD << endl;
-    // }
-    // else
-    // {
-    //     cout << ans % MOD << endl;
-    // }
+    ll n, d;
+    cin >> n >> d;
+    vector<pair<ll, ll>> fact = Factors(n);
+    unordered_map<ll, ll> m;
+    for (auto it : fact)
+    {
+        ll base = it.first;
+        ll exponent = it.second;
+        m[base] = 2 * exponent;
+    }
+    m[2] += 2 * d;
+    m[5] += 2 * d;
+    ll ans = 1;
+    bool flag = true;
+    for (auto it : m)
+    {
+        if (it.second % 2 != 0)
+        {
+            flag = false;
+        }
+        ans = ((ans % MOD) * (it.second + 1)) % MOD;
+    }
+    ans = ans * 2;
+    if (flag == true)
+    {
+        cout << ((ans - 1) + MOD) % MOD << endl;
+    }
+    else
+    {
+        cout << ans % MOD << endl;
+    }
+}
 
-    // ll        l, r, m;
-    // cin >> l >> r >> m;
-    // ll        value_1 = GET(l - 1, m);
-    // ll        value_2 = GET(r, m);
-    // cout << ((value_2 - value_1) + MOD) % MOD << endl;
-    // ll        n;
-    // cin >> n;
-    // vector<pair<ll       , ll       >> factors = Factors(n);
-    // ll        ans = n;
-    // // 1-1/p = p-1*(p-2)* .....
-    // // denom = p1*p2*p3 ......
+void solve_range_mod_sum()
+{
+    ll l, r, m;
+    cin >> l >> r >> m;
+    ll value_1 = GET(l - 1, m);
+    ll value_2 = GET(r, m);
+    cout << ((value_2 - value_1) + MOD) % MOD << endl;
+}
 
-    // for (auto it : factors)
-    // {
-    //     ans /= it.first;
-    //     ans *= (it.first - 1);
-    // }
-    // cout << ans << endl;
+void solve_euler_totient_single()
+{
+    ll n;
+    cin >> n;
+    vector<pair<ll, ll>> factors = Factors(n);
+    ll ans = n;
+    // 1-1/p = p-1*(p-2)* .....
+    // denom = p1*p2*p3 ......
 
-    // vector<ll       > input(n);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     cin >> input[x];
-    //     ll        root = sqrtl(input[x]);
-    //     ll        mul = (root * root);
-    //     if (mul != input[x])
-    //     {
-    //         cout<<"NO"<<endl;
-    //         continue;
-    //     }
-    //     else
-    //     {
-    //         if (primes_arr[root] == true)
-    //         {
-    //             cout << "YES" << endl;
-    //         }
-    //         else{
-    //             cout<<"NO"<<endl;
-    //         }
-    //     }
-    // }
+    for (auto it : factors)
+    {
+        ans /= it.first;
+        ans *= (it.first - 1);
+    }
+    cout << ans << endl;
+}
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > ans = compute_factors(n);
-    // for (auto num : ans)
-    // {
-    //     cout << num << " ";
-    // }
-    // cout << endl;
+void solve_prime_square_check()
+{
+    ll n;
+    cin >> n;
+    vector<ll> input(n);
+    for (int x = 0; x < n; x++)
+    {
+        cin >> input[x];
+        ll root = sqrtl(input[x]);
+        ll mul = (root * root);
+        if (mul != input[x])
+        {
+            cout << "NO" << endl;
+            continue;
+        }
+        else
+        {
+            if (primes_arr[root] == true)
+            {
+                cout << "YES" << endl;
+            }
+            else
+            {
+                cout << "NO" << endl;
+            }
+        }
+    }
+}
 
-    // ll        a, b;
-    // cin >> a >> b;
-    // vector<ll       > v = segmeneted_sieve(a, b);
-    // cout << v.size() << endl;
-    // for (ll        x = 0; x < v.size(); x++)
-    // {
-    //     cout << v[x] << " ";
-    // }
+void solve_print_prime_factors()
+{
+    ll n;
+    cin >> n;
+    unordered_map<ll, ll> ans = compute_factors(n);
+    for (auto num : ans)
+    {
+        cout << num << " ";
+    }
+    cout << endl;
+}
 
-    // string s1, s2;
-    // cin >> s1 >> s2;
-    // ll        f_plus = 0;
-    // ll        f_minus = 0;
-    // for (auto ch : s1)
-    // {
-    //     if (ch == '+')
-    //         f_plus++;
-    // }
-    // f_minus = (s1.size() - f_plus);
-    // vector<string> ans;
-    // rec(s2, 0, ans);
-    // long double cnt = 0;
-    // for (auto st : ans)
-    // {
-    //     long double a = 0;
-    //     long double b = 0;
-    //     for (auto ch : st)
-    //     {
-    //         if (ch == '+')
-    //             a++;
-    //         else
-    //         {
-    //             b++;
-    //         }
-    //     }
-    //     if (a == f_plus && b == f_minus)
-    //         cnt++;
-    // }
-    // cout << fixed << setprecision(12) << (cnt / (long double)ans.size()) << endl;
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > a(n, 0);
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll        i;
-    //     cin >> i;
-    //     a[x] = i;
-    // }
-    // if (n == 1)
-    // {
-    //     cout << "YES" << endl;
-    //     return;
-    // }
-    // ll        initial_gcd = gcd(a[0], a[1]);
-    // for (int x = 2; x < n; x++)
-    // {
-    //     initial_gcd = gcd(initial_gcd, a[x]);
-    // }
-    // if (initial_gcd >= 2)
-    // {
-    //     cout << "YES" << endl;
-    // }
-    // else
-    // {
-    //     cout << "NO" << endl;
-    // }
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > divs = single_divisor(n);
-    // cout<<divs.size()<<endl;
-    // if (is_prime(n))
-    // {
-    //     cout << "YES" << endl;
-    // }
-    // else
-    // {
-    //     cout << "NO" << endl;
-    // }
-    // ll        m;
-    // cin >> m;
-    // vector<ll       > a(m);
-    // vector<pair<ll       , ll       >> v;
-    // for (ll        x = 0; x < m; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     a[x] = num;
-    // }
-    // for (ll        x = 0; x < m; x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v.push_back({num, x});
-    // }
-    // sort(a.begin(), a.end());
-    // sort(v.begin(), v.end(),cmp);
-    // ll        cnt = 0;
-    // vector<ll       > ans(m, 0);
-    // for (auto pair : v)
-    // {
-    //     ll        idx = pair.second;
-    //     ans[idx] = a[cnt];
-    //     cnt++;
-    // }
-    // for (auto num : ans)
-    // {
-    //     cout << num << " ";
-    // }
-    // cout << endl;
+void solve_segmented_sieve_print()
+{
+    ll a, b;
+    cin >> a >> b;
+    vector<ll> v = segmeneted_sieve(a, b);
+    cout << v.size() << endl;
+    for (ll x = 0; x < v.size(); x++)
+    {
+        cout << v[x] << " ";
+    }
+}
 
-    // ll        n;
-    // cin >> n;
-    // string s = "";
-    // cin >> s;
-    // string prefix = "";
-    // string suffix = "";
-    // for (int x = 0; x < n; x++)
-    // {
-    //     if (prefix.size() == 0)
-    //     {
-    //         prefix.push_back(s[x]);
-    //     }
-    //     else
-    //     {
-    //         if (prefix[prefix.size() - 1] == s[x])
-    //         {
-    //             prefix.push_back(s[x]);
-    //         }
-    //         else
-    //         {
-    //             break;
-    //         }
-    //     }
-    // }
-    // for (int x = (n - 1); x >= 0; x--)
-    // {
-    //     if (suffix.size() == 0)
-    //     {
-    //         suffix.push_back(s[x]);
-    //     }
-    //     else
-    //     {
-    //         if (suffix[suffix.size() - 1] == s[x])
-    //         {
-    //             suffix.push_back(s[x]);
-    //         }
-    //         else
-    //         {
-    //             break;
-    //         }
-    //     }
-    // }
-    // if (prefix == suffix && prefix.size() == suffix.size() && prefix.size() == n)
-    // {
-    //     ll        a = (n * (n + 1)) % MOD;
-    //     ll        b = inverse(2, MOD);
-    //     cout << (((a * b) % MOD)) << endl;
-    // }
-    // else
-    // {
-    //     if (prefix[0] != suffix[0])
-    //     {
-    //         cout << (prefix.size() + suffix.size() + 1) << endl;
-    //     }
-    //     else
-    //     {
-    //         cout << ((prefix.size() + 1) * (suffix.size() + 1)) % MOD << endl;
-    //     }
-    // }
-    // ll        k;
-    // cin >> k;
-    // // 4^2^k-2
-    // ll        b = binpow(2, k, MOD - 1);
-    // ll        c = binpow(4, b - 2, MOD);
-    // cout << (6 * c) % MOD << endl;
+void solve_plus_minus_probability()
+{
+    string s1, s2;
+    cin >> s1 >> s2;
+    ll f_plus = 0;
+    ll f_minus = 0;
+    for (auto ch : s1)
+    {
+        if (ch == '+')
+            f_plus++;
+    }
+    f_minus = (s1.size() - f_plus);
+    vector<string> ans;
+    rec(s2, 0, ans);
+    long double cnt = 0;
+    for (auto st : ans)
+    {
+        long double a = 0;
+        long double b = 0;
+        for (auto ch : st)
+        {
+            if (ch == '+')
+                a++;
+            else
+            {
+                b++;
+            }
+        }
+        if (a == f_plus && b == f_minus)
+            cnt++;
+    }
+    cout << fixed << setprecision(12) << (cnt / (long double)ans.size()) << endl;
+}
 
-    // ll        a;
-    // cin >> a;
-    // if (a == 1)
-    // {
-    //     cout << 1 << endl;
-    //     return;
-    // }
-    // cout << ((6 * a * (a - 1)) + 1) << endl;
-    // ll        x1, y1, x2, y2;
-    // cin >> x1 >> y1 >> x2 >> y2;
+void solve_common_gcd_check()
+{
+    ll n;
+    cin >> n;
+    vector<ll> a(n, 0);
+    for (int x = 0; x < n; x++)
+    {
+        ll i;
+        cin >> i;
+        a[x] = i;
+    }
+    if (n == 1)
+    {
+        cout << "YES" << endl;
+        return;
+    }
+    ll initial_gcd = gcd(a[0], a[1]);
+    for (int x = 2; x < n; x++)
+    {
+        initial_gcd = gcd(initial_gcd, a[x]);
+    }
+    if (initial_gcd >= 2)
+    {
+        cout << "YES" << endl;
+    }
+    else
+    {
+        cout << "NO" << endl;
+    }
+}
 
-    // ll        a = abs(x2 - x1);
-    // ll        b = abs(y2 - y1);
+void solve_prime_and_divisor_count()
+{
+    ll n;
+    cin >> n;
+    vector<ll> divs = single_divisor(n);
+    cout << divs.size() << endl;
+    if (is_prime(n))
+    {
+        cout << "YES" << endl;
+    }
+    else
+    {
+        cout << "NO" << endl;
+    }
+}
 
-    // ll        c = a * a;
-    // ll        d = b * b;
+void solve_reorder_by_rank()
+{
+    ll m;
+    cin >> m;
+    vector<ll> a(m);
+    vector<pair<ll, ll>> v;
+    for (ll x = 0; x < m; x++)
+    {
+        ll num;
+        cin >> num;
+        a[x] = num;
+    }
+    for (ll x = 0; x < m; x++)
+    {
+        ll num;
+        cin >> num;
+        v.push_back({num, x});
+    }
+    sort(a.begin(), a.end());
+    sort(v.begin(), v.end(), cmp);
+    ll cnt = 0;
+    vector<ll> ans(m, 0);
+    for (auto pair : v)
+    {
+        ll idx = pair.second;
+        ans[idx] = a[cnt];
+        cnt++;
+    }
+    for (auto num : ans)
+    {
+        cout << num << " ";
+    }
+    cout << endl;
+}
 
-    // cout << setprecision(10) << sqrtl(c + d) << endl;
-    // ll        l, r, m;
-    // cin >> l >> r >> m;
-    // ll        ans = binadd(l, l + 1, m);
-    // for (int x = l + 2; x <= r; x += 1)
-    // {
-    //     ans = binadd(ans, x, m);
-    // }
-    // cout << ans << endl;
-    // ll        n;
-    // cin>>n;
-    // vector<vector<ll       >> v = ncr_table_2(30, 30, MOD);
-    // for (auto arr : v)
-    // {
-    //     if(n <=0)break;
-    //     for (auto num : arr)
-    //     {
-    //         if (num == 0)
-    //             continue;
-    //         else
-    //         {
+void solve_prefix_suffix_removal()
+{
+    ll n;
+    cin >> n;
+    string s = "";
+    cin >> s;
+    string prefix = "";
+    string suffix = "";
+    for (int x = 0; x < n; x++)
+    {
+        if (prefix.size() == 0)
+        {
+            prefix.push_back(s[x]);
+        }
+        else
+        {
+            if (prefix[prefix.size() - 1] == s[x])
+            {
+                prefix.push_back(s[x]);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    for (int x = (n - 1); x >= 0; x--)
+    {
+        if (suffix.size() == 0)
+        {
+            suffix.push_back(s[x]);
+        }
+        else
+        {
+            if (suffix[suffix.size() - 1] == s[x])
+            {
+                suffix.push_back(s[x]);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    if (prefix == suffix && prefix.size() == suffix.size() && prefix.size() == n)
+    {
+        ll a = (n * (n + 1)) % MOD;
+        ll b = inverse(2, MOD);
+        cout << (((a * b) % MOD)) << endl;
+    }
+    else
+    {
+        if (prefix[0] != suffix[0])
+        {
+            cout << (prefix.size() + suffix.size() + 1) << endl;
+        }
+        else
+        {
+            cout << ((prefix.size() + 1) * (suffix.size() + 1)) % MOD << endl;
+        }
+    }
+}
 
-    //             cout << num << " ";
-    //         }
-    //     }
-    //     cout << endl;
-    //     n--;
-    // }
-    // ll        a, b;
-    // cin >> a >> b;
-    // cout << ncr(a, b, MOD) << " " << npr(a, b, MOD) << endl;
+void solve_tower_of_fours()
+{
+    ll k;
+    cin >> k;
+    // 4^2^k-2
+    ll b = binpow(2, k, MOD - 1);
+    ll c = binpow(4, b - 2, MOD);
+    cout << (6 * c) % MOD << endl;
+}
 
-    // ll        a, b;
-    // cin >> a >> b;
-    // ll        lc = lcm(a, b);
-    // ll        gd = gcd(a, b);
-    // cout << gd << " " << lc << endl;
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v = single_divisor(n);
-    // ll        ans = 0;
-    // for (auto num : v)
-    // {
-    //     ans += num;
-    // }
-    // cout << ans << endl;
-    //  ll        n, m;
-    //     cin >> n >> m;
+void solve_hexagon_cells()
+{
+    ll a;
+    cin >> a;
+    if (a == 1)
+    {
+        cout << 1 << endl;
+        return;
+    }
+    cout << ((6 * a * (a - 1)) + 1) << endl;
+}
 
-    //     ll        kmax = -1;
-    //     ll        kmin = INT_MAX;
+void solve_euclidean_distance()
+{
+    ll x1, y1, x2, y2;
+    cin >> x1 >> y1 >> x2 >> y2;
 
-    //     kmax = ((n - m) * (n - m + 1)) / 2;
+    ll a = abs(x2 - x1);
+    ll b = abs(y2 - y1);
 
-    //     ll        rem = n % m;
-    //     ll        a = (n - rem) / m;
+    ll c = a * a;
+    ll d = b * b;
 
-    //     if (rem == 0)
-    //     {
-    //         kmin = m * ((a * (a - 1)) / 2);
-    //     }
-    //     else
-    //     {
-    //         kmin = (m - rem) * ((a * (a - 1)) / 2);
+    cout << setprecision(10) << sqrtl(c + d) << endl;
+}
 
-    //         ll        extraGroupPairs = ((a + 1) * a) / 2;
-    //         kmin += rem * extraGroupPairs;
-    //     }
+void solve_binadd_range_sum()
+{
+    ll l, r, m;
+    cin >> l >> r >> m;
+    ll ans = binadd(l, l + 1, m);
+    for (int x = l + 2; x <= r; x += 1)
+    {
+        ans = binadd(ans, x, m);
+    }
+    cout << ans << endl;
+}
 
-    //     cout << kmin << " " << kmax << endl;
-    // int n, k;
-    // cin >> n >> k;
-    // string s;
-    // cin >> s;
-    // unordered_set<char> st;
-    // for (int i = 0; i < k; i++)
-    // {
-    //     char c;
-    //     cin >> c;
-    //     st.insert(c);
-    // }
-    // ll        count = 0;
-    // int l = 0, r = 0;
-    // while (r < n)
-    // {
-    //     if (st.count(s[r]))
-    //     {
-    //         r++;
-    //     }
-    //     else
-    //     {
-    //         ll        len = r - l;
-    //         count += len * (len + 1) / 2;
-    //         r++;
-    //         l = r;
-    //     }
-    // }
-    // ll        len = r - l;
-    // count += len * (len + 1) / 2;
-    // cout << count << endl;
-    // ll        n;
-    // cin >> n;
-    // n--;
-    // ll        num1, num2, num3;
-    // ll        n1 = floor(n / 3);
-    // ll        n2 = floor(n / 5);
-    // ll        n3 = floor(n / 15);
+void solve_pascal_rows()
+{
+    ll n;
+    cin >> n;
+    vector<vector<ll>> v = ncr_table_2(30, 30, MOD);
+    for (auto arr : v)
+    {
+        if (n <= 0)
+            break;
+        for (auto num : arr)
+        {
+            if (num == 0)
+                continue;
+            else
+            {
 
-    // ll        sum1 = 3 * ((n1 * (n1 + 1)) / 2);
-    // ll        sum2 = 5 * ((n2 * (n2 + 1)) / 2);
-    // ll        sum3 = 15 * ((n3 * (n3 + 1)) / 2);
-    // cout << ((sum1 + sum2) - sum3) << endl;
+                cout << num << " ";
+            }
+        }
+        cout << endl;
+        n--;
+    }
+}
 
-    // ll        n, k;
-    // cin >> n >> k;
-    // // n-2 a and 2 b
-    // string ans = "";
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ans.push_back('a');
-    // }
-    // ll        total = 0;
-    // for (int x = (n - 2); x >= 0; x--)
-    // {
-    //     // (n-2) which is the maximums rightmost postion of leftmost 'b'
-    //     // then the right most positions can contribute to atmost  (n-(x+1)) types of different strings
-    //     // then we can say that if k is the kth smalles lexicographical string then k <= count of strings till now .
-    //     // then fix the position of the leftmost b str[x]='b', then we have to find the rightmost position of 'b'.
-    //     ll        curr_contribution = 0;
-    //     curr_contribution = (n - (x + 1));
-    //     // 3
-    //     ll        temp = total;
-    //     // 6
-    //     total += curr_contribution;
-    //     if (total >= k)
-    //     {
-    //         ans[x] = 'b';
-    //         ll        idx = (n - (k - temp));
-    //         ans[idx] = 'b';
-    //         cout << ans << endl;
-    //         return;
-    //     }
-    // }
-    // ll        n;
-    // cin >> n;
-    // // 3^3n-7^n
-    // ll        component = (3 * n) % MOD;
-    // ll        pow_1 = binpow(3, component, MOD);
-    // ll        pow_2 = binpow(7, n, MOD);
+void solve_ncr_npr()
+{
+    ll a, b;
+    cin >> a >> b;
+    cout << ncr(a, b, MOD) << " " << npr(a, b, MOD) << endl;
+}
 
-    // ll        ans = (((pow_1 % MOD) - (pow_2 % MOD)) + MOD) % MOD;
-    // cout << ans << endl;
+void solve_gcd_lcm()
+{
+    ll a, b;
+    cin >> a >> b;
+    ll lc = lcm(a, b);
+    ll gd = gcd(a, b);
+    cout << gd << " " << lc << endl;
+}
 
-    // ll        n;
-    // cin >> n;
-    // ll        ans = binpow(2, n, MOD);
-    // cout << (ans % MOD) << endl;
+void solve_divisor_sum()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v = single_divisor(n);
+    ll ans = 0;
+    for (auto num : v)
+    {
+        ans += num;
+    }
+    cout << ans << endl;
+}
 
-    // ll        n;
-    // cin >> n;
-    // ll        ans = 0;
-    // for (ll        x = 1; x <= n; x++)
-    // {
-    //     ans = (ans + binpow(2, x)) % MOD;
-    // }
-    // cout << ans << endl;
+void solve_team_pairs_min_max()
+{
+    ll n, m;
+    cin >> n >> m;
 
-    // ll        n;
-    // cin >> n;
-    // vector<ll       > v(n);
-    // unordered_map<ll       , ll       > m;
-    // for (ll        x = 0; x < v.size(); x++)
-    // {
-    //     ll        num;
-    //     cin >> num;
-    //     v[x] = num;
-    //     m[num]++;
-    // }
-    // sort(v.begin(), v.end());
-    // ll        diff = v[v.size() - 1] - v[0];
-    // ll        n1 = m[v[v.size() - 1]];
-    // if (diff == 0)
-    // {
-    //     cout << diff << " " << (n * (n - 1)) / 2 << endl;
-    //     return;
-    // }
-    // ll        n2 = m[v[0]];
-    // ll        ans = n1 * n2;
-    // cout << diff << " " << ans << endl;
-    // string s;
-    // cin >> s;
-    // char ch1 = s[0];
-    // char ch2 = s[1];
-    // int num1 = 26 - ('z' - ch1);
-    // int num2 = 26 - ('z' - ch2);
-    // int offset = (num1 - 1) * 25;
-    // int rank = 0;
-    // if (num2 > num1)
-    // {
-    //     rank = offset + (num2 - 1);
-    // }
-    // else
-    // {
-    //     rank = offset + num2;
-    // }
-    // cout << rank << endl;
-    // ll        n, m;
-    // cin >> n >> m;
-    // ll        final = ncr((n + m), n, MOD);
-    // cout << final << endl;
+    ll kmax = -1;
+    ll kmin = INT_MAX;
 
-    // ll        n;
-    // cin >> n;
-    // ll        num1 = (n * (n - 1)) % MOD;
-    // ll        num2 = (num1 * (n - 2)) % MOD;
-    // ll        num3 = (num3 * (n - 3)) % MOD;
-    // ll        deno = 24;
-    // ll        dinv = inverse(deno, MOD);
-    // ll        ans = (num3 * dinv) % MOD;
-    // ll        n;
-    // cin >> n;
-    // dearrangement(n);
-    // ll        ans = dearrange[n];
-    // cout << ans % MOD << endl;
+    kmax = ((n - m) * (n - m + 1)) / 2;
 
-    // ll        n;
-    // cin >> n;
-    // for (int x = 1; x <= 32; x++)
-    // {
-    //     if (((1 << x) & n) == n)
-    //     {
-    //         cout << "YES" << endl;
-    //         return;
-    //     }
-    // }
-    // cout << "NO" << endl;
+    ll rem = n % m;
+    ll a = (n - rem) / m;
 
-    //     ll        x1, y1, x2, y2, x3, y3, x4, y4;
-    //     cin >> x1 >> y1 >> x2 >> y2;
-    //     cin >> x3 >> y3 >> x4 >> y4;
+    if (rem == 0)
+    {
+        kmin = m * ((a * (a - 1)) / 2);
+    }
+    else
+    {
+        kmin = (m - rem) * ((a * (a - 1)) / 2);
 
-    //     ll        center_1_x = (x1 + x2) * 2;
-    //     ll        center_1_y = (y1 + y2) * 2;
+        ll extraGroupPairs = ((a + 1) * a) / 2;
+        kmin += rem * extraGroupPairs;
+    }
 
-    //     pair<ll       , ll       > center1 = {center_1_x, center_1_y};
+    cout << kmin << " " << kmax << endl;
+}
 
-    //     ll        center_2_x = (x3 + x4) * 2;
-    //     ll        center_2_y = (y3 + y4) * 2;
+void solve_allowed_char_substrings()
+{
+    int n, k;
+    cin >> n >> k;
+    string s;
+    cin >> s;
+    unordered_set<char> st;
+    for (int i = 0; i < k; i++)
+    {
+        char c;
+        cin >> c;
+        st.insert(c);
+    }
+    ll count = 0;
+    int l = 0, r = 0;
+    while (r < n)
+    {
+        if (st.count(s[r]))
+        {
+            r++;
+        }
+        else
+        {
+            ll len = r - l;
+            count += len * (len + 1) / 2;
+            r++;
+            l = r;
+        }
+    }
+    ll len = r - l;
+    count += len * (len + 1) / 2;
+    cout << count << endl;
+}
 
-    //     pair<ll       , ll       > center2 = {center_2_x, center_2_y};
+void solve_multiples_of_3_and_5()
+{
+    ll n;
+    cin >> n;
+    n--;
+    ll num1, num2, num3;
+    ll n1 = floor(n / 3);
+    ll n2 = floor(n / 5);
+    ll n3 = floor(n / 15);
 
-    //     ll        dist_1 = (((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
-    //     ll        dist_2 = (((x3 - x4) * (x3 - x4)) + ((y3 - y4) * (y3 - y4)));
+    ll sum1 = 3 * ((n1 * (n1 + 1)) / 2);
+    ll sum2 = 5 * ((n2 * (n2 + 1)) / 2);
+    ll sum3 = 15 * ((n3 * (n3 + 1)) / 2);
+    cout << ((sum1 + sum2) - sum3) << endl;
+}
 
-    //     ll        dist = (((center1.first - center2.first) * (center1.first - center2.first)) + ((center1.second - center2.second) * (center1.second - center2.second)));
-    //     dist = sqrt(dist);
+void solve_kth_two_b_string()
+{
+    ll n, k;
+    cin >> n >> k;
+    // n-2 a and 2 b
+    string ans = "";
+    for (int x = 0; x < n; x++)
+    {
+        ans.push_back('a');
+    }
+    ll total = 0;
+    for (int x = (n - 2); x >= 0; x--)
+    {
+        // (n-2) which is the maximums rightmost postion of leftmost 'b'
+        // then the right most positions can contribute to atmost  (n-(x+1)) types of different strings
+        // then we can say that if k is the kth smalles lexicographical string then k <= count of strings till now .
+        // then fix the position of the leftmost b str[x]='b', then we have to find the rightmost position of 'b'.
+        ll curr_contribution = 0;
+        curr_contribution = (n - (x + 1));
+        // 3
+        ll temp = total;
+        // 6
+        total += curr_contribution;
+        if (total >= k)
+        {
+            ans[x] = 'b';
+            ll idx = (n - (k - temp));
+            ans[idx] = 'b';
+            cout << ans << endl;
+            return;
+        }
+    }
+}
 
-    //     ll        radius_1 = sqrt(dist_1) * 2;
-    //     ll        radius_2 = sqrt(dist_2) * 2;
+void solve_power_difference()
+{
+    ll n;
+    cin >> n;
+    // 3^3n-7^n
+    ll component = (3 * n) % MOD;
+    ll pow_1 = binpow(3, component, MOD);
+    ll pow_2 = binpow(7, n, MOD);
+
+    ll ans = (((pow_1 % MOD) - (pow_2 % MOD)) + MOD) % MOD;
+    cout << ans << endl;
+}
+
+void solve_power_of_two_mod()
+{
+    ll n;
+    cin >> n;
+    ll ans = binpow(2, n, MOD);
+    cout << (ans % MOD) << endl;
+}
+
+void solve_sum_powers_of_two()
+{
+    ll n;
+    cin >> n;
+    ll ans = 0;
+    for (ll x = 1; x <= n; x++)
+    {
+        ans = (ans + binpow(2, x)) % MOD;
+    }
+    cout << ans << endl;
+}
+
+void solve_max_diff_pairs()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<ll, ll> m;
+    for (ll x = 0; x < v.size(); x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+        m[num]++;
+    }
+    sort(v.begin(), v.end());
+    ll diff = v[v.size() - 1] - v[0];
+    ll n1 = m[v[v.size() - 1]];
+    if (diff == 0)
+    {
+        cout << diff << " " << (n * (n - 1)) / 2 << endl;
+        return;
+    }
+    ll n2 = m[v[0]];
+    ll ans = n1 * n2;
+    cout << diff << " " << ans << endl;
+}
+
+void solve_two_letter_rank()
+{
+    string s;
+    cin >> s;
+    char ch1 = s[0];
+    char ch2 = s[1];
+    int num1 = 26 - ('z' - ch1);
+    int num2 = 26 - ('z' - ch2);
+    int offset = (num1 - 1) * 25;
+    int rank = 0;
+    if (num2 > num1)
+    {
+        rank = offset + (num2 - 1);
+    }
+    else
+    {
+        rank = offset + num2;
+    }
+    cout << rank << endl;
+}
+
+void solve_grid_paths()
+{
+    ll n, m;
+    cin >> n >> m;
+    ll final = ncr((n + m), n, MOD);
+    cout << final << endl;
+}
+
+void solve_choose_four()
+{
+    ll n;
+    cin >> n;
+    ll num1 = (n * (n - 1)) % MOD;
+    ll num2 = (num1 * (n - 2)) % MOD;
+    ll num3 = (num2 * (n - 3)) % MOD;
+    ll deno = 24;
+    ll dinv = inverse(deno, MOD);
+    ll ans = (num3 * dinv) % MOD;
+    cout << ans << endl;
+}
+
+void solve_derangement_count()
+{
+    ll n;
+    cin >> n;
+    dearrangement(n);
+    ll ans = dearrange[n];
+    cout << ans % MOD << endl;
+}
+
+void solve_power_of_two_check()
+{
+    ll n;
+    cin >> n;
+    for (int x = 1; x <= 32; x++)
+    {
+        if (((1 << x) & n) == n)
+        {
+            cout << "YES" << endl;
+            return;
+        }
+    }
+    cout << "NO" << endl;
+}
+
+void solve_circles_touch()
+{
+    ll x1, y1, x2, y2, x3, y3, x4, y4;
+    cin >> x1 >> y1 >> x2 >> y2;
+    cin >> x3 >> y3 >> x4 >> y4;
+
+    ll center_1_x = (x1 + x2) * 2;
+    ll center_1_y = (y1 + y2) * 2;
+
+    pair<ll, ll> center1 = {center_1_x, center_1_y};
+
+    ll center_2_x = (x3 + x4) * 2;
+    ll center_2_y = (y3 + y4) * 2;
+
+    pair<ll, ll> center2 = {center_2_x, center_2_y};
+
+    ll dist_1 = (((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+    ll dist_2 = (((x3 - x4) * (x3 - x4)) + ((y3 - y4) * (y3 - y4)));
+
+    ll dist = (((center1.first - center2.first) * (center1.first - center2.first)) + ((center1.second - center2.second) * (center1.second - center2.second)));
+    dist = sqrt(dist);
+
+    ll radius_1 = sqrt(dist_1) * 2;
+    ll radius_2 = sqrt(dist_2) * 2;
     // cout << "center_1_x = " << center_1_x << '\n';
     // cout << "center_1_y = " << center_1_y << '\n';
     // cout << "center_2_x = " << center_2_x << '\n';
@@ -2999,81 +3391,96 @@ void solve()
     // cout << "radius_2 = " << radius_2 << '\n';
 
     // cout << "radius_1 + radius_2 = " << (radius_1 + radius_2) << '\n';
-    //     if ((radius_1 + radius_2) > dist)
-    //     {
-    //         cout << "NO" << endl;
-    //         return;
-    //     }
-    //     else if ((radius_1 + radius_2) < dist)
-    //     {
-    //         cout << "NO" << endl;
-    //         return;
-    //     }
-    //     cout << "YES" << endl;
+    if ((radius_1 + radius_2) > dist)
+    {
+        cout << "NO" << endl;
+        return;
+    }
+    else if ((radius_1 + radius_2) < dist)
+    {
+        cout << "NO" << endl;
+        return;
+    }
+    cout << "YES" << endl;
+}
 
-    // ll        a, b;
-    // cin >> a >> b;
-    // ll        mini = min(a,b);
-    // ll        maxi = max(a,b);
-    // a = mini;
-    // b = maxi;
-    // ll        total_sum = ((b * (b + 1)) ) / 2;
-    // ll        total_even_numbers = b / 2;
-    // ll        total_odd_numbers = b - total_even_numbers;
+void solve_range_even_odd_sums()
+{
+    ll a, b;
+    cin >> a >> b;
+    ll mini = min(a, b);
+    ll maxi = max(a, b);
+    a = mini;
+    b = maxi;
+    ll total_sum = ((b * (b + 1))) / 2;
+    ll total_even_numbers = b / 2;
+    ll total_odd_numbers = b - total_even_numbers;
 
-    // ll        prev = ((a - 1) * (a) ) / 2;
+    ll prev = ((a - 1) * (a)) / 2;
 
-    // ll        inclusive_sum = ((total_sum - prev) ) ;
+    ll inclusive_sum = ((total_sum - prev));
 
-    // ll        even_sum = 0;
-    // ll        odd_sum = 0;
+    ll even_sum = 0;
+    ll odd_sum = 0;
 
-    // ll        s = (a - 1) / 2;
-    // ll        e = (s * (s + 1)) ;
-    // ll        e_total = (total_even_numbers * (total_even_numbers + 1)) ;
-    // even_sum = ((e_total - e) ) ;
+    ll s = (a - 1) / 2;
+    ll e = (s * (s + 1));
+    ll e_total = (total_even_numbers * (total_even_numbers + 1));
+    even_sum = ((e_total - e));
 
-    // odd_sum = ((inclusive_sum - even_sum) ) ;
-    // cout << inclusive_sum << endl;
-    // cout << even_sum << endl;
-    // cout << odd_sum << endl;
-    // ll        a, b, q;
-    // cin >> a>>b>>q;
-    // ll        c = a ^ b;
-    // ll        rem = q % 3;
-    // if (q == 1)
-    // {
-    //     cout << a << endl;
-    //     return;
-    // }
-    // if (q == 2)
-    // {
-    //     cout << b << endl;
-    //     return;
-    // }
-    // if (rem == 0)
-    // {
-    //     cout << c << endl;
-    //     return;
-    // }
-    // else if (rem == 1)
-    // {
-    //     cout << a << endl;
-    //     return;
-    // }
-    // else
-    // {
-    //     cout << b << endl;
-    // }
+    odd_sum = ((inclusive_sum - even_sum));
+    cout << inclusive_sum << endl;
+    cout << even_sum << endl;
+    cout << odd_sum << endl;
+}
 
-    // ll        n;
-    // cin >> n;
-    // // n2+n <= 2*n
-    // // n2+n-2*n<=0
-    // //-1+-1-8n/2
-    // ll        r = sqrt(1 + (8 * n));
-    // ll        root = (-1 + r) / 2;
-    // cout << root << endl;
+void solve_xor_sequence()
+{
+    ll a, b, q;
+    cin >> a >> b >> q;
+    ll c = a ^ b;
+    ll rem = q % 3;
+    if (q == 1)
+    {
+        cout << a << endl;
+        return;
+    }
+    if (q == 2)
+    {
+        cout << b << endl;
+        return;
+    }
+    if (rem == 0)
+    {
+        cout << c << endl;
+        return;
+    }
+    else if (rem == 1)
+    {
+        cout << a << endl;
+        return;
+    }
+    else
+    {
+        cout << b << endl;
+    }
+}
+
+void solve_quadratic_root()
+{
+    ll n;
+    cin >> n;
+    // n2+n <= 2*n
+    // n2+n-2*n<=0
+    //-1+-1-8n/2
+    ll r = sqrt(1 + (8 * n));
+    ll root = (-1 + r) / 2;
+    cout << root << endl;
+}
+
+void solve()
+{
+
 }
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
@@ -3090,18 +3497,18 @@ int maxSubArray(vector<int> &nums)
 int main()
 {
     // O(N)
-    // factorial(MOD);
+    factorial(MOD);
     // O(log log(n))
-    // compute_primes();
-    //  compute_co_prime();
+    compute_primes();
+    compute_co_prime();
     // O(log log p)
-    // build_spf(1000000);
+    build_spf(1000000);
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
     int t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();
@@ -3121,5 +3528,22 @@ int main()
     5) Products of all subarrays.
     6) Kadanes algorithm or maximum subarray sum.
     7) Prefix sums and contribution technique 3rd form that is cumulative datas structures.
+
+// */
+// /*
+// 0 0 0 0 0 0
+// 0 -1 1 4 0 2
+// 0 -1 1 4 0 6
+// 0 0 4 11 10 21
+// 0 -1 -2 3 5 20
+// 0 -1 -5 -5 0 9
+
+// */
+
+/*
+    arr(n) and m ranges;
+    with each range consisting of {li,ri};
+    arr[li]....+arr[ri] into s and sort arr;
+    Q queries kth query to return kth smallest;
 
 */
