@@ -3477,10 +3477,182 @@ void solve_quadratic_root()
     ll root = (-1 + r) / 2;
     cout << root << endl;
 }
+long long gcdSum(vector<int> &nums)
+{
+    vector<ll> pf_max(nums.size());
+    vector<ll> pf_gcd(nums.size());
+
+    pf_max[0] = nums[0];
+
+    for (ll x = 1; x < nums.size(); x++)
+    {
+        pf_max[x] = max(pf_max[x - 1], (ll)nums[x]);
+    }
+    pf_gcd[0] = gcd(min(pf_max[0], (ll)nums[0]), max(pf_max[0], (ll)nums[0]));
+    for (ll x = 1; x < nums.size(); x++)
+    {
+        ll maxi = pf_max[x];
+        pf_gcd[x] = gcd(min(pf_max[x], (ll)nums[x]), max(pf_max[x], (ll)nums[x]));
+    }
+    sort(pf_gcd.begin(), pf_gcd.end());
+    ll l = 0;
+    ll r = pf_gcd.size() - 1;
+    ll sum = 0;
+    while (l != r && r > l)
+    {
+        sum += gcd(pf_gcd[l], pf_gcd[r]);
+        r--;
+        l++;
+    }
+    return sum;
+}
+string largestNumber(vector<int> &nums)
+{
+
+    sort(nums.begin(), nums.end());
+    string ans = "";
+    for (int x = 0; x < nums.size(); x++)
+    {
+        ans += to_string(nums[x]);
+    }
+    if (ans[0] == '0')
+    {
+
+        string s = "0";
+        for (int x = 0; x < ans.length(); x++)
+        {
+            if (ans[x] != '0')
+                s.push_back(ans[x]);
+        }
+        return s;
+    }
+    return ans;
+}
+void towers()
+{
+    ll n;
+    cin >> n;
+    ll tower_no = 0;
+    map<ll, ll> st;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        if (st.size() == 0)
+        {
+            tower_no++;
+            st.insert({num, 1});
+        }
+        else
+        {
+            auto it = st.upper_bound(num);
+            if (it == st.end())
+            {
+                tower_no++;
+            }
+            else
+            {
+                st[it->first]--;
+                if (st[it->first] <= 0)
+                {
+                    st.erase(it);
+                }
+            }
+            st[num]++;
+        }
+    }
+    cout << tower_no << endl;
+}
 
 void solve()
 {
+    
+    // ll n,x,y;
+    // cin>>n>>x>>y;
+    // vector<ll>v(n);
+    // for(ll x=0;x<n;x++){
+    //     ll num;
+    //     cin>>num;
+    //     v[x]=num;
+    // }
+    // ll gcd_val = gcd(min(x,y),max(x,y));
 
+    // for(ll x=0;x<n;x++){
+    //     if(abs((x+1)-v[x])%gcd_val != 0){
+    //         cout<<"No"<<"\n";
+    //         return;
+    //     }
+    // }
+    // cout<<"Yes"<<"\n";
+
+    // ll n;
+    // cin>>n;
+    // vector<ll>v(n);
+    // for(ll x=0;x<n;x++){
+    //     ll num;
+    //     cin>>num;
+    //     v[x]=num;
+    // }
+    // for(ll x=0;x<=n-1;x++){
+    //     if(v[x]==1)continue;
+    //     else{
+    //         ll val = abs(v[x]-(x+1));
+    //         if(x+1 < n){
+    //             v[x+1] += val;
+    //             v[x] = (x+1);
+    //         }
+    //     }
+    // }
+    // for(ll x=0;x<n && (x+1) < n;x++){
+    //     if(v[x+1] <= v[x]){cout<<"No"<<"\n";return;}
+    // }
+    // cout<<"Yes"<<"\n";
+
+    // ll n;
+    // cin >> n;
+    // string s;
+    // cin >> s;
+    // ll maxi = 0;
+    // ll len = 0;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     if (s[x] == '#')
+    //     {
+    //         len++;
+    //     }
+    //     else if (s[x] != '#')
+    //     {
+    //         maxi = max(len, maxi);
+    //         len = 0;
+    //     }
+    // }
+    // maxi = max(len, maxi);
+    // cout << ceil((double)maxi /(double) 2) << "\n";
+
+    // ll a, b, c;
+    // cin >> a >> b >> c;
+    // ll gcd_val = gcd(a, b);
+    // if (c % gcd_val != 0)
+    // {
+    //     cout << "No" << "\n";
+    // }
+    // else
+    // {
+    //     bool flag = false;
+    //     for (ll x = 0; x <= 10000; x++)
+    //     {
+    //         for (ll y = 0; y <= 10000; y++)
+    //         {
+    //             if(((x*a)+(b*y)) == c){
+    //                 cout<<"Yes"<<"\n";
+    //                 return;
+    //             }
+    //         }
+    //     }
+    //     if(flag == false){
+    //         cout<<"No"<<"\n";
+    //     }
+    // }
 }
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
@@ -3497,18 +3669,18 @@ int maxSubArray(vector<int> &nums)
 int main()
 {
     // O(N)
-    factorial(MOD);
+    // factorial(MOD);
     // O(log log(n))
-    compute_primes();
-    compute_co_prime();
+    // compute_primes();
+    // compute_co_prime();
     // O(log log p)
-    build_spf(1000000);
+    // build_spf(1000000);
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
     int t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
@@ -3529,21 +3701,11 @@ int main()
     6) Kadanes algorithm or maximum subarray sum.
     7) Prefix sums and contribution technique 3rd form that is cumulative datas structures.
 
-// */
-// /*
-// 0 0 0 0 0 0
-// 0 -1 1 4 0 2
-// 0 -1 1 4 0 6
-// 0 0 4 11 10 21
-// 0 -1 -2 3 5 20
-// 0 -1 -5 -5 0 9
+    Greedy and sweep-line formulation
+    swapping proof or exchange arguments for ordering based problems - min(dot-product) and problems and decay .
+    greedy forward based problems covering problems of gas station its 3 variants.
+    operator decoding based problems .
 
-// */
 
-/*
-    arr(n) and m ranges;
-    with each range consisting of {li,ri};
-    arr[li]....+arr[ri] into s and sort arr;
-    Q queries kth query to return kth smallest;
 
-*/
+    */
