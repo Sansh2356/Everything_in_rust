@@ -3564,95 +3564,425 @@ void towers()
     cout << tower_no << endl;
 }
 
+/*
+ is a result about the representation of integers as sums of Fibonacci numbers. It states that every positive integer can be represented uniquely as the sum of one or more distinct Fibonacci numbers in such a way that the sum does not include any two consecutive Fibonacci numbers.
+*/
+vector<ll> arr(50, -1);
+ll fibonacci(ll num)
+{
+    if (num == 0)
+        return 0;
+    if (num == 1 || num == 2)
+    {
+        return 1;
+    }
+    if (arr[num] != -1)
+        return arr[num];
+    return arr[num] = fibonacci(num - 1) + fibonacci(num - 2);
+}
+// Pair up a[x] with b[x], sort by (a[x]+b[x]) descending and let Alice pick the
+// even indexed a values and Bob the odd indexed b values.
+void solve_alice_bob_pair_game()
+{
+    ll n;
+    cin >> n;
+    vector<ll> a(n);
+    vector<ll> b(n);
+    vector<pair<ll, pair<ll, ll>>> c(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> a[x];
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> b[x];
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        c[x] = {(a[x] + b[x]), {a[x], b[x]}};
+    }
+    sort(c.begin(), c.end(), [](pair<ll, pair<ll, ll>> &a, pair<ll, pair<ll, ll>> &b) -> bool
+         { return a.first > b.first; });
+    ll alice_sum = 0;
+    ll bob_sum = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        if (x % 2 == 0)
+        {
+            alice_sum += c[x].second.first;
+        }
+        else
+        {
+            bob_sum += c[x].second.second;
+        }
+    }
+    if (alice_sum > bob_sum)
+    {
+        cout << "Alice \n";
+    }
+    else if (bob_sum > alice_sum)
+    {
+        cout << "Bob \n";
+    }
+    else
+    {
+        cout << "Tie \n";
+    }
+}
+
+// Zeckendorf representation - greedily subtracting the largest fibonacci number
+// <= k gives the minimum count of fibonacci terms summing up to k.
+void solve_min_fibonacci_terms()
+{
+    for (ll x = 1; x <= 50; x++)
+    {
+        arr[x] = fibonacci(x);
+    }
+    ll k;
+    cin >> k;
+    ll ans = 0;
+    while (k > 0)
+    {
+        ll l = 0;
+        ll r = arr.size() - 1;
+        ll mid = (l + r) / 2;
+        ll idx = -1;
+        while (l <= r)
+        {
+            mid = (l + r) / 2;
+            if (arr[mid] > k)
+            {
+                r = mid - 1;
+            }
+            else
+            {
+                idx = mid;
+                l = mid + 1;
+            }
+        }
+        k -= arr[idx];
+        ans++;
+    }
+    cout << ans << "\n";
+}
+
+// Processing the (num1,num2) pairs ordered by the difference num1-num2 kept on
+// top of the priority queue.
+void solve_pq_pair_difference()
+{
+    ll n;
+    cin >> n;
+    priority_queue<pair<ll, pair<ll, ll>>> pq;
+    for (ll x = 0; x < n; x++)
+    {
+        ll num1;
+        ll num2;
+        cin >> num1 >> num2;
+        pq.push({num1 - num2, {num1, num2}});
+    }
+    ll ans = 0;
+    ll rem = 0;
+    while (pq.empty() != true)
+    {
+        if (ans == 0)
+        {
+            ans = pq.top().second.first;
+            rem = pq.top().first;
+        }
+        else
+        {
+            if (rem < pq.top().second.first)
+            {
+                ans += abs(rem - pq.top().second.first);
+                rem = pq.top().first;
+            }
+            else
+            {
+                rem -= pq.top().second.second;
+            }
+        }
+        pq.pop();
+    }
+    cout << ans << "\n";
+}
+
+// Every element can only be shifted by multiples of gcd(x,y), so each value has
+// to be congruent to its target index modulo that gcd.
+void solve_permutation_gcd_shift()
+{
+    ll n, x, y;
+    cin >> n >> x >> y;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    ll gcd_val = gcd(min(x, y), max(x, y));
+
+    for (ll x = 0; x < n; x++)
+    {
+        if (abs((x + 1) - v[x]) % gcd_val != 0)
+        {
+            cout << "No" << "\n";
+            return;
+        }
+    }
+    cout << "Yes" << "\n";
+}
+
+// Pushing the excess of every position onto the next one and then checking
+// whether the resulting array is strictly increasing.
+void solve_increasing_after_carry()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        v[x] = num;
+    }
+    for (ll x = 0; x <= n - 1; x++)
+    {
+        if (v[x] == 1)
+            continue;
+        else
+        {
+            ll val = abs(v[x] - (x + 1));
+            if (x + 1 < n)
+            {
+                v[x + 1] += val;
+                v[x] = (x + 1);
+            }
+        }
+    }
+    for (ll x = 0; x < n && (x + 1) < n; x++)
+    {
+        if (v[x + 1] <= v[x])
+        {
+            cout << "No" << "\n";
+            return;
+        }
+    }
+    cout << "Yes" << "\n";
+}
+
+// Longest run of '#' characters, every operation covering 2 of them.
+void solve_max_hash_segment()
+{
+    ll n;
+    cin >> n;
+    string s;
+    cin >> s;
+    ll maxi = 0;
+    ll len = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        if (s[x] == '#')
+        {
+            len++;
+        }
+        else if (s[x] != '#')
+        {
+            maxi = max(len, maxi);
+            len = 0;
+        }
+    }
+    maxi = max(len, maxi);
+    cout << ceil((double)maxi / (double)2) << "\n";
+}
+
+// a*x + b*y = c is solvable only when gcd(a,b) divides c, the brute force below
+// additionally looks for the non negative solution pair.
+void solve_linear_diophantine()
+{
+    ll a, b, c;
+    cin >> a >> b >> c;
+    ll gcd_val = gcd(a, b);
+    if (c % gcd_val != 0)
+    {
+        cout << "No" << "\n";
+    }
+    else
+    {
+        bool flag = false;
+        for (ll x = 0; x <= 10000; x++)
+        {
+            for (ll y = 0; y <= 10000; y++)
+            {
+                if (((x * a) + (b * y)) == c)
+                {
+                    cout << "Yes" << "\n";
+                    return;
+                }
+            }
+        }
+        if (flag == false)
+        {
+            cout << "No" << "\n";
+        }
+    }
+}
+
+// Processing the elements in increasing order of their value and deriving the
+// removal time of a position from the already resolved neighbours of it.
+void solve_neighbour_removal_time()
+{
+    ll n;
+    cin >> n;
+    vector<pair<ll, ll>> v(n);
+    vector<pair<ll, ll>> v_temp(n);
+
+    vector<ll> time(n, INT_MAX);
+    for (ll x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+
+        v[x] = {num, x};
+    }
+    v_temp = v;
+    sort(v.begin(), v.end());
+    for (ll x = 0; x < n; x++)
+    {
+        ll orig_idx = v[x].second;
+        ll val = v[x].first;
+        if (orig_idx + 1 < n && orig_idx - 1 >= 0)
+        {
+
+            if (time[orig_idx + 1] == INT_MAX && time[orig_idx - 1] == INT_MAX)
+            {
+                time[orig_idx] = min(1LL, time[orig_idx]);
+            }
+            else if (time[orig_idx + 1] == INT_MAX && time[orig_idx - 1] != INT_MAX)
+            {
+                ll v1 = v_temp[orig_idx].first;
+                ll v2 = v_temp[orig_idx - 1].first;
+                if (v1 > v2)
+                {
+                    time[orig_idx] = time[orig_idx - 1] + 1;
+                }
+
+                else
+                {
+                    time[orig_idx] = 1;
+                }
+            }
+            else if (time[orig_idx + 1] != INT_MAX && time[orig_idx - 1] == INT_MAX)
+            {
+                ll v1 = v_temp[orig_idx].first;
+                ll v2 = v_temp[orig_idx + 1].first;
+                if (v1 > v2)
+                {
+                    time[orig_idx] = time[orig_idx + 1] + 1;
+                }
+                else
+                {
+                    time[orig_idx] = 1;
+                }
+            }
+            else
+            {
+                ll v1 = v_temp[orig_idx].first;
+                ll v2 = v_temp[orig_idx + 1].first;
+                ll v3 = v_temp[orig_idx - 1].first;
+                if (v1 > v2 && v1 > v3)
+                {
+                    time[orig_idx] = max(time[orig_idx + 1], time[orig_idx - 1]) + 1;
+                }
+                else if (v1 < v2 && v1 < v3)
+                {
+                    time[orig_idx] = min(1LL, time[orig_idx]);
+                }
+                else if (v1 > v2 && v1 < v3)
+                {
+                    time[orig_idx] = time[orig_idx - 1] + 1;
+                }
+                else if (v1 > v3 && v1 < v2)
+                {
+                    time[orig_idx] = time[orig_idx + 1] + 1;
+                }
+                else if (v1 == v2 && v1 != v3)
+                {
+                    if (v3 > v1)
+                    {
+                        time[orig_idx] = time[orig_idx + 1];
+                    }
+                    else if (v3 < v1)
+                    {
+                        time[orig_idx] = time[orig_idx - 1] + 1;
+                    }
+                }
+                else if (v1 == v3 && v1 != v2)
+                {
+                    if (v2 > v1)
+                    {
+                        time[orig_idx] = time[orig_idx - 1];
+                    }
+                    else if (v2 < v1)
+                    {
+                        time[orig_idx] = time[orig_idx + 1] + 1;
+                    }
+                }
+                else if (v1 == v2 && v1 == v3)
+                {
+                    time[orig_idx] = time[orig_idx + 1];
+                }
+                else
+                {
+                    time[orig_idx] = time[orig_idx + 1];
+                }
+            }
+        }
+        else if (orig_idx + 1 < n)
+        {
+
+            if (time[orig_idx + 1] == INT_MAX)
+            {
+                time[orig_idx] = 1;
+            }
+            else
+            {
+                ll v1 = v_temp[orig_idx].first;
+                ll v2 = v_temp[orig_idx + 1].first;
+
+                if (v1 > v2)
+                    time[orig_idx] = time[orig_idx + 1] + 1;
+                else
+                    time[orig_idx] = 1;
+            }
+        }
+        else if (orig_idx - 1 >= 0)
+        {
+            if (time[orig_idx - 1] == INT_MAX)
+            {
+                time[orig_idx] = 1;
+            }
+            else
+            {
+                ll v1 = v_temp[orig_idx].first;
+                ll v2 = v_temp[orig_idx - 1].first;
+
+                if (v1 > v2)
+                    time[orig_idx] = time[orig_idx - 1] + 1;
+                else
+                    time[orig_idx] = 1;
+            }
+        }
+    }
+    ll ans = 0;
+    for (auto i : time)
+    {
+        ans += i;
+    };
+    cout << ans << "\n";
+}
 void solve()
 {
-    
-    // ll n,x,y;
-    // cin>>n>>x>>y;
-    // vector<ll>v(n);
-    // for(ll x=0;x<n;x++){
-    //     ll num;
-    //     cin>>num;
-    //     v[x]=num;
-    // }
-    // ll gcd_val = gcd(min(x,y),max(x,y));
 
-    // for(ll x=0;x<n;x++){
-    //     if(abs((x+1)-v[x])%gcd_val != 0){
-    //         cout<<"No"<<"\n";
-    //         return;
-    //     }
-    // }
-    // cout<<"Yes"<<"\n";
-
-    // ll n;
-    // cin>>n;
-    // vector<ll>v(n);
-    // for(ll x=0;x<n;x++){
-    //     ll num;
-    //     cin>>num;
-    //     v[x]=num;
-    // }
-    // for(ll x=0;x<=n-1;x++){
-    //     if(v[x]==1)continue;
-    //     else{
-    //         ll val = abs(v[x]-(x+1));
-    //         if(x+1 < n){
-    //             v[x+1] += val;
-    //             v[x] = (x+1);
-    //         }
-    //     }
-    // }
-    // for(ll x=0;x<n && (x+1) < n;x++){
-    //     if(v[x+1] <= v[x]){cout<<"No"<<"\n";return;}
-    // }
-    // cout<<"Yes"<<"\n";
-
-    // ll n;
-    // cin >> n;
-    // string s;
-    // cin >> s;
-    // ll maxi = 0;
-    // ll len = 0;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     if (s[x] == '#')
-    //     {
-    //         len++;
-    //     }
-    //     else if (s[x] != '#')
-    //     {
-    //         maxi = max(len, maxi);
-    //         len = 0;
-    //     }
-    // }
-    // maxi = max(len, maxi);
-    // cout << ceil((double)maxi /(double) 2) << "\n";
-
-    // ll a, b, c;
-    // cin >> a >> b >> c;
-    // ll gcd_val = gcd(a, b);
-    // if (c % gcd_val != 0)
-    // {
-    //     cout << "No" << "\n";
-    // }
-    // else
-    // {
-    //     bool flag = false;
-    //     for (ll x = 0; x <= 10000; x++)
-    //     {
-    //         for (ll y = 0; y <= 10000; y++)
-    //         {
-    //             if(((x*a)+(b*y)) == c){
-    //                 cout<<"Yes"<<"\n";
-    //                 return;
-    //             }
-    //         }
-    //     }
-    //     if(flag == false){
-    //         cout<<"No"<<"\n";
-    //     }
-    // }
 }
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
@@ -3679,8 +4009,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     int t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();

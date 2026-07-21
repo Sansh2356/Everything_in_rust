@@ -1,7 +1,37 @@
 #![feature(btree_cursors)]
-#![allow(unused)]
-use std::io::{Stdin, stdin};
+use std::fmt::Debug;
+use std::io::{BufRead, Stdin, stdin};
+use std::str::FromStr;
 use std::{collections::BTreeMap, ops::Bound};
+pub struct InputReader;
+impl InputReader {
+    pub fn read_input<T>(mut obj: Box<dyn BufRead>) -> T
+    where
+        T: FromStr,
+        <T as FromStr>::Err: Debug,
+    {
+        let mut buffer_string = String::new();
+        let _ = obj.read_line(&mut buffer_string);
+        buffer_string = buffer_string.trim().to_string();
+        buffer_string.parse::<T>().unwrap()
+    }
+    pub fn read_input_vec<T>(mut obj: Box<dyn BufRead>) -> Vec<T>
+    where
+        T: FromStr,
+        <T as FromStr>::Err: Debug,
+    {
+        let mut buffer_string = String::new();
+        let _ = obj.read_line(&mut buffer_string);
+        buffer_string
+            .split_ascii_whitespace()
+            .map(|mut val| {
+                val = val.trim();
+                return val.parse::<T>().unwrap();
+            })
+            .collect()
+    }
+}
+#[allow(dead_code)]
 fn random_problem(stdin: Stdin) {
     let mut buffer = String::from("");
     match stdin.read_line(&mut buffer) {
@@ -49,7 +79,7 @@ pub fn towers(towers: Vec<u32>) -> u32 {
             if upper_bound_cursor.peek_next().is_none() {
                 total_towers += 1;
             } else {
-                if let Some((key, val)) = upper_bound_cursor.next() {
+                if let Some((key, _val)) = upper_bound_cursor.next() {
                     if let Some(val) = tower_map.get_mut(key) {
                         *val -= 1;
                         if *val == 0 {
@@ -68,41 +98,37 @@ pub fn towers(towers: Vec<u32>) -> u32 {
     }
     total_towers
 }
-fn solve(stdin: Stdin) {
-    let mut buffer = String::from("");
-    match stdin.read_line(&mut buffer) {
-        Ok(_) => {}
-        Err(error) => {
-            panic!("{error:?}");
+fn minimize_dot_product(mut v: Vec<i32>, mut w: Vec<i32>) -> i32 {
+    let mut sum = 0;
+    v.sort();
+    w.sort_by(|a, b| {
+        if b > a {
+            return std::cmp::Ordering::Greater;
+        } else if b < a {
+            return std::cmp::Ordering::Less;
+        } else {
+            return std::cmp::Ordering::Equal;
         }
-    };
-    let input = buffer.trim();
-    let mut n = input.parse::<usize>().unwrap();
-    let mut tower_height: Vec<u32> = Vec::with_capacity(n);
-    for line in stdin.lines() {
-        if let Ok(word) = line {
-            tower_height.push(word.parse::<u32>().unwrap());
-        }
-        n -= 1;
-        if n == 0 {
-            break;
-        }
+    });
+    for idx in 0..v.len() {
+        let ele_1 = v.get(idx).unwrap();
+        let ele_2 = w.get(idx).unwrap();
+        sum += ele_1 * ele_2;
     }
-    let v = towers(tower_height);
-    println!("{v}");
+    sum
+}
+fn solve(stdin: Stdin) {
+    let _n: usize = InputReader::read_input(Box::from(stdin.lock()));
+    let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+    let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+
+    let val = minimize_dot_product(v, w);
+
+    println!("{val}");
 }
 fn main() {
     let std_in_obj = stdin();
-    let mut buffer = String::from("");
-    match std_in_obj.read_line(&mut buffer) {
-        Ok(_) => {}
-        Err(error) => {
-            panic!("{error:?}");
-        }
-    };
-    let input = buffer.trim();
-
-    let mut t = input.parse::<u32>().unwrap();
+    let mut t: usize = InputReader::read_input(Box::new(std_in_obj.lock()));
     // let mut t = 1;
 
     while t >= 1 {
