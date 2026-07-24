@@ -3980,9 +3980,184 @@ void solve_neighbour_removal_time()
     };
     cout << ans << "\n";
 }
+void simple_qe()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll sum = 0;
+    ll square_sum = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        sum += v[x];
+        square_sum += (v[x] * v[x]);
+    }
+    ll min_x = (sum / n);
+    ll ans = INT_MAX;
+    ll sum_1 = 0;
+    ll sum_2 = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        sum_1 += ((v[x] - min_x) * (v[x] - min_x));
+        sum_2 += ((v[x] - (min_x + 1)) * (v[x] - (min_x + 1)));
+    }
+    ans = min(sum_1, sum_2);
+
+    cout << ans << "\n";
+}
+ll subarraySum(vector<ll> &nums, ll k)
+{
+    ll cnt = 0;
+    unordered_map<ll, ll> m;
+    ll cum_sum = 0;
+    m[cum_sum] = 1;
+    for (ll x = 0; x < nums.size(); x++)
+    {
+        cum_sum += nums[x];
+        if (m.count((cum_sum - k)) == true)
+            cnt += m[(cum_sum - k)];
+        m[cum_sum] += 1;
+    }
+    return cnt;
+}
+// Using pigeon hole principle and prefix sum 
+// modulo will repeat itself always for atleas 1 value .
+vector<ll> subset_divisible_n()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<ll, ll> m;
+    vector<ll> pf_arr(n + 1);
+    pf_arr[0] = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        pf_arr[x + 1] = v[x] + pf_arr[x];
+    }
+    m[0] = -1;
+    ll i = -1;
+    ll j = -1;
+    for (ll x = 0; x < n; x++)
+    {
+        if (m.count(pf_arr[x + 1] % n))
+        {
+            j = m[pf_arr[x + 1]] + 1;
+            i = x;
+            break;
+        }
+        m[pf_arr[x + 1] % n] = x;
+    }
+    cout << i << " " << j << endl;
+    vector<ll> ans;
+    for (ll x = j; x <= i; x++)
+        ans.push_back(v[x]);
+    for (auto i : ans)
+        cout << i << " ";
+    cout << "\n";
+    return ans;
+}
 void solve()
 {
 
+    // ll n, k;
+    // cin >> n >> k;
+    // ll ans = 0;
+    // vector<ll> v(n);
+    // vector<ll> prefix_arr(n, 0);
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    // }
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     if (x == 0)
+    //     {
+    //         if (v[x] == 0)
+    //             ans++;
+    //         prefix_arr[x]++;
+    //         if ((x + k) < n)
+    //         {
+    //             prefix_arr[x + k]--;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         ll change = (prefix_arr[x - 1] + prefix_arr[x]);
+    //         prefix_arr[x] = change;
+    //         if (change % 2 != 0)
+    //         {
+    //             v[x] = ~v[x];
+    //         }
+    //         if (v[x] == 0)
+    //             ans++;
+    //         prefix_arr[x]++;
+    //         if ((x + k) < n)
+    //         {
+    //             prefix_arr[x + k]--;
+    //         }
+    //     }
+    // }
+    // cout << ans << "\n";
+    // ll n;
+    // cin >> n;
+    // vector<ll> v(n);
+    // ll ans = 0;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    //     ans += v[x];
+    // }
+    // ans-=v[v.size()-1];
+    // if(ans >= v[v.size()-1]){
+    //     ans = (ans-v[v.size()-1])%2;
+    // }
+    // else{
+    //     ans = (v[v.size()-1]-ans);
+    // }
+    // cout<<ans<<"\n";
+
+    // ll n;
+    // cin >> n;
+    // vector<ll> v(n);
+    // priority_queue<ll>pq;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    //     pq.push(v[x]);
+    // }
+    // ll ans = 0;
+    // while(pq.size() >=2){
+    //     ll top_1 = pq.top();
+    //     pq.pop();
+    //     ll top_2 = pq.top();
+    //     pq.pop();
+    //     pq.push(top_1-top_2);
+    // }
+    // while(pq.empty() != true){
+    //     ans += pq.top();
+    //     pq.pop();
+    // }
+    // cout<<ans<<"\n";
+
+    // ll n;
+    // cin >> n;
+    // vector<ll> v(n);
+    // ll ans = 0;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    // }
+    // for (ll x = 1; x < n; x++)
+    // {
+    //     if(v[x-1] > v[x]){
+    //         ans += (v[x-1]-v[x]);
+    //     }
+
+    // }
+
+    // cout<<ans<<"\n";
 }
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
