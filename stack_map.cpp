@@ -1,10 +1,12 @@
 #include <iostream>
 #include <unordered_map>
 #include <climits>
-#include<set>
-#include<list>
-#include<unordered_set>
-#include <stack>;
+#include <set>
+#include <list>
+#include <unordered_set>
+#include <stack>
+#include <vector>
+typedef long long ll;
 using namespace std;
 class FreqStack
 {
@@ -51,8 +53,157 @@ public:
         return top;
     }
 };
+ll subarraySum(vector<ll> &nums, ll k)
+{
+    ll cnt = 0;
+    unordered_map<ll, ll> m;
+    ll cum_sum = 0;
+    m[cum_sum] = 1;
+    for (ll x = 0; x < nums.size(); x++)
+    {
+        cum_sum += nums[x];
+        if (m.count((cum_sum - k)) == true)
+            cnt += m[(cum_sum - k)];
+        m[cum_sum] += 1;
+    }
+    return cnt;
+}
+vector<vector<ll>> prefix_2d(vector<vector<ll>> &arr)
+{
+    vector<vector<ll>> pf(arr.size(), vector<ll>(arr[0].size(), 0));
+    for (ll x = 0; x < pf.size(); x++)
+    {
+        for (ll y = 0; y < pf[0].size(); y++)
+        {
+            pf[x][y] = arr[x][y];
+            if (x > 0)
+                pf[x][y] += pf[x - 1][y];
+            if (y > 0)
+                pf[x][y] += pf[x][y - 1];
+            if (x > 0 && y > 0)
+                pf[x][y] -= pf[x - 1][y - 1];
+        }
+    }
+    return pf;
+}
+void solve_rect_sum_queries()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<vector<ll>> arr(n + 1, vector<ll>(n + 1, 0));
+    for (int x = 1; x <= n; x++)
+    {
+        for (int y = 1; y <= n; y++)
+        {
+            char num;
+            cin >> num;
+            if (num == '*')
+            {
+                arr[x][y] = 1;
+            }
+            else
+            {
+                arr[x][y] = 0;
+            }
+        }
+    }
+    vector<vector<ll>> pf_arr = prefix_2d(arr);
+
+    while (q--)
+    {
+        ll x1, y1, x2, y2;
+        cin >> x1 >> y1 >> x2 >> y2;
+        ll ans = pf_arr[x2][y2];
+        if ((y1 - 1) > 0)
+            ans = (((ans) - (pf_arr[x2][y1 - 1])));
+        if ((x1 - 1) > 0)
+            ans = (((ans) - (pf_arr[x1 - 1][y2])));
+        if ((x1 - 1) > 0 && (y1 - 1) > 0)
+            ans = ((ans) + (pf_arr[x1 - 1][y1 - 1]));
+        cout << ans << "\n";
+    }
+}
+vector<vector<ll>> partial_sum_2d(vector<vector<ll>> &queries, ll n, ll m)
+{
+    vector<vector<ll>> partial_sum_arr(n, vector<ll>(m, 0));
+    for (ll i = 0; i < queries.size(); i++)
+    {
+        ll u = queries[i][0];
+        ll l = queries[i][1];
+        ll d = queries[i][2];
+        ll r = queries[i][3];
+        ll x = 1;
+
+        partial_sum_arr[u][l] += x;
+        if (r + 1 < m)
+            partial_sum_arr[u][r + 1] -= x;
+        if (d + 1 < n)
+            partial_sum_arr[d + 1][l] -= x;
+        if ((d + 1) < m && (r + 1) < n)
+            partial_sum_arr[d + 1][r + 1] += x;
+    }
+    return prefix_2d(partial_sum_arr);
+}
+vector<ll> next_smaller_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nse(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nse[x] = x + 1;
+        while (nse[x] != n && v[x] <= v[nse[x]])
+        {
+            nse[x] = nse[nse[x]];
+        }
+    }
+    return nse;
+}
+vector<ll> previous_smaller_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pse(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pse[x] = x - 1;
+        while (pse[x] != -1 && v[x] <= v[pse[x]])
+        {
+            pse[x] = pse[pse[x]];
+        }
+    }
+    return pse;
+}
+void solve()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    vector<ll>nse = next_smaller_element(v);
+    vector<ll>pse = previous_smaller_element(v);
+
+    ll sum = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        ll pse_element_idx = x-pse[x];
+        ll nse_element_idx = nse[x]-x;
+        sum += (v[x]*(pse_element_idx*nse_element_idx));
+
+    }
+    cout << sum << "\n";
+}
 int main()
 {
-
-
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    ll t;
+    cin>>t;
+    // t = 1;
+    while (t--)
+    {
+        solve();
+    }
 }

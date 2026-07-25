@@ -4021,7 +4021,7 @@ ll subarraySum(vector<ll> &nums, ll k)
     }
     return cnt;
 }
-// Using pigeon hole principle and prefix sum 
+// Using pigeon hole principle and prefix sum
 // modulo will repeat itself always for atleas 1 value .
 vector<ll> subset_divisible_n()
 {
@@ -4058,9 +4058,209 @@ vector<ll> subset_divisible_n()
     cout << "\n";
     return ans;
 }
+vector<ll> next_greater_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nge(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nge[x] = x + 1;
+        while (nge[x] != n && v[x] >= v[nge[x]])
+        {
+            nge[x] = nge[nge[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (nge[x] == n)
+        {
+            cout << "No element which is next greater than " << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element greater than " << v[x] << " is " << v[nge[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return nge;
+}
+vector<ll> previous_greater_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pge(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pge[x] = x - 1;
+        while (pge[x] != -1 && v[x] >= v[pge[x]])
+        {
+            pge[x] = pge[pge[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (pge[x] == -1)
+        {
+            cout << "No element which is previous greater than " << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element greater than " << v[x] << " is " << v[pge[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return pge;
+}
+vector<ll> next_smaller_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nse(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nse[x] = x + 1;
+        while (nse[x] != n && v[x] <= v[nse[x]])
+        {
+            nse[x] = nse[nse[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (nse[x] == n)
+        {
+            cout << "No element which is next smallest than " << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element next smallest than " << v[x] << " is " << v[nse[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return nse;
+}
+vector<ll> previous_smaller_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pse(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pse[x] = x - 1;
+        while (pse[x] != -1 && v[x] <= v[pse[x]])
+        {
+            pse[x] = pse[pse[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (pse[x] == -1)
+        {
+            cout << "No element which is previous smallest than " << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element previous smallest than " << v[x] << " is " << v[pse[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return pse;
+}
+vector<ll> next_greater_element_circular(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nge(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nge[x] = (x + 1);
+        while (nge[x] != n && v[x] >= v[nge[x]])
+        {
+            nge[x] = nge[nge[x]];
+        }
+    }
+    vector<ll> ans;
+    for (ll x = 0; x < n / 2; x++)
+    {
+        if (nge[x] == n)
+        {
+            ans.push_back(-1);
+        }
+        else
+        {
+            ans.push_back(v[nge[x]]);
+        }
+    }
+    return ans;
+}
+ll largestRectangleArea(vector<ll> &heights)
+{
+    ll ans = LLONG_MAX;
+    ll n = heights.size();
+    vector<ll> pse = previous_smaller_element(heights);
+    vector<ll> nse = next_smaller_element(heights);
+    for (int x = 0; x < heights.size(); x++)
+    {
+
+        ans = max(ans, (heights[x] * (nse[x] - pse[x] - 1)));
+    }
+    return ans;
+}
 void solve()
 {
+    ll n;
+    cin >> n;
+    multiset<ll> s1;
+    vector<ll> v(pow(2, n));
+    for (ll x = 0; x < pow(2, n); x++)
+    {
+        cin >> v[x];
+        s1.insert(v[x]);
+    }
+    s1.erase(s1.begin());
+    multiset<ll> s3;
+    multiset<ll> s2;
+    s2.insert(0);
+    while (s1.empty() == false)
+    {
+        ll smallest = *s1.begin();
+        multiset<ll> s4;
+        for (auto it : s2)
+        {
+            s4.insert(it + smallest);
+        }
+        for (auto it : s4)
+        {
+            s1.erase(s1.find(it));
+            s2.insert(it);
+        }
+        s3.insert(smallest);
+    }
+    for (auto it : s3)
+    {
+        cout << it << " ";
+    }
+    cout << "\n";
+    // ll n;
+    // cin >> n;
+    // vector<ll> v(n);
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    // }
 
+    // vector<ll>nse = next_smaller_element(v);
+    // vector<ll>pse = previous_smaller_element(v);
+
+    // ll sum = 0;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     ll pse_element_idx = x-pse[x];
+    //     ll nse_element_idx = nse[x]-x;
+    //     sum += (v[x]*(pse_element_idx*nse_element_idx));
+
+    // }
+    // cout << sum << "\n";
+
+    // next_greater_element(v);
+    // next_smaller_element(v);
+    // previous_greater_element(v);
+    // previous_smaller_element(v);
     // ll n, k;
     // cin >> n >> k;
     // ll ans = 0;
@@ -4211,6 +4411,7 @@ int main()
     greedy forward based problems covering problems of gas station its 3 variants.
     operator decoding based problems .
 
-
+    NGE array creation, nse,pse,pge via both method of stack and non-stack version.
+    histogram area
 
     */
