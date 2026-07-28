@@ -2,7 +2,10 @@
 #include <unordered_map>
 #include <climits>
 #include <set>
+#include <map>
+#include <queue>
 #include <list>
+#include <algorithm>
 #include <unordered_set>
 #include <stack>
 #include <vector>
@@ -172,27 +175,107 @@ vector<ll> previous_smaller_element(vector<ll> v)
     }
     return pse;
 }
+vector<ll> next_greater_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nge(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nge[x] = x + 1;
+        while (nge[x] != n && v[x] >= v[nge[x]])
+        {
+            nge[x] = nge[nge[x]];
+        }
+    }
+    //     for (ll x = 0; x < n; x++)
+    // {
+    //     if (nge[x] == n)
+    //     {
+    //         cout << "No element which is next greater than or equal to" << v[x] << " exists \n";
+    //     }
+    //     else
+    //     {
+    //         cout << "Element greater than or equal to" << v[x] << " is " << v[nge[x]]<<" " <<nge[x] <<"\n";
+    //     }
+    // }
+    // cout << "\n";
+    return nge;
+}
+vector<ll> previous_greater_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pge(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pge[x] = x - 1;
+        while (pge[x] != -1 && v[x] > v[pge[x]])
+        {
+            pge[x] = pge[pge[x]];
+        }
+    }
+    return pge;
+}
+vector<ll> previous_greater_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pge(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pge[x] = x - 1;
+        while (pge[x] != -1 && v[x] >= v[pge[x]])
+        {
+            pge[x] = pge[pge[x]];
+        }
+    }
+    return pge;
+}
+vector<ll> next_greater_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nge(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nge[x] = x + 1;
+        while (nge[x] != n && v[x] > v[nge[x]])
+        {
+            nge[x] = nge[nge[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (nge[x] == n)
+        {
+            cout << "No element which is next greater than " << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element greater than " << v[x] << " is " << v[nge[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return nge;
+}
+class MonotonicDeque{
+    public:
+    deque<ll>dq;
+    void insert(ll value){
+        while(dq.empty() == false && dq.back() > value){
+            dq.pop_back();
+        }
+        dq.push_back(value);
+    }
+    void remove(ll v){
+        if(dq.empty() == false && dq.front() == v){
+            dq.pop_front();
+        }
+    }
+    ll min_value(){
+      return dq.front(); 
+    }
+};
 void solve()
 {
-    ll n;
-    cin >> n;
-    vector<ll> v(n);
-    for (ll x = 0; x < n; x++)
-    {
-        cin >> v[x];
-    }
-    vector<ll>nse = next_smaller_element(v);
-    vector<ll>pse = previous_smaller_element(v);
 
-    ll sum = 0;
-    for (ll x = 0; x < n; x++)
-    {
-        ll pse_element_idx = x-pse[x];
-        ll nse_element_idx = nse[x]-x;
-        sum += (v[x]*(pse_element_idx*nse_element_idx));
-
-    }
-    cout << sum << "\n";
 }
 int main()
 {
@@ -200,7 +283,7 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    cin>>t;
+    cin >> t;
     // t = 1;
     while (t--)
     {

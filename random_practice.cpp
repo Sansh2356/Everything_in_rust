@@ -4022,7 +4022,7 @@ ll subarraySum(vector<ll> &nums, ll k)
     return cnt;
 }
 // Using pigeon hole principle and prefix sum
-// modulo will repeat itself always for atleas 1 value .
+// modulo will repeat itself always for atleast 1 value .
 vector<ll> subset_divisible_n()
 {
     ll n;
@@ -4065,7 +4065,7 @@ vector<ll> next_greater_element(vector<ll> v)
     for (ll x = v.size() - 1; x >= 0; x--)
     {
         nge[x] = x + 1;
-        while (nge[x] != n && v[x] >= v[nge[x]])
+        while (nge[x] != n && v[x] > v[nge[x]])
         {
             nge[x] = nge[nge[x]];
         }
@@ -4079,6 +4079,32 @@ vector<ll> next_greater_element(vector<ll> v)
         else
         {
             cout << "Element greater than " << v[x] << " is " << v[nge[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return nge;
+}
+vector<ll> next_greater_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nge(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nge[x] = x + 1;
+        while (nge[x] != n && v[x] > v[nge[x]])
+        {
+            nge[x] = nge[nge[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (nge[x] == n)
+        {
+            cout << "No element which is next greater than or equal to" << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element greater than or equal to" << v[x] << " is " << v[nge[x]] << "\n";
         }
     }
     cout << "\n";
@@ -4110,6 +4136,32 @@ vector<ll> previous_greater_element(vector<ll> v)
     cout << "\n";
     return pge;
 }
+vector<ll> previous_greater_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pge(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pge[x] = x - 1;
+        while (pge[x] != -1 && v[x] > v[pge[x]])
+        {
+            pge[x] = pge[pge[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (pge[x] == -1)
+        {
+            cout << "No element which is previous greater than or equal" << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element greater than or equal" << v[x] << " is " << v[pge[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return pge;
+}
 vector<ll> next_smaller_element(vector<ll> v)
 {
     ll n = v.size();
@@ -4131,6 +4183,33 @@ vector<ll> next_smaller_element(vector<ll> v)
         else
         {
             cout << "Element next smallest than " << v[x] << " is " << v[nse[x]] << "\n";
+        }
+    }
+    cout << "\n";
+    return nse;
+}
+
+vector<ll> next_smaller_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> nse(v.size());
+    for (ll x = v.size() - 1; x >= 0; x--)
+    {
+        nse[x] = x + 1;
+        while (nse[x] != n && v[x] < v[nse[x]])
+        {
+            nse[x] = nse[nse[x]];
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (nse[x] == n)
+        {
+            cout << "No element which is next smaller than or equal to" << v[x] << " exists \n";
+        }
+        else
+        {
+            cout << "Element next smaller than or equal to" << v[x] << " is " << v[nse[x]] << "\n";
         }
     }
     cout << "\n";
@@ -4160,6 +4239,32 @@ vector<ll> previous_smaller_element(vector<ll> v)
         }
     }
     cout << "\n";
+    return pse;
+}
+vector<ll> previous_smaller_equal_element(vector<ll> v)
+{
+    ll n = v.size();
+    vector<ll> pse(v.size());
+    for (ll x = 0; x < n; x++)
+    {
+        pse[x] = x - 1;
+        while (pse[x] != -1 && v[x] < v[pse[x]])
+        {
+            pse[x] = pse[pse[x]];
+        }
+    }
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     if (pse[x] == -1)
+    //     {
+    //         cout << "No element which is previous smallest than or equal to" << v[x] << " exists \n";
+    //     }
+    //     else
+    //     {
+    //         cout << "Element previous smallest than or equal to" << v[x] << " is " << v[pse[x]] << "\n";
+    //     }
+    // }
+    // cout << "\n";
     return pse;
 }
 vector<ll> next_greater_element_circular(vector<ll> v)
@@ -4201,7 +4306,7 @@ ll largestRectangleArea(vector<ll> &heights)
     }
     return ans;
 }
-void solve()
+void subset_original_arr()
 {
     ll n;
     cin >> n;
@@ -4236,128 +4341,582 @@ void solve()
         cout << it << " ";
     }
     cout << "\n";
-    // ll n;
-    // cin >> n;
-    // vector<ll> v(n);
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    // }
+}
+// Single symbol based can also be solved using a single variable of
+// depth which is intutive indicator of each depth being matched .
+bool valid_parentheses()
+{
+    string s;
+    cin >> s;
+    unordered_map<char, int> m;
+    m['('] = 1;
+    m[')'] = -1;
+    m['{'] = 2;
+    m['}'] = -2;
+    m['['] = 3;
+    m[']'] = -3;
+    stack<int> st;
+    bool flag = true;
+    for (ll x = 0; x < s.length(); x++)
+    {
+        if (st.size() == 0 && m[s[x]] < 0)
+        {
+            flag = false;
+            break;
+        }
+        else if (st.size() == 0 && m[s[x]] > 0)
+        {
+            st.push(m[s[x]]);
+        }
+        else
+        {
+            if (m[s[x]] > 0)
+                st.push(m[s[x]]);
+            else if (m[s[x]] < 0)
+            {
+                if (st.top() + m[s[x]] == 0)
+                {
+                    st.pop();
+                }
+                else
+                {
+                    flag = false;
+                    break;
+                }
+            }
+        }
+    }
+    if (flag == false || st.size() != 0)
+        return false;
+    return true;
+}
+ll min_number_parentheses()
+{
+    string s;
+    cin >> s;
+    unordered_map<char, int> m;
+    m['('] = 1;
+    m[')'] = -1;
+    m['{'] = 2;
+    m['}'] = -2;
+    m['['] = 3;
+    m[']'] = -3;
+    stack<int> st;
+    for (ll x = 0; x < s.length(); x++)
+    {
+        if (st.size() == 0 && m[s[x]] < 0)
+        {
+            st.push(m[s[x]]);
+        }
+        else if (st.size() == 0 && m[s[x]] > 0)
+        {
+            st.push(m[s[x]]);
+        }
+        else
+        {
+            if (m[s[x]] > 0)
+                st.push(m[s[x]]);
+            else if (m[s[x]] < 0)
+            {
+                if (st.top() + m[s[x]] == 0)
+                {
+                    st.pop();
+                }
+                else
+                {
+                    st.push(m[s[x]]);
+                }
+            }
+        }
+    }
+    return st.size();
+}
+// Monotonic deque for maintaining minimum or maximum element 
+// within a window of length k.
+class MonotonicDeque
+{
+public:
+    deque<ll> dq;
+    void insert(ll value)
+    {
+        while (dq.empty() == false && dq.back() > value)
+        {
+            dq.pop_back();
+        }
+        dq.push_back(value);
+    }
+    void erase(ll v)
+    {
+        if (dq.empty() == false && dq.front() == v)
+        {
+            dq.pop_front();
+        }
+    }
+    ll min_value()
+    {
+        return dq.front();
+    }
+};
+// Minimum of every window of length k using a monotonic deque.
+void solve_sliding_window_min_deque()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    MonotonicDeque st = MonotonicDeque();
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        st.insert(v[x]);
 
-    // vector<ll>nse = next_smaller_element(v);
-    // vector<ll>pse = previous_smaller_element(v);
+        if ((x - k) >= 0)
+        {
+            st.erase(v[x - k]);
+        }
+        if (x >= k - 1)
+        {
+            cout << st.min_value() << " ";
+        }
+    }
+    cout << "\n";
+}
 
-    // ll sum = 0;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     ll pse_element_idx = x-pse[x];
-    //     ll nse_element_idx = nse[x]-x;
-    //     sum += (v[x]*(pse_element_idx*nse_element_idx));
+// Maximum of every window of length k maintained via a multiset.
+void solve_sliding_window_max_multiset()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    multiset<ll> st;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        st.insert(v[x]);
 
-    // }
-    // cout << sum << "\n";
+        if (((ll)st.size() - k) > 0)
+        {
+            st.erase(st.find(v[x - k]));
+        }
+        if (st.size() == k)
+        {
+            cout << *(st.rbegin()) << " ";
+        }
+    }
+    cout << "\n";
+}
 
-    // next_greater_element(v);
-    // next_smaller_element(v);
-    // previous_greater_element(v);
-    // previous_smaller_element(v);
-    // ll n, k;
-    // cin >> n >> k;
-    // ll ans = 0;
-    // vector<ll> v(n);
-    // vector<ll> prefix_arr(n, 0);
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    // }
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     if (x == 0)
-    //     {
-    //         if (v[x] == 0)
-    //             ans++;
-    //         prefix_arr[x]++;
-    //         if ((x + k) < n)
-    //         {
-    //             prefix_arr[x + k]--;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         ll change = (prefix_arr[x - 1] + prefix_arr[x]);
-    //         prefix_arr[x] = change;
-    //         if (change % 2 != 0)
-    //         {
-    //             v[x] = ~v[x];
-    //         }
-    //         if (v[x] == 0)
-    //             ans++;
-    //         prefix_arr[x]++;
-    //         if ((x + k) < n)
-    //         {
-    //             prefix_arr[x + k]--;
-    //         }
-    //     }
-    // }
-    // cout << ans << "\n";
-    // ll n;
-    // cin >> n;
-    // vector<ll> v(n);
-    // ll ans = 0;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    //     ans += v[x];
-    // }
-    // ans-=v[v.size()-1];
-    // if(ans >= v[v.size()-1]){
-    //     ans = (ans-v[v.size()-1])%2;
-    // }
-    // else{
-    //     ans = (v[v.size()-1]-ans);
-    // }
-    // cout<<ans<<"\n";
+// Four query types over a sorted array : value/index of the first element
+// >= x (lower_bound) and > x (upper_bound).
+void solve_sorted_array_bound_queries()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    while (q--)
+    {
+        ll t, x;
+        cin >> t >> x;
+        if (t == 1)
+        {
+            auto it = lower_bound(v.begin(), v.end(), x);
+            if (it != v.end())
+            {
+                cout << *it << "\n";
+            }
+            else
+            {
+                cout << "-1" << "\n";
+            }
+        }
+        else if (t == 2)
+        {
+            auto it = upper_bound(v.begin(), v.end(), x);
+            if (it != v.end())
+            {
+                cout << *it << "\n";
+            }
+            else
+            {
+                cout << "-1" << "\n";
+            }
+        }
+        else if (t == 3)
+        {
+            auto it = lower_bound(v.begin(), v.end(), x);
+            if (it != v.end())
+            {
+                cout << it - v.begin() << "\n";
+            }
+            else
+            {
+                cout << "-1" << "\n";
+            }
+        }
+        else
+        {
+            auto it = upper_bound(v.begin(), v.end(), x);
+            if (it != v.end())
+            {
+                cout << it - v.begin() << "\n";
+            }
+            else
+            {
+                cout << "-1" << "\n";
+            }
+        }
+    }
+}
 
-    // ll n;
-    // cin >> n;
-    // vector<ll> v(n);
-    // priority_queue<ll>pq;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    //     pq.push(v[x]);
-    // }
-    // ll ans = 0;
-    // while(pq.size() >=2){
-    //     ll top_1 = pq.top();
-    //     pq.pop();
-    //     ll top_2 = pq.top();
-    //     pq.pop();
-    //     pq.push(top_1-top_2);
-    // }
-    // while(pq.empty() != true){
-    //     ans += pq.top();
-    //     pq.pop();
-    // }
-    // cout<<ans<<"\n";
+// Maximum count of items buyable with budget m : sort , prefix sum and
+// binary search the largest prefix that fits inside the budget.
+void solve_max_items_within_budget_queries()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n);
+    vector<ll> pf_arr(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    sort(v.begin(), v.end());
+    pf_arr[0] = v[0];
+    for (ll x = 1; x < n; x++)
+    {
+        pf_arr[x] = pf_arr[x - 1] + v[x];
+    }
+    while (q--)
+    {
+        ll m;
+        cin >> m;
+        auto it = upper_bound(pf_arr.begin(), pf_arr.end(), m);
+        cout << it - pf_arr.begin() << "\n";
+    }
+}
 
-    // ll n;
-    // cin >> n;
-    // vector<ll> v(n);
-    // ll ans = 0;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    // }
-    // for (ll x = 1; x < n; x++)
-    // {
-    //     if(v[x-1] > v[x]){
-    //         ans += (v[x-1]-v[x]);
-    //     }
+// Trapping rain water : water above a bar is bounded by the smaller of the
+// running prefix maximum and suffix maximum around it.
+void solve_trapping_rain_water()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    vector<ll> pf_arr(n);
+    vector<ll> sf_arr(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    pf_arr[0] = v[0];
+    for (ll x = 1; x < n; x++)
+    {
+        pf_arr[x] = max(pf_arr[x - 1], v[x]);
+    }
+    sf_arr[n - 1] = v[n - 1];
+    for (ll x = n - 2; x >= 0; x--)
+    {
+        sf_arr[x] = max(sf_arr[x + 1], v[x]);
+    }
+    ll ans = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        ans += min(pf_arr[x], sf_arr[x]) - v[x];
+    }
+    cout << ans << "\n";
+}
 
-    // }
+// Maximum of the minimums for every window size : each element is the
+// minimum of the segment (pse , nse) , afterwards a suffix maximum fills
+// the window sizes that were never hit directly.
+// [5,4,2,INT_MIN,INT_MIN,1]
+// [5,4,2,1,1,1] ---->  ANS
+void solve_max_of_min_for_every_window()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    vector<ll> pse = previous_smaller_element(v);
+    vector<ll> nse = next_smaller_element(v);
+    vector<ll> suffix_arr(n + 1, INT_MIN);
+    for (ll x = 0; x < n; x++)
+    {
+        ll segment_length = nse[x] - pse[x] - 1;
+        suffix_arr[segment_length] = max(v[x], suffix_arr[segment_length]);
+    }
+    for (ll x = suffix_arr.size() - 2; x >= 0; x--)
+    {
+        suffix_arr[x] = max(suffix_arr[x], suffix_arr[x + 1]);
+    }
+    suffix_arr[0] = -1;
+    for (auto i : suffix_arr)
+    {
+        if (i >= 0)
+        {
+            cout << i << " ";
+        }
+    }
+    cout << "\n";
+}
 
-    // cout<<ans<<"\n";
+// 1-indexed position of the previous smaller element , 0 when none exists.
+void solve_previous_smaller_element_indices()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    vector<ll> pse = previous_smaller_element(v);
+    for (auto &it : pse)
+    {
+        if (it == -1)
+            cout << 0 << " ";
+        else
+        {
+            cout << it + 1 << " ";
+        }
+    }
+    cout << "\n";
+}
+
+// Maximise the number of unequal pairs after k decrements : greedily strip
+// one occurrence off the currently most frequent value each time.
+void solve_max_distinct_pairs_after_k_ops()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    unordered_map<ll, ll> freq_map;
+    ll curr_diversity = (n * (n - 1)) / 2;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        freq_map[v[x]]++;
+    }
+    priority_queue<pair<ll, ll>> pq;
+    for (auto it : freq_map)
+    {
+        ll freq = it.second;
+        ll key = it.first;
+        curr_diversity -= (freq * (freq - 1)) / 2;
+        pq.push({freq, key});
+    }
+    while (pq.empty() != true && k > 0)
+    {
+        auto p = pq.top();
+        pq.pop();
+        if (p.first <= 1)
+        {
+            break;
+        }
+        curr_diversity += p.first - 1;
+        pq.push({p.first - 1, p.second});
+        k--;
+    }
+    cout << curr_diversity << "\n";
+}
+
+// Sum of subarray ranges : sum of maximums minus sum of minimums , both by
+// the contribution of every element over the segments it dominates.
+void solve_sum_of_subarray_ranges()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    vector<ll> psee = previous_smaller_equal_element(v);
+    vector<ll> nse = next_smaller_element(v);
+    vector<ll> nge = next_greater_element(v);
+    vector<ll> pgee = previous_greater_equal_element(v);
+    ll maxima = 0;
+    ll minima = 0;
+    for (ll x = 0; x < n; x++)
+    {
+
+        maxima += (v[x] * (nge[x] - x) * (x - pgee[x]));
+        minima += (v[x] * (nse[x] - x) * (x - psee[x]));
+    }
+    cout << (maxima - minima) << "\n";
+}
+
+// Sum of subarray minimums via the contribution of every element over the
+// (pse , nse) window where it stays the minimum.
+void solve_sum_of_subarray_minimums()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+
+    vector<ll> nse = next_smaller_element(v);
+    vector<ll> pse = previous_smaller_element(v);
+
+    ll sum = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        ll pse_element_idx = x - pse[x];
+        ll nse_element_idx = nse[x] - x;
+        sum += (v[x] * (pse_element_idx * nse_element_idx));
+    }
+    cout << sum << "\n";
+}
+
+// Driver for the four monotonic stack helpers over a single array.
+void solve_monotonic_stack_demo()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    next_greater_element(v);
+    next_smaller_element(v);
+    previous_greater_element(v);
+    previous_smaller_element(v);
+}
+
+// Count of zeroes after applying a flip of length k starting at every index
+// the flip parity is tracked with a difference array.
+void solve_k_length_bit_flips_zero_count()
+{
+    ll n, k;
+    cin >> n >> k;
+    ll ans = 0;
+    vector<ll> v(n);
+    vector<ll> prefix_arr(n, 0);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (x == 0)
+        {
+            if (v[x] == 0)
+                ans++;
+            prefix_arr[x]++;
+            if ((x + k) < n)
+            {
+                prefix_arr[x + k]--;
+            }
+        }
+        else
+        {
+            ll change = (prefix_arr[x - 1] + prefix_arr[x]);
+            prefix_arr[x] = change;
+            if (change % 2 != 0)
+            {
+                v[x] = ~v[x];
+            }
+            if (v[x] == 0)
+                ans++;
+            prefix_arr[x]++;
+            if ((x + k) < n)
+            {
+                prefix_arr[x + k]--;
+            }
+        }
+    }
+    cout << ans << "\n";
+}
+
+// Cancel the last element against the sum of all the others , whatever is
+// left over decays down to its parity.
+void solve_reduce_last_element_parity()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll ans = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        ans += v[x];
+    }
+    ans -= v[v.size() - 1];
+    if (ans >= v[v.size() - 1])
+    {
+        ans = (ans - v[v.size() - 1]) % 2;
+    }
+    else
+    {
+        ans = (v[v.size() - 1] - ans);
+    }
+    cout << ans << "\n";
+}
+
+// Last stone weight : repeatedly smash the two heaviest stones together.
+void solve_last_stone_weight_max_diff()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    priority_queue<ll> pq;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        pq.push(v[x]);
+    }
+    ll ans = 0;
+    while (pq.size() >= 2)
+    {
+        ll top_1 = pq.top();
+        pq.pop();
+        ll top_2 = pq.top();
+        pq.pop();
+        pq.push(top_1 - top_2);
+    }
+    while (pq.empty() != true)
+    {
+        ans += pq.top();
+        pq.pop();
+    }
+    cout << ans << "\n";
+}
+
+// Total decrease needed to make the array non decreasing , only the drops
+// between adjacent elements contribute.
+void solve_min_decrements_non_decreasing()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll ans = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    for (ll x = 1; x < n; x++)
+    {
+        if (v[x - 1] > v[x])
+        {
+            ans += (v[x - 1] - v[x]);
+        }
+    }
+
+    cout << ans << "\n";
+}
+void solve()
+{
+    
 }
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
@@ -4413,5 +4972,15 @@ int main()
 
     NGE array creation, nse,pse,pge via both method of stack and non-stack version.
     histogram area
+
+    STL patterns - algorithmic design problems such as LRU etc .
+
+    1) Window maintainaince - find min of every k window, finding number of max,finding number of even or odd etc
+    montonic deque applications.
+    2) Subarray finding .
+    3) Parantheses based questions.
+
+
+
 
     */
