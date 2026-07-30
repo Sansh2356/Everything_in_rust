@@ -1,16 +1,4 @@
-#include <climits>
-#include <unordered_set>
-#include <cmath>
-#include <iomanip>
-#include <set>
-#include <unordered_map>
-#include <map>
-#include <queue>
-#include <deque>
-#include <stack>
-#include <algorithm>
-#include <iostream>
-#include <vector>
+#include<bits/stdc++.h>
 typedef long long ll;
 using namespace std;
 
@@ -4431,7 +4419,7 @@ ll min_number_parentheses()
     }
     return st.size();
 }
-// Monotonic deque for maintaining minimum or maximum element 
+// Monotonic deque for maintaining minimum or maximum element
 // within a window of length k.
 class MonotonicDeque
 {
@@ -4914,10 +4902,6 @@ void solve_min_decrements_non_decreasing()
 
     cout << ans << "\n";
 }
-void solve()
-{
-    
-}
 // Solving via contribution framework of type extended ends .
 int maxSubArray(vector<int> &nums)
 {
@@ -4930,6 +4914,352 @@ int maxSubArray(vector<int> &nums)
     }
     return ans;
 }
+void count_pairs()
+{
+    ll n, num;
+    cin >> n >> num;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    sort(v.begin(), v.end());
+    ll ans = 0;
+    for (ll x = 0; x < v.size(); x++)
+    {
+        auto it = upper_bound(v.begin(), v.end(), (num - v[x]));
+        cout << it - v.begin() - 1 << "\n";
+        {
+            if (num - v[x] >= v[x])
+            {
+                ans += (it - v.begin() - 1);
+            }
+            else
+            {
+                ans += (it - v.begin());
+            }
+        }
+    }
+    cout << ans << "\n";
+}
+class Operations
+{
+public:
+    ll sum;
+    ll sum_of_squares;
+    ll num_elements;
+    map<ll, ll> freq_map;
+    map<ll, ll> inverse_freq_map;
+
+    // Sorted set 1
+    multiset<ll> m1;
+    // Sorted set 2
+    multiset<ll> m2;
+    Operations()
+    {
+        this->sum = 0;
+        this->sum_of_squares = 0;
+        this->num_elements = 0;
+    }
+    long double get_mean()
+    {
+        return (long double)this->sum / (long double)this->num_elements;
+    }
+    long double get_variance()
+    {
+        //-mu^2
+        long double first_term = (long double)this->sum_of_squares / (long double)this->num_elements;
+        long double mean_value = this->get_mean();
+        return first_term - (mean_value * mean_value);
+    }
+    ll get_median()
+    {
+        if ((m1.size() + m2.size()) % 2 && (m1.size() + m2.size()) != 0)
+        {
+            // odd
+            return *m1.rbegin();
+        }
+        else
+        {
+            // even
+            return (*m1.rbegin() + *m2.begin()) / 2;
+        }
+    }
+    ll get_mode()
+    {
+        if (inverse_freq_map.size() != 0)
+        {
+            return inverse_freq_map.rbegin()->second;
+        }
+    }
+    void update_mode(ll value)
+    {
+        if (inverse_freq_map.count(freq_map[value]))
+        {
+            inverse_freq_map.erase(freq_map[value]);
+        }
+    }
+    void handle_extra()
+    {
+        if ((m2.size() - m1.size()) >= 1)
+        {
+            ll v = *m2.begin();
+            m2.erase(m2.begin());
+            m1.insert(v);
+        }
+        if ((m1.size() - m2.size()) >= 1)
+        {
+            ll v = *m1.rbegin();
+            m1.erase(v);
+            m2.insert(v);
+        }
+    }
+    void insert(ll value)
+    {
+        sum += value;
+        num_elements++;
+        sum_of_squares += (value * value);
+        update_mode(value);
+        freq_map[value]++;
+        inverse_freq_map.insert({freq_map[value], value});
+        if (m1.empty())
+        {
+            m1.insert(value);
+        }
+        else
+        {
+            ll smaller_value = *m1.rbegin();
+            if (value > smaller_value)
+            {
+                m2.insert(value);
+            }
+            else
+            {
+                m1.insert(value);
+            }
+        }
+        handle_extra();
+    }
+    void erase(ll value)
+    {
+        sum -= value;
+        num_elements--;
+        sum_of_squares -= (value * value);
+        update_mode(value);
+        freq_map[value]--;
+        inverse_freq_map.insert({freq_map[value], value});
+        if (m1.find(value) != m1.end())
+        {
+            m1.erase(value);
+        }
+        else if (m2.find(value) != m2.end())
+        {
+            m2.erase(value);
+        }
+        handle_extra();
+    }
+};
+// VVIP question + technique.
+// Making n elements equal mostly about median to be minimum
+// or top k elements .
+class MinCost
+{
+public:
+    multiset<ll> left, right;
+    ll left_sum, right_sum;
+    MinCost()
+    {
+        this->left_sum = 0;
+        this->right_sum = 0;
+    }
+    void insert(ll value)
+    {
+        if (left.empty())
+        {
+            left.insert(value);
+            left_sum += value;
+        }
+        else
+        {
+            ll left_max_val = *left.rbegin();
+            if (value > left_max_val)
+            {
+                right.insert(value);
+                right_sum += value;
+            }
+            else
+            {
+                left.insert(value);
+                left_sum += value;
+            }
+        }
+        this->balance();
+    }
+    void erase(ll value)
+    {
+        if (left.find(value) != left.end())
+        {
+            left.erase(left.find(value));
+            left_sum -= value;
+        }
+        else if (right.find(value) != right.end())
+        {
+            right.erase(right.find(value));
+            right_sum -= value;
+        }
+        this->balance();
+    }
+    long double get_median()
+    {
+        if ((left.size() + right.size()) % 2 && (left.size() + right.size()) != 0)
+        {
+            if (left.size() != 0)
+                return *left.rbegin();
+        }
+        else
+        {
+            long double v1, v2;
+            v1 = 0;
+            v2 = 0;
+            if (!left.empty())
+            {
+                v1 = *left.rbegin();
+            }
+            if (!right.empty())
+            {
+                v2 = *right.begin();
+            }
+            return (v1 + v2) / 2;
+        }
+    }
+    void balance()
+    {
+        if ((ll)(left.size() - right.size()) >= 1)
+        {
+            ll x = *left.rbegin();
+            left.erase(left.find(x));
+            left_sum -= x;
+            right.insert(x);
+            right_sum += x;
+        }
+        if ((ll)(right.size() - left.size()) >= 1)
+        {
+            ll x = *right.begin();
+            right_sum -= x;
+            right.erase(right.find(x));
+            left.insert(x);
+            left_sum += x;
+        }
+    }
+    ll cost()
+    {
+        ll ans = 0;
+        ll median = get_median();
+        // Considering median to be a member of the right set and the smallest one too so
+        // mod sign will remain positive for all the members of right set and negitive for all
+        // members of left set.
+        ans += (right_sum - (right.size() * median));
+        ans += ((left.size() * median) - left_sum);
+        return ans;
+    }
+};
+class TopK
+{
+public:
+    multiset<ll> m1;
+    multiset<ll> remove;
+    ll running_sum;
+    ll k;
+    TopK(ll k_val)
+    {
+        this->running_sum = 0;
+        this->k = k_val;
+    }
+    void insert(ll value)
+    {
+        m1.insert(value);
+        running_sum += value;
+        if (m1.size() > k)
+        {
+            ll val = *m1.begin();
+            remove.insert(val);
+            m1.erase(m1.find(val));
+            running_sum -= val;
+        }
+    }
+    void erase(ll value)
+    {
+        if (m1.find(value) != m1.end())
+        {
+            m1.erase(m1.find(value));
+            running_sum -= value;
+            if (m1.size() < k)
+            {
+                if (remove.size() > 0)
+                {
+                    m1.insert(*remove.rbegin());
+                    running_sum += *remove.rbegin();
+                    remove.erase(remove.find(*remove.rbegin()));
+                }
+            }
+        }
+        else if (remove.find(value) != remove.end())
+        {
+            remove.erase(remove.find(value));
+        }
+    }
+    ll get_tok_k_sum()
+    {
+        return running_sum;
+    }
+};
+void solve()
+{
+    ll n;
+    cin >> n;
+    vector<pair<ll, ll>> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        ll li, ri;
+        cin >> li >> ri;
+        v[x] = {li, ri};
+    }
+    ll q;
+    cin >> q;
+    while (q--)
+    {
+        ll y;
+        cin>>y;
+
+    }
+
+    // ll q, k;
+    // cin >> q >> k;
+    // TopK new_obj = TopK(k);
+    // while (q--)
+    // {
+    //     ll query;
+    //     cin >> query;
+    //     if (query == 1)
+    //     {
+    //         ll num;
+    //         cin >> num;
+    //         new_obj.insert(num);
+    //     }
+    //     else if (query == 2)
+    //     {
+    //         ll num;
+    //         cin >> num;
+    //         new_obj.erase(num);
+    //     }
+    //     else if (query == 3)
+    //     {
+    //         char ch;
+    //         cin>>ch;
+    //         cout << new_obj.get_tok_k_sum() << "\n";
+    //     }
+    // }
+}
 int main()
 {
     // O(N)
@@ -4939,12 +5269,12 @@ int main()
     // compute_co_prime();
     // O(log log p)
     // build_spf(1000000);
-    ios_base::sync_with_stdio(false);
-    cin.tie(0);
-    cout.tie(0);
+    // ios_base::sync_with_stdio(false);
+    // cin.tie(0);
+    // cout.tie(0);
     int t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
@@ -4980,6 +5310,8 @@ int main()
     2) Subarray finding .
     3) Parantheses based questions.
 
+    Finding mean,median and mode related designing questions and TopK pattern.
+    Range maintainence ideas .
 
 
 

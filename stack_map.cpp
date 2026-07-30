@@ -275,7 +275,26 @@ class MonotonicDeque{
 };
 void solve()
 {
-
+    ll n,num;
+    cin>>n>>num;
+    vector<ll>v(n);
+    for( ll x=0;x<n;x++){
+        cin>>v[x];
+    }
+    sort(v.begin(),v.end());
+    ll ans = 0;
+    for(ll x=0;x<v.size();x++){
+        auto it = upper_bound(v.begin(),v.end(),(num-v[x]));
+        {
+            if(num-v[x] >= v[x]){
+                ans += (it-v.begin()-1);
+            }
+            else{
+                ans += (it-v.begin());
+            }
+        }
+    }
+    cout<<ans<<"\n";
 }
 int main()
 {
