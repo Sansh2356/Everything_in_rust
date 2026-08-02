@@ -275,26 +275,50 @@ class MonotonicDeque{
 };
 void solve()
 {
-    ll n,num;
-    cin>>n>>num;
-    vector<ll>v(n);
-    for( ll x=0;x<n;x++){
-        cin>>v[x];
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
     }
-    sort(v.begin(),v.end());
-    ll ans = 0;
-    for(ll x=0;x<v.size();x++){
-        auto it = upper_bound(v.begin(),v.end(),(num-v[x]));
+    ll ans = -1;
+    vector<ll> changes;
+    for (ll x = 0; x <= n - k - 1; x++)
+    {
+        ll change = 0;
+        if (!changes.empty())
         {
-            if(num-v[x] >= v[x]){
-                ans += (it-v.begin()-1);
-            }
-            else{
-                ans += (it-v.begin());
+
+            change = (changes.end() - lower_bound(changes.begin(), changes.end(), (x - k)));
+        }
+        cout << change << "\n";
+        if (change % 2 != 0)
+        {
+            if (v[x] == 0)
+                v[x] = 1;
+            else
+            {
+                v[x] = 0;
             }
         }
+        ll value = v[x];
+        if (value == 0)
+        {
+            changes.push_back(x);
+            ans++;
+            v[x] = 1;
+        }
     }
-    cout<<ans<<"\n";
+    for (auto i : v)
+    {
+        if (i == 0)
+        {
+            cout << -1 << "\n";
+            return;
+        }
+    }
+    cout << ans << "\n";
 }
 int main()
 {

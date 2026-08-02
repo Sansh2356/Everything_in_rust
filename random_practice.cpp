@@ -1,4 +1,4 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 typedef long long ll;
 using namespace std;
 
@@ -5208,30 +5208,130 @@ public:
             remove.erase(remove.find(value));
         }
     }
-    ll get_tok_k_sum()
+    ll get_top_k_sum()
     {
         return running_sum;
     }
 };
+vector<int> countTasks(vector<int> &tasks, vector<int> &shifts)
+{
+    vector<int> prefix_arr(tasks.size());
+    prefix_arr[0] = tasks[0];
+    for (int x = 1; x < tasks.size(); x++)
+    {
+        prefix_arr[x] = prefix_arr[x - 1] + tasks[x];
+    }
+    vector<int> ans;
+    int total_work_done = 0;
+    int n = tasks.size();
+    for (int x = 0; x < shifts.size(); x++)
+    {
+        auto it = upper_bound(prefix_arr.begin(), prefix_arr.end(), total_work_done + shifts[x]);
+        if (total_work_done + shifts[x] >= prefix_arr[prefix_arr.size() - 1])
+        {
+            total_work_done = 0;
+            ans.push_back(0);
+        }
+        else
+        {
+            if (it == prefix_arr.end())
+            {
+                ans.push_back(prefix_arr.size());
+            }
+            else
+            {
+                ans.push_back((prefix_arr.end() - it));
+            }
+            total_work_done += shifts[x];
+        }
+    }
+    for (auto i : ans)
+    {
+        cout << i << " ";
+    }
+    cout << "\n";
+    return ans;
+}
 void solve()
 {
-    ll n;
-    cin >> n;
-    vector<pair<ll, ll>> v(n);
-    for (ll x = 0; x < n; x++)
-    {
-        ll li, ri;
-        cin >> li >> ri;
-        v[x] = {li, ri};
-    }
-    ll q;
-    cin >> q;
-    while (q--)
-    {
-        ll y;
-        cin>>y;
+    /*
+    [4,2,3] -------> [2,1,4,4]
+    [4,6,9] -------> [2,1,4,4] ------> [3]
+    [4,6,9] -------> [1+2 = 3,4,4]  -------> [3,3]
+    [4,6,9] ---------> [4+3 = 7,4] --------------> [2,2,1]
+    [4,6,9] -----------> [7+2 = 9] ---------------> ][2,2,1,0]
 
-    }
+
+    [5,2] ----> [3,1,1]
+    [5,7] -----> [3,1,1]
+    [5,7] ---------> [3,1] -------> [0]
+
+*/
+    int n, s;
+    cin >> n >> s;
+    vector<int> tasks(n);
+    vector<int> shifts(s);
+    for (int x = 0; x < n; x++)
+        cin >> tasks[x];
+    for (int x = 0; x < s; x++)
+        cin >> shifts[x];
+    countTasks(tasks, shifts);
+
+    // ll n, k;
+    // cin >> n >> k;
+    // vector<ll> v(n);
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     cin >> v[x];
+    // }
+    // ll ans = 0;
+    // vector<ll> changes;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     ll change = 0;
+    //     if (!changes.empty())
+    //     {
+    //         change = changes.end() -
+    //                  lower_bound(changes.begin(), changes.end(), x - k + 1);
+    //     }
+    //     ll value = v[x];
+    //     if (change % 2 != 0)
+    //     {
+    //         if (value == 0)
+    //             value = 1;
+    //         else
+    //             value = 0;
+    //     }
+    //     if (value == 0)
+    //     {
+    //         if (x + k > n)
+    //         {
+    //             cout << -1 << "\n";
+    //             return;
+    //         }
+    //         changes.push_back(x);
+    //         ans++;
+    //     }
+    // }
+    // cout << ans << "\n";
+
+    // ll n;
+    // cin >> n;
+    // vector<pair<ll, ll>> v(n);
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     ll li, ri;
+    //     cin >> li >> ri;
+    //     v[x] = {li, ri};
+    // }
+    // ll q;
+    // cin >> q;
+    // while (q--)
+    // {
+    //     ll y;
+    //     cin>>y;
+
+    // }
 
     // ll q, k;
     // cin >> q >> k;
