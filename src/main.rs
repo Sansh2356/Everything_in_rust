@@ -1,8 +1,12 @@
+#![allow(unused)]
 #![feature(btree_cursors)]
 use std::fmt::Debug;
 use std::io::{BufRead, Stdin, stdin};
 use std::str::FromStr;
-use std::{collections::BTreeMap, ops::Bound};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    ops::Bound,
+};
 pub struct InputReader;
 impl InputReader {
     pub fn read_input<T>(mut obj: Box<dyn BufRead>) -> T
@@ -118,18 +122,36 @@ fn minimize_dot_product(mut v: Vec<i32>, mut w: Vec<i32>) -> i32 {
     sum
 }
 fn solve(stdin: Stdin) {
-    let _n: usize = InputReader::read_input(Box::from(stdin.lock()));
-    let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
-    let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+    // let _n: usize = InputReader::read_input(Box::from(stdin.lock()));
+    // let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+    // let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
 
-    let val = minimize_dot_product(v, w);
+    // let val = minimize_dot_product(v, w);
 
-    println!("{val}");
+    // println!("{val}");
+
+    // let v: String = InputReader::read_input(Box::new(stdin.lock()));
+    // let mut stack: VecDeque<char> = VecDeque::new();
+    // for char in v.chars() {
+    //     if (stack.is_empty()) {
+    //         stack.push_back(char);
+    //     } else {
+    //         let top_char: &char = stack.back().unwrap();
+    //         if *top_char == char {
+    //             stack.pop_back();
+    //         } else {
+    //             stack.push_back(char);
+    //         }
+    //     }
+    // }
+    // let ans: String = stack.iter().collect();
+    // println!("{ans}");
+    
 }
 fn main() {
     let std_in_obj = stdin();
-    let mut t: usize = InputReader::read_input(Box::new(std_in_obj.lock()));
-    // let mut t = 1;
+    // let mut t: usize = InputReader::read_input(Box::new(std_in_obj.lock()));
+    let mut t = 1;
 
     while t >= 1 {
         solve(stdin());

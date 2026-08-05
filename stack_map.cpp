@@ -255,70 +255,33 @@ vector<ll> next_greater_element(vector<ll> v)
     cout << "\n";
     return nge;
 }
-class MonotonicDeque{
-    public:
-    deque<ll>dq;
-    void insert(ll value){
-        while(dq.empty() == false && dq.back() > value){
+class MonotonicDeque
+{
+public:
+    deque<ll> dq;
+    void insert(ll value)
+    {
+        while (dq.empty() == false && dq.back() > value)
+        {
             dq.pop_back();
         }
         dq.push_back(value);
     }
-    void remove(ll v){
-        if(dq.empty() == false && dq.front() == v){
+    void remove(ll v)
+    {
+        if (dq.empty() == false && dq.front() == v)
+        {
             dq.pop_front();
         }
     }
-    ll min_value(){
-      return dq.front(); 
+    ll min_value()
+    {
+        return dq.front();
     }
 };
 void solve()
 {
-    ll n, k;
-    cin >> n >> k;
-    vector<ll> v(n);
-    for (ll x = 0; x < n; x++)
-    {
-        cin >> v[x];
-    }
-    ll ans = -1;
-    vector<ll> changes;
-    for (ll x = 0; x <= n - k - 1; x++)
-    {
-        ll change = 0;
-        if (!changes.empty())
-        {
 
-            change = (changes.end() - lower_bound(changes.begin(), changes.end(), (x - k)));
-        }
-        cout << change << "\n";
-        if (change % 2 != 0)
-        {
-            if (v[x] == 0)
-                v[x] = 1;
-            else
-            {
-                v[x] = 0;
-            }
-        }
-        ll value = v[x];
-        if (value == 0)
-        {
-            changes.push_back(x);
-            ans++;
-            v[x] = 1;
-        }
-    }
-    for (auto i : v)
-    {
-        if (i == 0)
-        {
-            cout << -1 << "\n";
-            return;
-        }
-    }
-    cout << ans << "\n";
 }
 int main()
 {
@@ -326,8 +289,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();

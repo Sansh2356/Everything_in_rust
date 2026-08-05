@@ -5252,8 +5252,346 @@ vector<int> countTasks(vector<int> &tasks, vector<int> &shifts)
     cout << "\n";
     return ans;
 }
+int countRatioSubarrays(vector<int> &nums, int a, int b)
+{
+    vector<int> odd, even;
+    for (auto i : nums)
+    {
+        if (i % 2 == 0)
+        {
+            even.push_back(1);
+            odd.push_back(0);
+        }
+        else
+        {
+            odd.push_back(1);
+            even.push_back(0);
+        }
+    }
+    vector<int> odd_prefix(odd.size() + 1, 0);
+    vector<int> even_prefix(even.size() + 1, 0);
+    for (int x = 1; x < even_prefix.size(); x++)
+    {
+        odd_prefix[x] = odd_prefix[x - 1] + odd[x - 1];
+        even_prefix[x] = even_prefix[x - 1] + even[x - 1];
+    }
+    int ans = 0;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        for (int y = x; y < nums.size(); y++)
+        {
+            int num_odds = odd_prefix[y] - odd_prefix[x];
+            int num_evens = even_prefix[y] - even_prefix[x];
+            if ((num_evens / num_odds) <= (a / b))
+                ans++;
+        }
+    }
+    return ans;
+}
+ll maxPairStrength(vector<int> &nums)
+{
+    sort(nums.begin(), nums.end());
+    ll ans = 0;
+    for (ll x = 0; x < nums.size(); x++)
+    {
+        for (ll y = 0; y < nums.size(); y++)
+        {
+            if (x == y)
+                continue;
+            else
+            {
+                ans = max(ans, (ll)((nums[x] * nums[y]) / gcd(nums[x], nums[y])));
+            }
+        }
+    }
+    return ans;
+}
+/*
+    a*b = gcd*lcm
+    max(lcm/gcd)
+*/
+int maximumWidth(vector<int> &planks)
+{
+    // 1,1,2,2,3,4,5,5,7
+    int ans = INT_MIN;
+    unordered_map<int, int> freq_map;
+    unordered_set<int> pairs;
+    for (int x = 0; x < planks.size(); x++)
+    {
+        pairs.insert(planks[x]);
+        freq_map[planks[x]]++;
+        for (int y = 0; y < planks.size(); y++)
+        {
+            if (x == y)
+                continue;
+            else
+            {
+                pairs.insert(planks[x] + planks[y]);
+            }
+        }
+    }
+    for (auto pair : pairs)
+    {
+        int cnt = 0;
+        unordered_set<int> visited_or_not;
+        for (auto it : freq_map)
+        {
+            int num = it.first;
+            int freq = it.second;
+            if (pair < num || visited_or_not.count(num))
+                continue;
+            else if (pair == num)
+            {
+                cnt += freq;
+                visited_or_not.insert(num);
+            }
+            else
+            {
+                if (freq_map.count(pair - num) && (pair - num) != num && visited_or_not.count(pair - num) == false)
+                {
+                    cnt += min(freq, freq_map[pair - num]);
+                    visited_or_not.insert(pair - num);
+                }
+                else if ((pair - num) == num)
+                {
+                    visited_or_not.insert(num);
+                    cnt += freq / 2;
+                }
+            }
+        }
+        ans = max(ans, cnt);
+    }
+    return ans;
+}
+int maximumWidth_optimized(vector<int> &planks)
+{
+    // 1,1,2,2,3,4,5,5,7
+    int ans = INT_MIN;
+    unordered_map<int, int> freq_map, res;
+    for (int x = 0; x < planks.size(); x++)
+    {
+        freq_map[planks[x]]++;
+        res[planks[x]]++;
+    }
+    for (auto p1 : freq_map)
+    {
+        for (auto p2 : freq_map)
+        {
+            if (p1.first == p2.first)
+            {
+                res[p1.first + p2.first] += p1.second / 2;
+            }
+            else if (p1.first < p2.first)
+            {
+                res[p1.first + p2.first] += min(p1.second, p2.second);
+            }
+        }
+    }
+    for (auto it : res)
+    {
+        ans = max(ans, it.second);
+    }
+    return ans;
+}
+bool is_valid(vector<int> &monsters, vector<int> &prefix_arr, ll initial_strength)
+{
+    for (int x = 0; x < monsters.size(); x++)
+    {
+        if ((prefix_arr[x] + initial_strength) < monsters[x])
+            return false;
+        else
+        {
+            initial_strength -= monsters[x];
+            if (initial_strength < 0)
+                initial_strength = 0;
+        }
+    }
+    return true;
+}
+ll minInitialStrength(vector<int> &monsters, vector<vector<int>> &boosts)
+{
+    ll total_sum = 0;
+    for (auto i : monsters)
+        total_sum += i;
+    vector<ll> diff_arr(monsters.size(), 0);
+    for (int x = 0; x < boosts.size(); x++)
+    {
+        int li = boosts[x][0];
+        int ri = boosts[x][1];
+        int val = boosts[x][2];
+        if (ri + 1 < monsters.size())
+            diff_arr[ri + 1] -= val;
+        diff_arr[li] += val;
+    }
+    vector<int> prefix_arr(diff_arr.size());
+    prefix_arr[0] = diff_arr[0];
+    for (int x = 1; x < diff_arr.size(); x++)
+    {
+        prefix_arr[x] = diff_arr[x] + prefix_arr[x - 1];
+    }
+    ll l = 0;
+    ll r = total_sum;
+    ll ans = LLONG_MAX;
+    while (l <= r)
+    {
+        ll mid = (l + r) / 2;
+        if (is_valid(monsters, prefix_arr, mid))
+        {
+            ans = min(ans, mid);
+            r = mid - 1;
+        }
+        else
+        {
+            l = mid + 1;
+        }
+    }
+    return ans;
+}
 void solve()
 {
+    // Approximated LRU in redis using idle time optimization and LRU clock .
+    // zmalloc for tracking of amount of memory currently being consumed.
+    
+    // ll n;
+    // cin >> n;
+    // ll ans = 0;
+    // stack<ll> st;
+    // st.push(1);
+    // ll maxi = (1LL << 32)-1;
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     string s;
+    //     cin >> s;
+    //     if (s == "add")
+    //     {
+    //         ans += st.top();
+    //     }
+    //     else if (s == "for")
+    //     {
+    //         ll num;
+    //         cin >> num;
+    //         st.push(min(num*st.top(), maxi));
+    //     }
+    //     else if (s == "end")
+    //     {
+    //         if (st.empty() == false)
+    //             st.pop();
+    //     }
+    // }
+    // if (ans >= maxi)
+    // {
+    //     cout << "OVERFLOW!!!" << "\n";
+    //     return;
+    // }
+    // cout << ans << "\n";
+    // ll n;
+    // cin>>n;
+    // vector<ll>v(n);
+    // for(ll x=0;x<n;x++){
+    //     cin>>v[x];
+    // }
+    // vector<ll>pse = previous_smaller_element(v);    
+    // for(auto p:pse){
+    //     cout<<p<<" ";
+    // }
+    // cout<<"\n";
+    // ll n, m;
+    // cin >> n >> m;
+    // multiset<ll> st;
+    // for (int x = 0; x < n; x++)
+    // {
+    //     ll num;
+    //     cin >> num;
+    //     st.insert(num);
+    // }
+    // for (int x = 0; x < m; x++)
+    // {
+    //     ll m;
+    //     cin >> m;
+    //     if (st.size() == 0)
+    //     {
+    //         cout << -1 << "\n";
+    //         continue;
+    //     }
+    //     auto it = st.upper_bound(m);
+    //     if (it == st.end() || it == st.begin())
+    //     {
+    //         if (*st.rbegin() <= m)
+    //         {
+    //             cout << *st.rbegin() << "\n";
+    //             st.erase(st.find(*st.rbegin()));
+    //         }
+    //         else
+    //         {
+    //             cout << -1 << "\n";
+    //         }
+    //     }
+    //     else
+    //     {
+    //         it--;
+    //         cout << *it << "\n";
+    //         st.erase(st.find(*it));
+    //     }
+    // }
+
+    // int n;
+    // cin >> n;
+    // if (n == 2)
+    //     cout << -1 << "\n";
+    // else
+    // {
+    //     if (n == 1)
+    //         cout << 1 << "\n";
+    //     else if (n == 3)
+    //         cout << 1 << " " << 2 << " " << 3 << "\n";
+    //     else
+    //     {
+    //         cout << 1 << " " << 2 << " " << 3 << " ";
+    //         n -= 3;
+    //         ll prev = 3;
+    //         while (n > 0)
+    //         {
+    //             cout << prev * 2 << " ";
+    //             prev = prev * 2;
+    //             n--;
+    //         }
+    //     }
+    // }
+    // 5,11,6,10 = 32
+    // 1,2,3,6,12 = 24
+    // 1,2,3,6,12,24 48
+    // 1,2,3,6,12,24,48
+
+    // string s;
+    // cin >> s;
+    // stack<char> st;
+    // for (auto ch : s)
+    // {
+    //     if (st.empty())
+    //     {
+    //         st.push(ch);
+    //     }
+    //     else
+    //     {
+    //         if (st.top() == ch)
+    //         {
+    //             st.pop();
+    //         }
+    //         else
+    //         {
+    //             st.push(ch);
+    //         }
+    //     }
+    // }
+    // string ans = "";
+    // while (!st.empty())
+    // {
+    //     ans.push_back(st.top());
+    //     st.pop();
+    // }
+    // reverse(ans.begin(),ans.end());
+    // cout << ans<<"\n";
+
     /*
     [4,2,3] -------> [2,1,4,4]
     [4,6,9] -------> [2,1,4,4] ------> [3]
@@ -5261,21 +5599,20 @@ void solve()
     [4,6,9] ---------> [4+3 = 7,4] --------------> [2,2,1]
     [4,6,9] -----------> [7+2 = 9] ---------------> ][2,2,1,0]
 
-
     [5,2] ----> [3,1,1]
     [5,7] -----> [3,1,1]
     [5,7] ---------> [3,1] -------> [0]
 
 */
-    int n, s;
-    cin >> n >> s;
-    vector<int> tasks(n);
-    vector<int> shifts(s);
-    for (int x = 0; x < n; x++)
-        cin >> tasks[x];
-    for (int x = 0; x < s; x++)
-        cin >> shifts[x];
-    countTasks(tasks, shifts);
+    // int n, s;
+    // cin >> n >> s;
+    // vector<int> tasks(n);
+    // vector<int> shifts(s);
+    // for (int x = 0; x < n; x++)
+    //     cin >> tasks[x];
+    // for (int x = 0; x < s; x++)
+    //     cin >> shifts[x];
+    // countTasks(tasks, shifts);
 
     // ll n, k;
     // cin >> n >> k;
@@ -5373,8 +5710,8 @@ int main()
     // cin.tie(0);
     // cout.tie(0);
     int t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();
@@ -5412,7 +5749,5 @@ int main()
 
     Finding mean,median and mode related designing questions and TopK pattern.
     Range maintainence ideas .
-
-
 
     */

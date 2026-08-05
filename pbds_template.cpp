@@ -2,7 +2,7 @@
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace __gnu_pbds;
-
+typedef long long ll;
 #define ordered_set tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>
 
 using namespace std;
@@ -59,6 +59,7 @@ int main()
     cout.tie(0);
     long long t;
     cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();
