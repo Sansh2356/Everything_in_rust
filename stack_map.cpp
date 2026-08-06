@@ -281,7 +281,13 @@ public:
 };
 void solve()
 {
-
+    // [1,3,6] ---> [0,1,0,0] -----> [1,2,3]
+    // [1,2,3] ---> [1,0,1] -----> []
+    // P[r]-P[l-1] = k
+    // P[r] = k+P[l-1] selecting r and checking
+    // P[l-1] = P[r]-k
+    // [1,1,1,2,2] = [1,0,0,1,0] and k = 0
+    // P[l-1] = P[r] for a,b and c all .
 }
 int main()
 {
@@ -289,8 +295,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();

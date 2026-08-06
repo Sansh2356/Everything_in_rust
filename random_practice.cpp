@@ -5447,11 +5447,74 @@ ll minInitialStrength(vector<int> &monsters, vector<vector<int>> &boosts)
     }
     return ans;
 }
+void non_overlapping_intervals()
+{
+    ll n;
+    cin >> n;
+    vector<vector<ll>> intervals(n);
+    for (ll x = 0; x < n; x++)
+    {
+        ll a, b;
+        cin >> a >> b;
+        intervals[x] = {a, b};
+    }
+    sort(intervals.begin(), intervals.end(), [](const auto &a, const auto &b)
+         { return a[1] < b[1]; });
+    int right = intervals[0][1];
+    int ans = 0;
+    for (int x = 1; x < intervals.size(); x++)
+    {
+        int l = intervals[x][0];
+        int r = intervals[x][1];
+        if (l < right)
+        {
+            ans += 1;
+        }
+        else
+        {
+            right = r;
+        }
+    }
+    cout << n - ans << "\n";
+}
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
     // zmalloc for tracking of amount of memory currently being consumed.
-    
+
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    multiset<ll> st;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    st.insert(v[n - 1]);
+    vector<ll> prefix_min(n);
+    prefix_min[0] = v[0];
+    for (ll i = 1; i < n; i++)
+        prefix_min[i] = min(prefix_min[i - 1], v[i]);
+    for (ll x = n - 1; x >= 0; x--)
+    {
+        ll j = v[x];
+        if (prefix_min[x] == v[x])
+        {
+            st.insert(j);
+            continue;
+        }
+        else if (prefix_min[x] != -1)
+        {
+            auto it = st.upper_bound(prefix_min[x]);
+            if (it != st.end() && *it < j)
+            {
+                cout << "YES" << "\n";
+                return;
+            }
+        }
+        st.insert(j);
+    }
+    cout << "No" << "\n";
     // ll n;
     // cin >> n;
     // ll ans = 0;
@@ -5490,7 +5553,7 @@ void solve()
     // for(ll x=0;x<n;x++){
     //     cin>>v[x];
     // }
-    // vector<ll>pse = previous_smaller_element(v);    
+    // vector<ll>pse = previous_smaller_element(v);
     // for(auto p:pse){
     //     cout<<p<<" ";
     // }
