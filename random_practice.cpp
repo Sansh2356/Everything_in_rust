@@ -1,5 +1,10 @@
 #include <bits/stdc++.h>
 typedef long long ll;
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+#define ordered_set tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>
+typedef long long ll;
 using namespace std;
 
 const int MOD = 1e9 + 7;
@@ -5477,6 +5482,60 @@ void non_overlapping_intervals()
     }
     cout << n - ans << "\n";
 }
+vector<int> canSeePersonsCount(vector<int> &heights)
+{
+    vector<int> ans(heights.size());
+    stack<int> st;
+    for (int x = heights.size() - 1; x >= 0; x--)
+    {
+        int cnt = 0;
+        while (!st.empty() && st.top() < heights[x])
+        {
+            cnt++;
+            st.pop();
+        }
+        if (st.empty() == false)
+            cnt++;
+        st.push(heights[x]);
+        ans[x] = cnt;
+    }
+    return ans;
+}
+long long countRatioSubarraysV2(vector<int> &nums, int a, int b)
+{
+    // x*b-y*a <= 0 = y*a-x*b >= 0
+    // Allotting +b and -a respectively to even and odd parity of numbers
+    // and then forming prefix_sum having condition of window sum be lesser
+    // <= 0 having condition as pf[R]-pf[l-1]<=0 ----> pf[r] >= pf[l-1] .
+
+    long long ans = 0;
+    vector<int> prefix_arr(nums.size());
+    for (int x = 0; x < nums.size(); x++)
+    {
+        if (nums[x] % 2 == 1)
+            nums[x] = -a;
+        else
+        {
+            nums[x] = b;
+        }
+    }
+    //-1,-1,2
+    //-1,-1,0
+    prefix_arr[0] = nums[0];
+    for (int x = 1; x < nums.size(); x++)
+    {
+        prefix_arr[x] = prefix_arr[x - 1] + nums[x];
+    }
+    ordered_set st;
+    st.insert(0);
+    for (auto pf_ele : prefix_arr)
+    {
+        ans += (st.order_of_key(pf_ele) +
+                (st.size() - st.order_of_key(pf_ele)));
+        st.insert(pf_ele);
+    }
+    return ans;
+}
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
@@ -5765,7 +5824,7 @@ int main()
     // O(N)
     // factorial(MOD);
     // O(log log(n))
-    // compute_primes();
+    compute_primes();
     // compute_co_prime();
     // O(log log p)
     // build_spf(1000000);

@@ -279,6 +279,46 @@ public:
         return dq.front();
     }
 };
+// Monotonic stack in O(N) .
+vector<int> canSeePersonsCount(vector<int> &heights)
+{
+    vector<int> ans(heights.size());
+    stack<int> st;
+    for (int x = heights.size() - 1; x >= 0; x--)
+    {
+        int cnt = 0;
+        while (!st.empty() && st.top() < heights[x])
+        {
+            cnt++;
+            st.pop();
+        }
+        if (st.empty() == false)
+            cnt++;
+        st.push(heights[x]);
+        ans[x] = cnt;
+    }
+    return ans;
+}
+bool primes_arr[10000001];
+
+void compute_primes()
+{
+    for (ll x = 2; x <= 10000000; x++)
+    {
+        primes_arr[x] = true;
+    }
+    primes_arr[1] = false;
+    for (ll x = 2; x <= 10000000; x++)
+    {
+        if (primes_arr[x] == true)
+        {
+            for (ll y = x * x; y <= 10000000; y += x)
+            {
+                primes_arr[y] = false;
+            }
+        }
+    }
+}
 void solve()
 {
     // [1,3,6] ---> [0,1,0,0] -----> [1,2,3]
@@ -288,6 +328,79 @@ void solve()
     // P[l-1] = P[r]-k
     // [1,1,1,2,2] = [1,0,0,1,0] and k = 0
     // P[l-1] = P[r] for a,b and c all .
+    int n;
+    cin >> n;
+    vector<int> v(n);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> v[i];
+    }
+    vector<int> consecutive_sequences, consecutive_sequences_len;
+    for (int i = 0; i < n; i++)
+    {
+        if (i > 0 && v[i] == v[i - 1])
+            consecutive_sequences_len.back()++;
+        else
+        {
+            consecutive_sequences.push_back(v[i]);
+            consecutive_sequences_len.push_back(1);
+        }
+    }
+    int ans = consecutive_sequences.size();
+    int extra = 0;
+    for (int x = 0; x + 1 < ans; x++)
+    {
+        if (consecutive_sequences_len[x] >= 2 && consecutive_sequences_len[x + 1] >= 2)
+        {
+            extra = 2;
+            break;
+        }
+    }
+    if (extra < 2)
+    {
+        for (int x = 0; x < ans; x++)
+        {
+            if (consecutive_sequences_len[x] < 2)
+                continue;
+            bool choice_1 = false;
+            if (x - 1 >= 0)
+            {
+                if (x - 2 < 0)
+                {
+                    choice_1 = true;
+                }
+                else
+                {
+                    if (consecutive_sequences[x - 2] != consecutive_sequences[x])
+                    {
+                        choice_1 = true;
+                    }
+                }
+            }
+
+            bool choice_2 = false;
+            if (x + 1 <= ans - 1)
+            {
+                if (x + 2 > ans - 1)
+                {
+                    choice_2 = true;
+                }
+                else
+                {
+                    if (consecutive_sequences[x + 2] != consecutive_sequences[x])
+                    {
+                        choice_2 = true;
+                    }
+                }
+            }
+            if (choice_1 || choice_2)
+            {
+                extra = 1;
+                break;
+            }
+        }
+    }
+    cout << (ans + extra) << "\n";
 }
 int main()
 {
