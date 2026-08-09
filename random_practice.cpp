@@ -3,7 +3,7 @@ typedef long long ll;
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
 using namespace __gnu_pbds;
-#define ordered_set tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>
+#define ordered_set tree<long long, null_type, less_equal<long long>, rb_tree_tag, tree_order_statistics_node_update>
 typedef long long ll;
 using namespace std;
 
@@ -5536,11 +5536,11 @@ long long countRatioSubarraysV2(vector<int> &nums, int a, int b)
     }
     return ans;
 }
-void solve()
+// Sweep from the right keeping every seen value in a multiset , for each
+// index the prefix minimum plays the role of the smaller left element and the
+// multiset is asked for something strictly between it and the current value .
+void solve_pattern_132_exists()
 {
-    // Approximated LRU in redis using idle time optimization and LRU clock .
-    // zmalloc for tracking of amount of memory currently being consumed.
-
     ll n;
     cin >> n;
     vector<ll> v(n);
@@ -5574,147 +5574,177 @@ void solve()
         st.insert(j);
     }
     cout << "No" << "\n";
-    // ll n;
-    // cin >> n;
-    // ll ans = 0;
-    // stack<ll> st;
-    // st.push(1);
-    // ll maxi = (1LL << 32)-1;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     string s;
-    //     cin >> s;
-    //     if (s == "add")
-    //     {
-    //         ans += st.top();
-    //     }
-    //     else if (s == "for")
-    //     {
-    //         ll num;
-    //         cin >> num;
-    //         st.push(min(num*st.top(), maxi));
-    //     }
-    //     else if (s == "end")
-    //     {
-    //         if (st.empty() == false)
-    //             st.pop();
-    //     }
-    // }
-    // if (ans >= maxi)
-    // {
-    //     cout << "OVERFLOW!!!" << "\n";
-    //     return;
-    // }
-    // cout << ans << "\n";
-    // ll n;
-    // cin>>n;
-    // vector<ll>v(n);
-    // for(ll x=0;x<n;x++){
-    //     cin>>v[x];
-    // }
-    // vector<ll>pse = previous_smaller_element(v);
-    // for(auto p:pse){
-    //     cout<<p<<" ";
-    // }
-    // cout<<"\n";
-    // ll n, m;
-    // cin >> n >> m;
-    // multiset<ll> st;
-    // for (int x = 0; x < n; x++)
-    // {
-    //     ll num;
-    //     cin >> num;
-    //     st.insert(num);
-    // }
-    // for (int x = 0; x < m; x++)
-    // {
-    //     ll m;
-    //     cin >> m;
-    //     if (st.size() == 0)
-    //     {
-    //         cout << -1 << "\n";
-    //         continue;
-    //     }
-    //     auto it = st.upper_bound(m);
-    //     if (it == st.end() || it == st.begin())
-    //     {
-    //         if (*st.rbegin() <= m)
-    //         {
-    //             cout << *st.rbegin() << "\n";
-    //             st.erase(st.find(*st.rbegin()));
-    //         }
-    //         else
-    //         {
-    //             cout << -1 << "\n";
-    //         }
-    //     }
-    //     else
-    //     {
-    //         it--;
-    //         cout << *it << "\n";
-    //         st.erase(st.find(*it));
-    //     }
-    // }
+}
 
-    // int n;
-    // cin >> n;
-    // if (n == 2)
-    //     cout << -1 << "\n";
-    // else
-    // {
-    //     if (n == 1)
-    //         cout << 1 << "\n";
-    //     else if (n == 3)
-    //         cout << 1 << " " << 2 << " " << 3 << "\n";
-    //     else
-    //     {
-    //         cout << 1 << " " << 2 << " " << 3 << " ";
-    //         n -= 3;
-    //         ll prev = 3;
-    //         while (n > 0)
-    //         {
-    //             cout << prev * 2 << " ";
-    //             prev = prev * 2;
-    //             n--;
-    //         }
-    //     }
-    // }
-    // 5,11,6,10 = 32
-    // 1,2,3,6,12 = 24
-    // 1,2,3,6,12,24 48
-    // 1,2,3,6,12,24,48
+// Nested for loops carry a multiplier on a stack , every add contributes the
+// multiplier sitting on the top and the multiplier itself is capped so the
+// product never overflows before the verdict is printed .
+void solve_catch_overflow()
+{
+    ll n;
+    cin >> n;
+    ll ans = 0;
+    stack<ll> st;
+    st.push(1);
+    ll maxi = (1LL << 32) - 1;
+    for (ll x = 0; x < n; x++)
+    {
+        string s;
+        cin >> s;
+        if (s == "add")
+        {
+            ans += st.top();
+        }
+        else if (s == "for")
+        {
+            ll num;
+            cin >> num;
+            st.push(min(num * st.top(), maxi));
+        }
+        else if (s == "end")
+        {
+            if (st.empty() == false)
+                st.pop();
+        }
+    }
+    if (ans >= maxi)
+    {
+        cout << "OVERFLOW!!!" << "\n";
+        return;
+    }
+    cout << ans << "\n";
+}
 
-    // string s;
-    // cin >> s;
-    // stack<char> st;
-    // for (auto ch : s)
-    // {
-    //     if (st.empty())
-    //     {
-    //         st.push(ch);
-    //     }
-    //     else
-    //     {
-    //         if (st.top() == ch)
-    //         {
-    //             st.pop();
-    //         }
-    //         else
-    //         {
-    //             st.push(ch);
-    //         }
-    //     }
-    // }
-    // string ans = "";
-    // while (!st.empty())
-    // {
-    //     ans.push_back(st.top());
-    //     st.pop();
-    // }
-    // reverse(ans.begin(),ans.end());
-    // cout << ans<<"\n";
+// Print the raw previous smaller element values , -1 where none exists .
+void solve_previous_smaller_element_print()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    vector<ll> pse = previous_smaller_element(v);
+    for (auto p : pse)
+    {
+        cout << p << " ";
+    }
+    cout << "\n";
+}
 
-    /*
+// For every query pull out and consume the largest stored value that does not
+// exceed the query , the multiset upper bound stepped back one place .
+void solve_largest_not_exceeding_queries()
+{
+    ll n, m;
+    cin >> n >> m;
+    multiset<ll> st;
+    for (int x = 0; x < n; x++)
+    {
+        ll num;
+        cin >> num;
+        st.insert(num);
+    }
+    for (int x = 0; x < m; x++)
+    {
+        ll query;
+        cin >> query;
+        if (st.size() == 0)
+        {
+            cout << -1 << "\n";
+            continue;
+        }
+        auto it = st.upper_bound(query);
+        if (it == st.end() || it == st.begin())
+        {
+            if (*st.rbegin() <= query)
+            {
+                cout << *st.rbegin() << "\n";
+                st.erase(st.find(*st.rbegin()));
+            }
+            else
+            {
+                cout << -1 << "\n";
+            }
+        }
+        else
+        {
+            it--;
+            cout << *it << "\n";
+            st.erase(st.find(*it));
+        }
+    }
+}
+
+// Seed the sequence with 1 2 3 and keep doubling the tail , n == 2 admits no
+// valid construction .
+// 5,11,6,10 = 32
+// 1,2,3,6,12 = 24
+// 1,2,3,6,12,24 48
+// 1,2,3,6,12,24,48
+void solve_construct_doubling_sequence()
+{
+    int n;
+    cin >> n;
+    if (n == 2)
+        cout << -1 << "\n";
+    else
+    {
+        if (n == 1)
+            cout << 1 << "\n";
+        else if (n == 3)
+            cout << 1 << " " << 2 << " " << 3 << "\n";
+        else
+        {
+            cout << 1 << " " << 2 << " " << 3 << " ";
+            n -= 3;
+            ll prev = 3;
+            while (n > 0)
+            {
+                cout << prev * 2 << " ";
+                prev = prev * 2;
+                n--;
+            }
+        }
+    }
+}
+
+// Cancel adjacent equal characters with a stack until nothing else collapses .
+void solve_remove_adjacent_duplicates()
+{
+    string s;
+    cin >> s;
+    stack<char> st;
+    for (auto ch : s)
+    {
+        if (st.empty())
+        {
+            st.push(ch);
+        }
+        else
+        {
+            if (st.top() == ch)
+            {
+                st.pop();
+            }
+            else
+            {
+                st.push(ch);
+            }
+        }
+    }
+    string ans = "";
+    while (!st.empty())
+    {
+        ans.push_back(st.top());
+        st.pop();
+    }
+    reverse(ans.begin(), ans.end());
+    cout << ans << "\n";
+}
+
+/*
     [4,2,3] -------> [2,1,4,4]
     [4,6,9] -------> [2,1,4,4] ------> [3]
     [4,6,9] -------> [1+2 = 3,4,4]  -------> [3,3]
@@ -5726,105 +5756,440 @@ void solve()
     [5,7] ---------> [3,1] -------> [0]
 
 */
-    // int n, s;
-    // cin >> n >> s;
-    // vector<int> tasks(n);
-    // vector<int> shifts(s);
-    // for (int x = 0; x < n; x++)
-    //     cin >> tasks[x];
-    // for (int x = 0; x < s; x++)
-    //     cin >> shifts[x];
-    // countTasks(tasks, shifts);
+void solve_count_tasks_per_shift()
+{
+    int n, s;
+    cin >> n >> s;
+    vector<int> tasks(n);
+    vector<int> shifts(s);
+    for (int x = 0; x < n; x++)
+        cin >> tasks[x];
+    for (int x = 0; x < s; x++)
+        cin >> shifts[x];
+    countTasks(tasks, shifts);
+}
 
-    // ll n, k;
-    // cin >> n >> k;
-    // vector<ll> v(n);
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     cin >> v[x];
-    // }
-    // ll ans = 0;
-    // vector<ll> changes;
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     ll change = 0;
-    //     if (!changes.empty())
-    //     {
-    //         change = changes.end() -
-    //                  lower_bound(changes.begin(), changes.end(), x - k + 1);
-    //     }
-    //     ll value = v[x];
-    //     if (change % 2 != 0)
-    //     {
-    //         if (value == 0)
-    //             value = 1;
-    //         else
-    //             value = 0;
-    //     }
-    //     if (value == 0)
-    //     {
-    //         if (x + k > n)
-    //         {
-    //             cout << -1 << "\n";
-    //             return;
-    //         }
-    //         changes.push_back(x);
-    //         ans++;
-    //     }
-    // }
-    // cout << ans << "\n";
+// Greedily flip a k sized window the moment a zero shows up , the indices of
+// the flips already made are binary searched to recover the parity affecting
+// the current position .
+void solve_min_k_bit_flips()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll ans = 0;
+    vector<ll> changes;
+    for (ll x = 0; x < n; x++)
+    {
+        ll change = 0;
+        if (!changes.empty())
+        {
+            change = changes.end() -
+                     lower_bound(changes.begin(), changes.end(), x - k + 1);
+        }
+        ll value = v[x];
+        if (change % 2 != 0)
+        {
+            if (value == 0)
+                value = 1;
+            else
+                value = 0;
+        }
+        if (value == 0)
+        {
+            if (x + k > n)
+            {
+                cout << -1 << "\n";
+                return;
+            }
+            changes.push_back(x);
+            ans++;
+        }
+    }
+    cout << ans << "\n";
+}
 
-    // ll n;
-    // cin >> n;
-    // vector<pair<ll, ll>> v(n);
-    // for (ll x = 0; x < n; x++)
-    // {
-    //     ll li, ri;
-    //     cin >> li >> ri;
-    //     v[x] = {li, ri};
-    // }
-    // ll q;
-    // cin >> q;
-    // while (q--)
-    // {
-    //     ll y;
-    //     cin>>y;
+// Read the intervals and the queries , the per query answer is still pending .
+void solve_interval_queries_stub()
+{
+    ll n;
+    cin >> n;
+    vector<pair<ll, ll>> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        ll li, ri;
+        cin >> li >> ri;
+        v[x] = {li, ri};
+    }
+    ll q;
+    cin >> q;
+    while (q--)
+    {
+        ll y;
+        cin >> y;
+    }
+}
 
-    // }
+// Insert , erase and running sum of the k largest values through the two
+// multiset TopK design .
+void solve_top_k_sum_queries()
+{
+    ll q, k;
+    cin >> q >> k;
+    TopK new_obj = TopK(k);
+    while (q--)
+    {
+        ll query;
+        cin >> query;
+        if (query == 1)
+        {
+            ll num;
+            cin >> num;
+            new_obj.insert(num);
+        }
+        else if (query == 2)
+        {
+            ll num;
+            cin >> num;
+            new_obj.erase(num);
+        }
+        else if (query == 3)
+        {
+            char ch;
+            cin >> ch;
+            cout << new_obj.get_top_k_sum() << "\n";
+        }
+    }
+}
+void solve_expression()
+{
+    ll a, b, n;
+    cin >> a >> b >> n;
+    ll first_term = binpow(a, n);
+    ll second_term_1 = b;
+    ll second_term_2_numerator = (a % MOD + (((binpow(a, n) - a) + MOD) % MOD)) % MOD;
+    ll inv = inverse((a - 1), MOD);
 
-    // ll q, k;
-    // cin >> q >> k;
-    // TopK new_obj = TopK(k);
-    // while (q--)
-    // {
-    //     ll query;
-    //     cin >> query;
-    //     if (query == 1)
-    //     {
-    //         ll num;
-    //         cin >> num;
-    //         new_obj.insert(num);
-    //     }
-    //     else if (query == 2)
-    //     {
-    //         ll num;
-    //         cin >> num;
-    //         new_obj.erase(num);
-    //     }
-    //     else if (query == 3)
-    //     {
-    //         char ch;
-    //         cin>>ch;
-    //         cout << new_obj.get_tok_k_sum() << "\n";
-    //     }
-    // }
+    ll f = ((second_term_2_numerator % MOD) * (inv % MOD)) % MOD;
+    ll f_2 = (second_term_1 * f) % MOD;
+    cout << (first_term % MOD + f_2 % MOD) % MOD << "\n";
+}
+void make_largest_smallest_palindrome()
+{
+    string s;
+    cin >> s;
+    bool odd_flag = false;
+    unordered_map<char, int> m;
+    for (auto ch : s)
+        m[ch]++;
+    vector<pair<char, ll>> chars;
+    ll final_length = 0;
+    char odd_char = ' ';
+    for (auto it : m)
+    {
+        if (it.second % 2 != 0 && odd_flag == false)
+        {
+            odd_flag = true;
+            chars.push_back({it.first, it.second - 1});
+            final_length += it.second - 1;
+            odd_char = it.first;
+        }
+        else
+        {
+            chars.push_back({it.first, it.second});
+            final_length += it.second;
+        }
+    }
+    string ans = "";
+
+    for (auto it : chars)
+    {
+        for (long long i = 0; i < it.second / 2; i++)
+            ans += it.first;
+    }
+    cout << ans;
+
+    if (odd_flag)
+        cout << odd_char;
+
+    reverse(ans.begin(), ans.end());
+    cout << ans << '\n';
+}
+void difference_greedy()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v1(n), v2(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v1[x];
+    for (ll x = 0; x < n; x++)
+        cin >> v2[x];
+
+    // Keeping 2 heaps one for the negitive difference
+    // and other one for positive difference because
+    // it might be best optimal to cancel from maximum
+    // difference present as compared to minimum present and can be maintained in heap .
+    priority_queue<ll, vector<ll>, greater<ll>> negitive_diff;
+    priority_queue<ll> positive_diff;
+    ll ans = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        if ((v1[x] - v2[x]) > 0)
+            positive_diff.push(abs(v1[x] - v2[x]));
+        else if ((v1[x] - v2[x]) < 0)
+            negitive_diff.push(abs(v1[x] - v2[x]));
+    }
+    while (negitive_diff.empty() == false && positive_diff.empty() == false)
+    {
+        // getting minimum negitive difference
+        ll val_1 = negitive_diff.top();
+        // getting maximum positive difference
+        ll val_2 = positive_diff.top();
+
+        if (val_2 >= val_1)
+        {
+            negitive_diff.pop();
+            positive_diff.pop();
+            val_2 -= val_1;
+            positive_diff.push(val_2);
+            ans++;
+        }
+        else
+        {
+            val_1 -= val_2;
+            positive_diff.pop();
+            negitive_diff.push(val_1);
+        }
+    }
+    for (ll x = 0; x < n; x++)
+    {
+        if (v1[x] == v2[x])
+            ans++;
+    }
+    cout << ans << "\n";
+}
+double minPrice(vector<int> &prices, vector<int> &discounts)
+{
+    priority_queue<ll> prices_pq;
+    priority_queue<ll> discounts_pq;
+    for (auto p : prices)
+        prices_pq.push(p);
+    for (auto d : discounts)
+        discounts_pq.push(d);
+
+    double ans = 0.0;
+    while (prices_pq.empty() == false)
+    {
+        double price = prices_pq.top();
+        prices_pq.pop();
+        double discount = discounts_pq.top();
+        discounts_pq.pop();
+        price = (double)(price * (100 - discount)) / (double)100;
+        ans += price;
+    }
+
+    return ans;
+}
+bool check(vector<int> &arr, int mid)
+{
+    if (mid != 0 && mid != arr.size() - 1)
+    {
+        if (arr[mid + 1] > arr[mid] || arr[mid - 1] > arr[mid])
+        {
+            return false;
+        }
+    }
+    if (mid == 0)
+    {
+        if (arr[mid + 1] > arr[mid])
+        {
+            return false;
+        }
+    }
+    if (mid == arr.size() - 1)
+    {
+        if (arr[mid - 1] > arr[mid])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+int findPeakElement(vector<int> &arr)
+{
+    // Seaching space will be [0,....n-1]//
+    int n = arr.size() - 1;
+    if (arr.size() == 1)
+    {
+        return 0;
+    }
+    int s = 0;
+    int e = n;
+    while (s <= e)
+    {
+        int mid = (s + e) / 2;
+        if (check(arr, mid) == true)
+        {
+            return mid;
+        }
+        if (mid != 0)
+        {
+            if (arr[mid - 1] > arr[mid])
+            {
+                e = mid - 1;
+            }
+            else
+            {
+                s = mid + 1;
+            }
+        }
+        else
+        {
+            s = mid + 1;
+        }
+    }
+    return 1;
+}
+long long weightedSum(vector<int> &parent, vector<int> &nums)
+{
+    int n = parent.size();
+    // Adjlist population
+    vector<vector<int>> children(n);
+
+    for (int i = 1; i < n; i++)
+    {
+        children[parent[i]].push_back(i);
+    }
+
+    vector<int> depth(n);
+    queue<int> q;
+
+    depth[0] = 1;
+    q.push(0);
+
+    int h = 1;
+
+    while (!q.empty())
+    {
+
+        int u = q.front();
+        q.pop();
+
+        for (int v : children[u])
+        {
+
+            depth[v] = depth[u] + 1;
+
+            h = max(h, depth[v]);
+
+            q.push(v);
+        }
+    }
+
+    long long ans = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        ans += 1LL * nums[i] * (h - depth[i] + 1);
+    }
+
+    return ans;
+}
+void extra_count_codeforces()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll i = 0; i < n; i++)
+    {
+        cin >> v[i];
+    }
+    vector<ll> consecutive_sequences, consecutive_sequences_len;
+    for (ll i = 0; i < n; i++)
+    {
+        if (i > 0 && v[i] == v[i - 1])
+            consecutive_sequences_len.back()++;
+        else
+        {
+            consecutive_sequences.push_back(v[i]);
+            consecutive_sequences_len.push_back(1);
+        }
+    }
+    ll ans = consecutive_sequences.size();
+    ll extra = 0;
+    for (ll x = 0; x + 1 < ans; x++)
+    {
+        if (consecutive_sequences_len[x] >= 2 && consecutive_sequences_len[x + 1] >= 2)
+        {
+            extra = 2;
+            break;
+        }
+    }
+    if (extra < 2)
+    {
+        for (ll x = 0; x < ans; x++)
+        {
+            if (consecutive_sequences_len[x] < 2)
+                continue;
+            bool choice_1 = false;
+            if (x - 1 >= 0)
+            {
+                if (x - 2 < 0)
+                {
+                    choice_1 = true;
+                }
+                else
+                {
+                    if (consecutive_sequences[x - 2] != consecutive_sequences[x])
+                    {
+                        choice_1 = true;
+                    }
+                }
+            }
+
+            bool choice_2 = false;
+            if (x + 1 <= ans - 1)
+            {
+                if (x + 2 > ans - 1)
+                {
+                    choice_2 = true;
+                }
+                else
+                {
+                    if (consecutive_sequences[x + 2] != consecutive_sequences[x])
+                    {
+                        choice_2 = true;
+                    }
+                }
+            }
+            if (choice_1 || choice_2)
+            {
+                extra = 1;
+                break;
+            }
+        }
+    }
+    cout << (ans + extra) << "\n";
+}
+// Compress the array into runs of equal values , the run count is the base
+// answer and one change can split at most one run of length >= 2 , two such
+// runs sitting next to each other buy two extra blocks .
+void solve()
+{
+    // Approximated LRU in redis using idle time optimization and LRU clock .
+    // zmalloc for tracking of amount of memory currently being consumed.
 }
 int main()
 {
     // O(N)
     // factorial(MOD);
     // O(log log(n))
-    compute_primes();
+    // compute_primes();
     // compute_co_prime();
     // O(log log p)
     // build_spf(1000000);
@@ -5841,6 +6206,10 @@ int main()
 }
 
 /*
+    // Monospace array having all 0s before 1s and vice-versa will fall under this category .
+    // default case to be kept in mind thus following the same template for binary search and finding first one.
+    // Forms - sublinear and binary search on answers,lower_bounds and binary search on every start .
+
     Contribution technique.
     inverting the relation if possible.
         i)Atomic item contribution.
