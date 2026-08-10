@@ -6176,6 +6176,228 @@ void extra_count_codeforces()
     }
     cout << (ans + extra) << "\n";
 }
+ll sum_2d(vector<vector<ll>> &prefix_arr, pair<ll, ll> &p1, pair<ll, ll> &p2)
+{
+    ll U = p1.first;
+    ll L = p1.second;
+    ll D = p2.first;
+    ll R = p2.second;
+
+    if (U < 0 || L < 0 ||
+        D >= prefix_arr.size() ||
+        R >= prefix_arr[0].size())
+        return -1;
+
+    ll sum = prefix_arr[D][R];
+
+    if (L > 0)
+        sum -= prefix_arr[D][L - 1];
+
+    if (U > 0)
+        sum -= prefix_arr[U - 1][R];
+
+    if (U > 0 && L > 0)
+        sum += prefix_arr[U - 1][L - 1];
+
+    return sum;
+}
+int maxArea(vector<vector<ll>> &mat)
+{
+    /*
+        mat[r][c] == 1 usable .
+        mat[r][c] == 0 non usable .
+        sum = k*k
+    */
+    // vector<vector<ll>> pf_arr = prefix_2d(mat);
+    // ll row = mat.size();
+    // ll col = mat[0].size();
+    // vector<pair<ll,ll>>valid_pairs;
+    // for (ll k = 1; k <= 500; k++)
+    // {
+    //     for (ll r = 0; r < row; r++)
+    //     {
+    //         for (ll c = 0; c < col; c++)
+    //         {
+    //             pair<ll,ll>p1 = make_pair(r,c);
+    //             pair<ll,ll>p2 = make_pair(r+k,c+k);
+
+    //             if (sum_2d(pf_arr,p1,p2) == (k*k)){
+    //                 //Valid sub-matrix from the starting row and column
+    //                 //starting with k row+k and column+k .
+    //                 valid_pairs.push_back({r,c});
+    //             }
+    //         }
+    //     }
+    // }
+    // for(ll x=0;x<valid_pairs.size();x++){
+    //     for(ll y=0;y<valid_pairs.size();y++){
+    //         if(x==y)continue;
+    //         else{
+
+    //         }
+    //     }
+    // }
+
+    vector<vector<ll>> pf_arr = prefix_2d(mat);
+
+    ll row = mat.size();
+    ll col = mat[0].size();
+
+    ll ans = 0;
+
+    for (ll k = 1; k <= min(row, col); k++)
+    {
+        vector<pair<ll, ll>> valid_pairs;
+
+        for (ll r = 0; r + k <= row; r++)
+        {
+            for (ll c = 0; c + k <= col; c++)
+            {
+                pair<ll, ll> p1 = {r, c};
+                pair<ll, ll> p2 = {r + k - 1, c + k - 1};
+
+                if (sum_2d(pf_arr, p1, p2) == k * k)
+                {
+                    valid_pairs.push_back({r, c});
+                }
+            }
+        }
+
+        // Check every pair of valid k x k squares
+        for (ll x = 0; x < valid_pairs.size(); x++)
+        {
+            ll r1 = valid_pairs[x].first;
+            ll c1 = valid_pairs[x].second;
+
+            for (ll y = x + 1; y < valid_pairs.size(); y++)
+            {
+                ll r2 = valid_pairs[y].first;
+                ll c2 = valid_pairs[y].second;
+
+                bool non_overlapping = false;
+
+                // Same starting row
+                if (r1 == r2)
+                {
+                    if (abs(c1 - c2) >= k)
+                        non_overlapping = true;
+                }
+                else
+                {
+                    // Different rows:
+                    // They are non-overlapping if they are
+                    // separated vertically OR horizontally.
+                    if (abs(r1 - r2) >= k ||
+                        abs(c1 - c2) >= k)
+                    {
+                        non_overlapping = true;
+                    }
+                }
+
+                if (non_overlapping)
+                {
+                    ans = max(ans, 2LL * k * k);
+                }
+            }
+        }
+    }
+    return ans;
+}
+void points_on_line()
+{
+    ll n, d;
+    cin >> n >> d;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    ll ans = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        auto it = upper_bound(v.begin(), v.end(), d + v[x]) - v.begin();
+        // Finding last valid value i.e. x such that v[x] <= d+v[x]
+        it--;
+        ans += ((it - x) * (it - x - 1)) / 2;
+    }
+    cout << ans << "\n";
+}
+bool check_factory_machines(ll mid, ll t, vector<ll> &v)
+{
+    ll total_elements = 0;
+    for (auto time : v)
+    {
+        total_elements += mid / time;
+        if (total_elements >= t)
+            return true;
+    }
+
+    return total_elements >= t;
+}
+void factory_machines()
+{
+    ll n, t;
+    cin >> n >> t;
+    vector<ll> v(n);
+    ll maxi = LLONG_MIN;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        maxi = max(maxi, v[x]);
+    }
+    ll low = 0;
+    ll high = (maxi * t);
+    ll ans = LLONG_MAX;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_factory_machines(mid, t, v) == true)
+        {
+            ans = min(ans, mid);
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
+bool check_bizon(ll mid, ll n, ll m, ll k)
+{
+    // For each row sum the elements less than x .
+    ll cnt = 0;
+    for (ll row = 1; row <= n; row++)
+    {
+        // each value will be i*j = v j = v/i(row)
+        // if mid == v then mid/i will represent all the values in a row < mid .
+        cnt += min((ll)floor(mid / row), m);
+    }
+    return cnt >= k;
+}
+// Special case when the process cannot be simulated 
+// so finding always by  ((total number of elements less than or equal x) >= k) .
+void multiplication_table()
+{
+    ll n, m, k;
+    cin >> n >> m >> k;
+
+    ll low = 0;
+    ll high = 1e18;
+    ll ans = LLONG_MAX;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_bizon(mid, n, m, k) == true)
+        {
+            ans = min(ans, mid);
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
 // Compress the array into runs of equal values , the run count is the base
 // answer and one change can split at most one run of length >= 2 , two such
 // runs sitting next to each other buy two extra blocks .
@@ -6197,8 +6419,8 @@ int main()
     // cin.tie(0);
     // cout.tie(0);
     int t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
