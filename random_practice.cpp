@@ -6373,7 +6373,7 @@ bool check_bizon(ll mid, ll n, ll m, ll k)
     }
     return cnt >= k;
 }
-// Special case when the process cannot be simulated 
+// Special case when the process cannot be simulated
 // so finding always by  ((total number of elements less than or equal x) >= k) .
 void multiplication_table()
 {
@@ -6398,9 +6398,259 @@ void multiplication_table()
     }
     cout << ans << "\n";
 }
+bool check_search(ll mid, vector<ll> &nums)
+{
+    if (nums[mid] > nums[nums.size() - 1])
+        return false;
+    return true;
+}
+ll search(vector<ll> &nums, ll target)
+{
+    ll ans = -1;
+    sort(nums.begin(), nums.end());
+    ll original_idx = upper_bound(nums.begin(), nums.end(), target) - nums.begin();
+    original_idx--;
+    if (original_idx < 0 || nums[original_idx] != target)
+        return -1;
+    // finding the index of smallest element by a monotone space array .
+    ll num_of_rotations = 0;
+    ll low = 0;
+    ll high = nums.size();
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_search(mid, nums) == true)
+        {
+            num_of_rotations = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    return (original_idx + num_of_rotations) % nums.size();
+}
+bool check_bitonic(ll mid, vector<ll> &nums)
+{
+    if (((mid + 1) < nums.size() && (nums[mid + 1] < nums[mid])) || mid == nums.size() - 1)
+        return true;
+    return false;
+}
+void bitonic_array()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> nums(n);
+    for (ll x = 0; x < n; x++)
+        cin >> nums[x];
+    ll peak_element_idx = 0;
+    ll low = 0;
+    ll high = nums.size() - 1;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_bitonic(mid, nums) == true)
+        {
+            peak_element_idx = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    while (q--)
+    {
+        ll k;
+        cin >> k;
+        ll pos_1 = -1;
+        ll pos_2 = -1;
+        if (k == nums[peak_element_idx])
+        {
+            cout << peak_element_idx + 1 << "\n";
+            continue;
+        }
+        {
+            ll it = upper_bound(nums.begin(), nums.begin() + peak_element_idx, k) - nums.begin();
+            it--;
+            if (it >= 0 && nums[it] == k)
+                pos_1 = it;
+        }
+        {
+            auto it = upper_bound(nums.begin() + peak_element_idx + 1, nums.end(), k, greater<ll>()) - nums.begin();
+            it--;
+            if (it < nums.size() && nums[it] == k)
+                pos_2 = it;
+        }
+        if (pos_1 != -1 && pos_2 != -1)
+            cout << pos_1 + 1 << " " << pos_2 + 1 << "\n";
+        else
+        {
+            if (pos_1 == -1 && pos_2 != -1)
+                cout << pos_2 + 1 << "\n";
+            else if (pos_1 != -1 && pos_2 == -1)
+            {
+                cout << pos_1 + 1 << "\n";
+            }
+        }
+    }
+}
 // Compress the array into runs of equal values , the run count is the base
 // answer and one change can split at most one run of length >= 2 , two such
 // runs sitting next to each other buy two extra blocks .
+ll digit_sum(ll num)
+{
+    ll sum = 0;
+    while (num >= 1)
+    {
+        sum += num % 10;
+        num /= 10;
+    }
+    return sum;
+}
+void number_and_sum_of_digit()
+{
+    // search space = [1,N], (X-sum_of_digits(X) >= S) smallest possible value of X .
+    ll n, s;
+    cin >> n >> s;
+    ll low = 1;
+    ll high = n;
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if ((mid - digit_sum(mid)) >= s)
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << n - ans + 1 << "\n";
+}
+bool check_painter_partition(ll mid, vector<ll> &v, ll k)
+{
+    /*
+      [2 5 7 2 5]
+      1 <----> 2
+
+
+    */
+    ll painters_cnt = 0;
+    ll time_left = 0;
+    for (ll x = 0; x < v.size(); x++)
+    {
+        if (time_left >= v[x])
+        {
+            // This painter can only be used here and never again .
+            time_left -= v[x];
+        }
+        else
+        {
+            painters_cnt += 1;
+            if (painters_cnt > k)
+                return false;
+            // Assigning full quota because each painter can paint
+            // till t seconds on some different walls which are non intersecting.
+            time_left = mid;
+            if (time_left >= v[x])
+            {
+                time_left -= v[x];
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return painters_cnt <= k;
+}
+void painter_partition()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    ll sum = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        sum += v[x];
+    }
+    ll low = 0;
+    ll high = sum;
+    ll ans = -1;
+    while (low <= high)
+    {
+        ll mid = (high + low) / 2;
+        if (check_painter_partition(mid, v, k))
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
+bool check_minimise_max_diff(ll mid, vector<ll> &v, ll k)
+{
+    ll total_points_required = 0;
+    for (ll x = 0; x < v.size() - 1; x++)
+    {
+        if (mid > 0)
+        {
+            total_points_required += ((((v[x + 1] - v[x]) + mid) - 1) / mid) - 1;
+            if (total_points_required > k)
+                return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    // total_points_required that are required to make the diff <= mid or X
+    // has to be be also lesser than k <= k;
+    return total_points_required <= k;
+}
+void minimise_max_diff()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    sort(v.begin(), v.end());
+    ll low = 0;
+    // Maximum possible difference in distance .
+    ll high = INT_MIN;
+    for (ll x = 0; x < n && (x + 1) < n; x++)
+    {
+        high = max(high, (v[x + 1] - v[x]));
+    }
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_minimise_max_diff(mid, v, k))
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
@@ -6419,8 +6669,8 @@ int main()
     // cin.tie(0);
     // cout.tie(0);
     int t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();

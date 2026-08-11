@@ -121,37 +121,55 @@ fn minimize_dot_product(mut v: Vec<i32>, mut w: Vec<i32>) -> i32 {
     }
     sum
 }
+fn check(mid: u64) -> bool {
+    true
+}
+fn stack_stimulation(stdin: Stdin) {
+    let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+    let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+
+    let val = minimize_dot_product(v, w);
+
+    println!("{val}");
+
+    let v: String = InputReader::read_input(Box::new(stdin.lock()));
+    let mut stack: VecDeque<char> = VecDeque::new();
+    for char in v.chars() {
+        if (stack.is_empty()) {
+            stack.push_back(char);
+        } else {
+            let top_char: &char = stack.back().unwrap();
+            if *top_char == char {
+                stack.pop_back();
+            } else {
+                stack.push_back(char);
+            }
+        }
+    }
+    let ans: String = stack.iter().collect();
+    println!("{ans}");
+}
 fn solve(stdin: Stdin) {
-    // let _n: usize = InputReader::read_input(Box::from(stdin.lock()));
-    // let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
-    // let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
-
-    // let val = minimize_dot_product(v, w);
-
-    // println!("{val}");
-
-    // let v: String = InputReader::read_input(Box::new(stdin.lock()));
-    // let mut stack: VecDeque<char> = VecDeque::new();
-    // for char in v.chars() {
-    //     if (stack.is_empty()) {
-    //         stack.push_back(char);
-    //     } else {
-    //         let top_char: &char = stack.back().unwrap();
-    //         if *top_char == char {
-    //             stack.pop_back();
-    //         } else {
-    //             stack.push_back(char);
-    //         }
-    //     }
-    // }
-    // let ans: String = stack.iter().collect();
-    // println!("{ans}");
-    
+    let n: u64 = InputReader::read_input(Box::from(stdin.lock()));
+    let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
+    let mut high: u64 = 0;
+    let mut low: u64 = n;
+    let mut ans = 0;
+    while low <= high {
+        let mid: u64 = (high + low) / 2;
+        if check(mid) == true {
+            ans = mid;
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+    println!("{:?}", ans);
 }
 fn main() {
     let std_in_obj = stdin();
-    // let mut t: usize = InputReader::read_input(Box::new(std_in_obj.lock()));
-    let mut t = 1;
+    let mut t: usize = InputReader::read_input(Box::new(std_in_obj.lock()));
+    // let mut t = 1;
 
     while t >= 1 {
         solve(stdin());
