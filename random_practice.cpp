@@ -8,6 +8,7 @@ typedef long long ll;
 using namespace std;
 
 const int MOD = 1e9 + 7;
+const long double EPSILON = 1e-9; // or 10^-12
 
 #define debarr(a, n)            \
     cout << #a << " : ";        \
@@ -6377,8 +6378,9 @@ bool check_bizon(ll mid, ll n, ll m, ll k)
 // so finding always by  ((total number of elements less than or equal x) >= k) .
 void multiplication_table()
 {
-    ll n, m, k;
-    cin >> n >> m >> k;
+    ll n;
+    cin >> n;
+    ll k = (n * n) / 2;
 
     ll low = 0;
     ll high = 1e18;
@@ -6386,7 +6388,7 @@ void multiplication_table()
     while (low <= high)
     {
         ll mid = (low + high) / 2;
-        if (check_bizon(mid, n, m, k) == true)
+        if (check_bizon(mid, n, n, k) == true)
         {
             ans = min(ans, mid);
             high = mid - 1;
@@ -6650,6 +6652,305 @@ void minimise_max_diff()
         }
     }
     cout << ans << "\n";
+}
+bool check_kth_sum_value(ll mid, vector<ll> &v1, vector<ll> &v2, ll k)
+{
+    // (Finding number of elements having sum <= X) >= k for process which cannot
+    // be simulated .
+    ll total_cnt = 0;
+    if (v1.size() >= v2.size())
+    {
+        // Iterate over v2
+        for (ll x = 0; x < v2.size(); x++)
+        {
+            // Finding (x-v2[x]) highest possible available value
+            auto it = upper_bound(v1.begin(), v1.end(), (mid - v2[x]));
+            if (it != v1.end())
+            {
+                ll idx = it - v1.begin();
+                total_cnt += idx;
+            }
+            else
+            {
+                // All values are lesser than (x-v2[x])
+                total_cnt += (v1.size());
+            }
+        }
+    }
+    else
+    {
+        // Iterate over v1
+        for (ll x = 0; x < v1.size(); x++)
+        {
+            // Finding (x-v2[x]) highest possible available value
+            auto it = upper_bound(v2.begin(), v2.end(), mid - v1[x]);
+            if (it != v2.end())
+            {
+                ll idx = it - v2.begin();
+                total_cnt += idx;
+            }
+            else
+            {
+                // All values are lesser than (x-v2[x])
+                total_cnt += (v2.size());
+            }
+        }
+    }
+    return k <= total_cnt;
+}
+void kth_sum_value()
+{
+    ll n, m, k;
+    cin >> n >> m >> k;
+    vector<ll> v1(n), v2(m);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v1[x];
+    }
+    for (ll x = 0; x < m; x++)
+    {
+        cin >> v2[x];
+    }
+    sort(v1.begin(), v1.end());
+    sort(v2.begin(), v2.end());
+
+    ll low = v1[0] + v2[0];
+    ll high = v1[v1.size() - 1] + v2[v2.size() - 1];
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_kth_sum_value(mid, v1, v2, k) == true)
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
+bool check_consecutive_ones(ll mid, vector<ll> &v, ll k, vector<ll> &prefix_zeros)
+{
+    // length <= mid && pf[r]-pf[l-1] <= k
+    // pf[l-1]-pf[r] >= k ===> pf[l-1] >= k+pf[r]
+    // [1 0 1 1 0 1 1 0 0] === [0,1,1,1,2,2,2,3,3] and k = 2
+    ll num_zeros = 0;
+    ll l = 0;
+    ll r = 0;
+    bool flag = false;
+    while (l <= r && r < v.size())
+    {
+        if (r < mid && flag == false)
+        {
+            if (v[r] == 0)
+                num_zeros++;
+            if ((r + 1) == mid)
+            {
+                flag = true;
+                continue;
+            }
+            r++;
+        }
+        else
+        {
+            if (num_zeros <= k)
+                return true;
+            else
+            {
+                if (v[l] == 0)
+                    num_zeros--;
+                if ((r + 1) < v.size() && v[r + 1] == 0)
+                    num_zeros++;
+            }
+            l++;
+            r++;
+        }
+    }
+    return false;
+}
+void solve_consecutive_ones()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    vector<ll> prefix_zeros(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        if (x == 0)
+            prefix_zeros[x] = v[x];
+        else
+        {
+            prefix_zeros[x] = prefix_zeros[x - 1] + v[x];
+        }
+    }
+    // Number of zeros must be <= K within a subarray .
+    ll low = 0;
+    ll high = n;
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_consecutive_ones(mid, v, k, prefix_zeros))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void bs_real_domain()
+{
+    long double n;
+    cin >> n;
+    long double low = 0.0;
+    long double high = n;
+    // Taking epsilon according to the error
+    //  limit provided in questions .
+    while (abs(low - high) >= EPSILON)
+    {
+        long double mid = (low + high) / 2;
+        // check function
+        if (1)
+        {
+            high = mid;
+        }
+        else
+        {
+            low = mid;
+        }
+    }
+    long double ans = (low + high) / 2;
+    cout << ans << "\n";
+}
+bool check_class_room(ll mid, vector<ll> &v, ll k)
+{
+    ll last = v[0];
+    k--;
+    for (ll x = 1; x < v.size(); x++)
+    {
+        if ((v[x] - last) < mid)
+            continue;
+        else
+        {
+            last = v[x];
+            k--;
+        }
+    }
+    if (k > 0)
+        return false;
+    return true;
+}
+void classRoom()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    sort(v.begin(), v.end());
+    ll low = v[1] - v[0];
+    ll high = v[v.size() - 1] - v[0];
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_class_room(mid, v, k))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void maximize_fraction()
+{
+    ll n, k;
+    cin >> n >> k;
+    ll temp = k;
+    vector<ll> a(n), b(n);
+    for (ll x = 0; x < n; x++)
+        cin >> a[x];
+    for (ll x = 0; x < n; x++)
+        cin >> b[x];
+
+    long double low = 0.0;
+    long double high = 1e8;
+    long double ans = 0.0;
+    while (abs(high - low) >= EPSILON)
+    {
+        long double mid = (low + high) / 2.0;
+        k = temp;
+        priority_queue<long double> pq;
+        for (ll x = 0; x < n; x++)
+        {
+            pq.push((a[x] - (b[x] * mid)));
+        }
+        long double sum = 0.0;
+        while (k--)
+        {
+            sum += pq.top();
+            pq.pop();
+        }
+        if (sum >= 0)
+        {
+            ans = mid;
+            low = mid;
+        }
+        else
+        {
+            high = mid;
+        }
+    }
+    cout << fixed << setprecision(6) << ans << "\n";
+}
+bool check_ugly_number(long long mid, long long a, long long b, long long c, long long n)
+{
+    // Using inclusion and exclusion principle
+    long long cnt = 0;
+    // (Number of elements <= mid) >= n
+    cnt += mid / a;
+    cnt += mid / b;
+    cnt += mid / c;
+    cnt -= mid / lcm(a, b);
+    cnt -= mid / lcm(b, c);
+    cnt -= mid / lcm(a, c);
+    cnt += mid / (lcm(lcm(a, b), c));
+    return cnt >= n;
+}
+int nthUglyNumber(int n, int a, int b, int c)
+{
+    long long low = 1;
+    long long high = 1e10;
+    long long ans = 0;
+    while (low <= high)
+    {
+        long long mid = (low + (high - low) / 2);
+        if (check_ugly_number(mid, a, b, c, n))
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    return ans;
+}
+void array_division()
+{
 }
 void solve()
 {

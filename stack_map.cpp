@@ -7,10 +7,12 @@
 #include <list>
 #include <algorithm>
 #include <unordered_set>
+#include <iomanip>
 #include <cmath>
 #include <stack>
 #include <vector>
 typedef long long ll;
+const long double EPSILON = 1e-9; // or 10^-12
 using namespace std;
 class FreqStack
 {
@@ -256,6 +258,10 @@ vector<ll> next_greater_element(vector<ll> v)
     cout << "\n";
     return nge;
 }
+// VVIQ having the answer as the point of search space during binary search
+void minimizing_difference()
+{
+}
 void solve()
 {
     // [1,3,6] ---> [0,1,0,0] -----> [1,2,3]
@@ -272,8 +278,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
