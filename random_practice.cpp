@@ -6952,6 +6952,860 @@ int nthUglyNumber(int n, int a, int b, int c)
 void array_division()
 {
 }
+long double get_time(ll num_operations, long double a, long double b)
+{
+    return (((long double)num_operations * b) + (a / sqrt((num_operations + 1))));
+}
+// Ternary search for problems that will be convex upwards or convex downwards.
+void freefall()
+{
+    long double a, b;
+    cin >> a >> b;
+    long double low = 0;
+    long double high = (a + b - 1) / b;
+    long double ans = 0;
+    while (low <= high)
+    {
+        long long mid = (low + high) / 2;
+        if (get_time(mid, a, b) <= get_time(mid + 1, a, b))
+        {
+            ans = get_time(mid, a, b);
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    cout << fixed << setprecision(15) << ans << "\n";
+}
+bool check_color_ball(ll mid, vector<ll> &balls, ll n, ll k, unordered_map<ll, ll> &freq_map)
+{
+    // Divinding one by one so k*x minimum balls must be required so group
+    // in K always if possible otherwise split 1-by-1 to each group .
+    ll cnt = 0;
+    for (auto it : freq_map)
+    {
+        cnt += min(it.second, k);
+    }
+    if (cnt >= k * mid)
+        return true;
+    return false;
+}
+void color_ball()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    unordered_map<ll, ll> freq_map;
+
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        freq_map[v[x]]++;
+    }
+    ll low = 0;
+    ll high = n;
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (high + low) / 2;
+        if (check_color_ball(mid, v, n, k, freq_map))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+
+    cout << ans << "\n";
+}
+bool check_min_subarray_len(int length, vector<int> &nums, int target)
+{
+    int l = 0;
+    int r = 0;
+    bool flag = false;
+    int sum = 0;
+    while (l <= r)
+    {
+        if ((r + 1) <= length && flag == false)
+        {
+            sum += nums[r];
+            if ((r + 1) >= length)
+            {
+                flag = true;
+                continue;
+            }
+            r++;
+        }
+        else
+        {
+            if (sum >= target)
+                return true;
+            target -= nums[l];
+            if ((r + 1) < nums.size())
+            {
+                target += nums[r + 1];
+            }
+            l++;
+            r++;
+        }
+    }
+    return false;
+}
+int minSubArrayLen(int target, vector<int> &nums)
+{
+    int low = 0;
+    int high = nums.size();
+    int ans = INT_MAX;
+    while (low <= high)
+    {
+        int mid = (low + high) / 2;
+        if (check_min_subarray_len(mid, nums, target))
+        {
+            ans = min(ans, mid);
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+    ans == INT_MAX ? ans = 0 : ans = ans;
+    cout << ans << "\n";
+}
+bool check_equal_substring(int mid, string s, string t, int maxCost)
+{
+    int l = 0;
+    int r = 0;
+    bool flag = false;
+    int sum = 0;
+    while (l <= r)
+    {
+        if ((r + 1) <= mid && flag == false)
+        {
+            sum += abs(s[r] - t[r]);
+            if ((r + 1) >= mid)
+            {
+                flag = true;
+                continue;
+            }
+            r++;
+        }
+        else
+        {
+            if (sum <= maxCost)
+                return true;
+            sum -= abs(s[l] - t[l]);
+            if ((r + 1) < t.size())
+            {
+                sum += abs(t[r + 1] - s[r + 1]);
+            }
+            l++;
+            r++;
+        }
+    }
+    return false;
+}
+int equalSubstring(string s, string t, int maxCost)
+{
+    int low = 0;
+    int high = s.length();
+    int ans = 0;
+    while (low <= high)
+    {
+        int mid = (low + high) / 2;
+        if (check_equal_substring(mid, s, t, maxCost))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    return ans;
+}
+int kthDigit(long long k)
+{
+    ll digits = 1;
+    ll power = 0;
+    ll batch_size = 9;
+    ll total_batch_count = 0;
+    while (1)
+    {
+        ll total_size = batch_size * digits * pow(10, power);
+        if (k - total_size <= 0)
+        {
+            break;
+        }
+        if (power != 0)
+        {
+            total_batch_count += pow(10, power - 1) * batch_size;
+        }
+        else if (power == 0)
+        {
+            total_batch_count++;
+        }
+        k -= total_size;
+        digits++;
+        power++;
+    }
+    ll smaller_batch_size = (k - 1) / (digits * 10);
+    smaller_batch_size += 1;
+    ll end = (pow(10, power) + (smaller_batch_size * 10)) - 1;
+    ll start = end - 9;
+    k -= ((smaller_batch_size - 1) * digits * 10);
+
+    total_batch_count += ((smaller_batch_size));
+
+    string interval_digits = "";
+    if (total_batch_count % 2 != 0)
+    {
+        for (ll x = start; x <= end; x++)
+        {
+            ll cur_num = x;
+            string small = "";
+            while (cur_num >= 1)
+            {
+                ll digit = cur_num % 10;
+                cur_num /= 10;
+                string s = to_string(digit);
+                small.push_back(s[0]);
+            }
+            reverse(small.begin(), small.end());
+            interval_digits += small;
+        }
+    }
+    else
+    {
+        for (ll x = end; x >= start; x--)
+        {
+            ll cur_num = x;
+            string small = "";
+            while (cur_num >= 1)
+            {
+                ll digit = cur_num % 10;
+                cur_num /= 10;
+                string s = to_string(digit);
+                small.push_back(s[0]);
+            }
+            reverse(small.begin(), small.end());
+            interval_digits += small;
+        }
+    }
+    char final_digit = interval_digits[k - 1];
+    string s_dash = "";
+    s_dash.push_back(final_digit);
+    return stoi(s_dash);
+}
+bool check_seperate_squares(long double y_coordinate, vector<vector<int>> &squares)
+{
+    long double area_above = 0.0;
+    long double area_below = 0.0;
+    for (int x = 0; x < squares.size(); x++)
+    {
+        int x_c = squares[x][0];
+        int y_c = squares[x][1];
+        int square_side_len = squares[x][2];
+
+        long double bottom = y_c;
+        long double top = y_c + square_side_len;
+
+        if (y_coordinate >= top)
+        {
+            area_below += (long double)square_side_len * square_side_len;
+        }
+        else if (y_coordinate <= bottom)
+        {
+            area_above += (long double)square_side_len * square_side_len;
+        }
+        else
+        {
+            long double height_below = y_coordinate - bottom;
+            long double height_above = top - y_coordinate;
+
+            area_below += height_below * square_side_len;
+            area_above += height_above * square_side_len;
+        }
+    }
+    if (area_below <= area_above)
+        return false;
+    return true;
+}
+double separateSquares(vector<vector<int>> &squares)
+{
+    long double low = 0.0;
+    long double high = 1e9;
+    long double ans = 0.0;
+    while (abs(low - high) >= EPSILON)
+    {
+        long double mid = (low + high) / 2;
+        if (check_seperate_squares(mid, squares))
+        {
+            ans = mid;
+            high = mid;
+        }
+        else
+        {
+            low = mid;
+        }
+    }
+    return ans;
+}
+vector<int> leftmostBuildingQueries(vector<int> &heights, vector<vector<int>> &queries)
+{
+}
+int nearestDrone(vector<vector<int>> &drones, vector<int> &target)
+{
+    vector<pair<int, int>> v;
+    for (int x = 0; x < drones.size(); x++)
+    {
+        if ((abs(target[0] - drones[x][0]) +
+             abs(target[1] - drones[x][1])) <= drones[x][2])
+        {
+            v.push_back({abs(target[0] - drones[x][0]) +
+                             abs(target[1] - drones[x][1]),
+                         x});
+        }
+    }
+    sort(v.begin(), v.end(), [](pair<int, int> &p1, pair<int, int> &p2)
+         {
+    if (p1.first == p2.first)
+        return p1.second > p2.second;
+    return p1.first > p2.first; });
+    if (v.size() == 0)
+        return -1;
+    return v[v.size() - 1].second;
+}
+int minOperations(string s)
+{
+
+    int n = s.size();
+    int ans = INT_MAX;
+
+    for (int r = 0; r < n; r++)
+    {
+
+        int ops = r;
+
+        for (int i = 0; i < n / 2; i++)
+        {
+
+            char left = s[(i + r) % n];
+            char right = s[(n - 1 - i + r) % n];
+
+            int f1 = (right - left + 26) % 26;
+            int f2 = (left - right + 26) % 26;
+
+            ops += min(f1, f2);
+        }
+
+        ans = min(ans, ops);
+    }
+
+    return ans;
+}
+bool check_kth_excluded(ll mid, vector<ll> &v, ll k)
+{
+    // (Number of elements <= mid )>= K
+    ll normal = mid;
+    auto extra = upper_bound(v.begin(), v.end(), mid) - v.begin();
+    return ((normal - extra) >= k);
+}
+void kth_excluded()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    sort(v.begin(), v.end());
+    while (q--)
+    {
+        ll k;
+        cin >> k;
+        ll low = 0;
+        ll high = 1e18;
+        ll ans = 0;
+        while (low <= high)
+        {
+            ll mid = (low + high) / 2;
+            if (check_kth_excluded(mid, v, k))
+            {
+                ans = mid;
+                high = mid - 1;
+            }
+            else
+            {
+                low = mid + 1;
+            }
+        }
+        cout << ans << "\n";
+    }
+}
+/*
+You are given a sequence of length N: A=(A1​,…,AN​).
+Answer Q queries given in the following format.
+You are given integers L, R, and X. Find the number of elements among AL​,…,AR​ whose values are equal to X.
+*/
+void beaver_2nd()
+{
+    int n, m;
+    cin >> n >> m;
+    ;
+
+    long long v1 = 0, v2 = 0;
+    for (int i = 0; i < n; i++)
+    {
+        long long num;
+        cin >> num;
+        if (i == 0)
+            v1 = num;
+    }
+    for (int i = 0; i < m; i++)
+    {
+        long long num;
+        cin >> num;
+        if (i == 0)
+            v2 = num;
+    }
+    if ((v1 + n) >= (v2 + m))
+        cout << 1 << "\n";
+    else
+    {
+        cout << 2 << "\n";
+    }
+}
+void range_count_query()
+{
+    ll n, q;
+    cin >> n;
+    vector<ll> v(n);
+    unordered_map<int, vector<int>> m;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        m[v[x]].push_back(x);
+    }
+    cin >> q;
+    while (q--)
+    {
+        ll l, r, x;
+        cin >> l >> r >> x;
+        ll final_len = (lower_bound(m[x].begin(), m[x].end(), r) - (lower_bound(m[x].begin(), m[x].end(), l - 1)));
+        cout << final_len << "\n";
+    }
+}
+bool check_burgers(ll mid, vector<ll> &v1, vector<ll> &cost, ll total_money, string s)
+{
+    ll bread_r = 0;
+    ll cheese_r = 0;
+    ll slice_r = 0;
+
+    for (auto ch : s)
+    {
+        if (ch == 'B')
+        {
+            bread_r++;
+        }
+        else if (ch == 'S')
+        {
+            slice_r++;
+        }
+        else
+        {
+            cheese_r++;
+        }
+    }
+    ll total_bread_required = mid * bread_r;
+    ll total_slice_required = mid * slice_r;
+    ll total_cheese_required = mid * cheese_r;
+    ll extra_cost_required = 0;
+    if (total_bread_required <= v1[0] && total_slice_required <= v1[1] && total_cheese_required <= v1[2])
+    {
+        return true;
+    }
+    else if (total_bread_required <= v1[0] && total_slice_required <= v1[1])
+    {
+        extra_cost_required += abs(v1[2] - total_cheese_required) * cost[2];
+    }
+    else if (total_slice_required <= v1[1] && total_cheese_required <= v1[2])
+    {
+        extra_cost_required += abs(v1[0] - total_bread_required) * cost[0];
+    }
+    else if (total_bread_required <= v1[0] && total_cheese_required <= v1[2])
+    {
+        extra_cost_required += abs(v1[1] - total_slice_required) * cost[1];
+    }
+    else if (total_bread_required > v1[0] && total_slice_required > v1[1])
+    {
+        extra_cost_required += abs(v1[0] - total_bread_required) * cost[0];
+        extra_cost_required += abs(v1[1] - total_slice_required) * cost[1];
+    }
+    else if (total_slice_required > v1[1] && total_cheese_required > v1[2])
+    {
+        extra_cost_required += abs(v1[1] - total_slice_required) * cost[1];
+        extra_cost_required += abs(v1[2] - total_cheese_required) * cost[2];
+    }
+    else if (total_bread_required > v1[0] && total_cheese_required > v1[2])
+    {
+        extra_cost_required += abs(v1[0] - total_bread_required) * cost[0];
+        extra_cost_required += abs(v1[2] - total_cheese_required) * cost[2];
+    }
+    else
+    {
+        extra_cost_required += abs(v1[0] - total_bread_required) * cost[0];
+        extra_cost_required += abs(v1[1] - total_slice_required) * cost[1];
+        extra_cost_required += abs(v1[2] - total_cheese_required) * cost[2];
+    }
+    if (extra_cost_required <= total_money)
+    {
+        return true;
+    }
+    return false;
+}
+void hamburgers()
+{
+    /*
+        nb,ns and nc and BSC -- bottom to top and bread,sausage and cheese respectively .
+        pb,ps and pc are the respective prices of each item.
+        bread,sausages and cheese pieces.
+        total r rubles is the total money tha the person can use to buy the items.
+    */
+    string s;
+    cin >> s;
+    ll bread_count, slice_count, cheese_count;
+    cin >> bread_count >> slice_count >> cheese_count;
+    vector<ll> v1 = {bread_count, slice_count, cheese_count};
+    ll bread_cost, slice_cost, cheese_cost;
+    cin >> bread_cost >> slice_cost >> cheese_cost;
+    vector<ll> v2 = {bread_cost, slice_cost, cheese_cost};
+
+    ll total_money;
+    cin >> total_money;
+    ll low = 0;
+    ll high = 1e18;
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + high) / 2;
+        if (check_burgers(mid, v1, v2, total_money, s))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void random_fixed_window()
+{
+    ll n, d;
+    cin >> n >> d;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    unordered_map<ll, ll> m;
+    ll distinct = 0;
+    for (ll x = 0; x <= d - 1; x++)
+    {
+        if (!m.count(v[x]))
+        {
+            distinct++;
+        }
+        m[v[x]]++;
+    }
+    ll l = 0;
+    ll r = d - 1;
+    ll pen = distinct;
+    while (l <= r && r < v.size())
+    {
+        if (distinct <= pen)
+        {
+            pen = min(pen, distinct);
+        }
+        m[v[l]]--;
+        if (m[v[l]] <= 0)
+        {
+            distinct--;
+            m.erase(v[l]);
+        }
+        if ((r + 1) < n)
+        {
+            if (!m.count(v[r + 1]))
+            {
+                distinct++;
+            }
+            m[v[r + 1]]++;
+        }
+        l++;
+        r++;
+    }
+    cout << pen << "\n";
+}
+bool check_midnight_lamp(ll mid, ll k, ll n)
+{
+    ll total_written = mid;
+    ll curr_power = 1;
+    while (1)
+    {
+        ll deno = floor(mid / pow(k, curr_power));
+        if (deno == 0)
+            break;
+        else
+        {
+            total_written += deno;
+        }
+        curr_power++;
+    }
+    return total_written >= n;
+}
+void midnight_lamp()
+{
+    ll n, k;
+    cin >> n >> k;
+    ll low = 1;
+    ll high = 1e9;
+    ll ans = 0;
+
+    while (low <= high)
+    {
+        ll mid = low + (high - low) / 2;
+
+        if (check_midnight_lamp(mid, k, n))
+        {
+            ans = mid;
+            high = mid - 1;
+        }
+        else
+        {
+            low = mid + 1;
+        }
+    }
+
+    cout << ans << "\n";
+}
+void count_zeros_maxm()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = INT_MIN;
+    ll cnt_0 = 0;
+    while (tail <= n)
+    {
+        while ((head + 1) < n && (v[head + 1] == 1) || (v[head + 1] == 0 && cnt_0 < k))
+        {
+            if (v[head + 1] == 0)
+                cnt_0++;
+            head++;
+        }
+        ans = max(ans, (head - tail + 1));
+        if (tail <= head)
+        {
+            if (v[tail] == 0)
+                cnt_0--;
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void cnt_distinct_element()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    ll distinct_cnt = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    unordered_map<ll, ll> freq_map;
+
+    while (tail < n)
+    {
+        while ((head + 1) < n && ((distinct_cnt < k) || (distinct_cnt == k && freq_map.count(v[head + 1]))))
+        {
+            head++;
+            if (freq_map.count(v[head]) == false)
+            {
+                distinct_cnt++;
+            }
+            freq_map[v[head]]++;
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            freq_map[v[tail]]--;
+            if (freq_map[v[tail]] <= 0)
+            {
+                freq_map.erase(v[tail]);
+                distinct_cnt--;
+            }
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void longest_distinct_subarray()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll distinct_cnt = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    unordered_map<ll, ll> freq_map;
+
+    while (tail < n)
+    {
+        while ((head + 1) < n && (freq_map.count(v[head + 1]) == false))
+        {
+            head++;
+            if (freq_map.count(v[head]) == false)
+            {
+                distinct_cnt++;
+            }
+            freq_map[v[head]]++;
+        }
+        ans = max(ans, head - tail + 1);
+        if (tail <= head)
+        {
+            freq_map[v[tail]]--;
+            if (freq_map[v[tail]] <= 0)
+            {
+                freq_map.erase(v[tail]);
+                distinct_cnt--;
+            }
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void shortest_subarray()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll distinct_cnt = 0;
+    unordered_set<ll> st;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        st.insert(v[x]);
+    }
+    // Distinct elements equal k where k is total .
+    // finding longest subarray having distinct elements <= (k-1) will find answer .
+    ll k = (ll)st.size() - 1;
+    ll head = -1;
+    ll tail = 0;
+    ll ans = (ll)v.size();
+    unordered_map<ll, ll> freq_map;
+
+    while (tail < n)
+    {
+        while ((head + 1) < n && ((distinct_cnt < k) || (distinct_cnt == k && freq_map.count(v[head + 1]))))
+        {
+            head++;
+            if (freq_map.count(v[head]) == false)
+            {
+                distinct_cnt++;
+            }
+            freq_map[v[head]]++;
+        }
+        if ((head + 1) < n)
+        {
+            ans = min(ans, (head - tail + 1) + 1);
+        }
+        if (tail <= head)
+        {
+            freq_map[v[tail]]--;
+            if (freq_map[v[tail]] <= 0)
+            {
+                freq_map.erase(v[tail]);
+                distinct_cnt--;
+            }
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void subarray_sum_less_k()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    ll curr_sum = 0;
+    while (tail < n)
+    {
+        while ((head + 1) < n && (curr_sum + v[head + 1] <= k))
+        {
+            head++;
+            curr_sum += v[head];
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            curr_sum -= v[tail];
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
@@ -6970,8 +7824,8 @@ int main()
     // cin.tie(0);
     // cout.tie(0);
     int t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
@@ -6979,6 +7833,19 @@ int main()
 }
 
 /*
+    2 pointers -
+
+    1)Form 0 - sliding window .
+    2)Form 1 - dynamic window and L and R --- subarray based and gap minimization problems.
+        i)eat as much as possible.
+        ii)update ans.
+        ii)remove 1 element.
+    3)Form 2 - pointers converging .
+
+    4)Form 3 - pointers on 2 different structures .
+
+
+
     // Monospace array having all 0s before 1s and vice-versa will fall under this category .
     // default case to be kept in mind thus following the same template for binary search and finding first one.
     // Forms - sublinear and binary search on answers,lower_bounds and binary search on every start .
