@@ -7806,6 +7806,552 @@ void subarray_sum_less_k()
     }
     cout << ans << "\n";
 }
+int minimumScore(vector<vector<int>> &grid)
+{
+    int n = grid.size();
+
+    if (n == 0)
+    {
+        return 0;
+    }
+
+    for (auto &row : grid)
+    {
+        if (row.empty())
+        {
+            return -1;
+        }
+
+        sort(row.begin(), row.end());
+    }
+
+    using State = tuple<int, int, int>;
+    priority_queue<State, vector<State>, greater<State>> minimumHeap;
+
+    int currentMaximum = LLONG_MIN;
+
+    for (int row = 0; row < n; row++)
+    {
+        minimumHeap.push({grid[row][0], row, 0});
+        currentMaximum = max(currentMaximum, grid[row][0]);
+    }
+
+    int answer = LLONG_MAX;
+
+    while (true)
+    {
+        auto [currentMinimum, row, position] = minimumHeap.top();
+        minimumHeap.pop();
+
+        answer = min(answer, currentMaximum - currentMinimum);
+
+        int nextPosition = position + 1;
+
+        if (nextPosition == (int)grid[row].size())
+        {
+            break;
+        }
+
+        int nextValue = grid[row][nextPosition];
+        minimumHeap.push({nextValue, row, nextPosition});
+        currentMaximum = max(currentMaximum, nextValue);
+    }
+
+    return answer;
+}
+void is_subsequence()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> v1(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v1[x];
+    vector<ll> v2(m);
+    for (ll x = 0; x < m; x++)
+        cin >> v2[x];
+
+    ll head_1 = 0;
+    ll head_2 = 0;
+    while ((head_1) < n && head_2 < m)
+    {
+        if (v1[head_1] == v2[head_2] && (head_2 + 1) >= m)
+        {
+            cout << "YES" << "\n";
+            return;
+        }
+        else if (v1[head_1] == v2[head_2])
+        {
+            head_1++;
+            head_2++;
+        }
+        if (v1[head_1] != v2[head_2])
+        {
+            head_1++;
+        }
+    }
+    cout << "NO" << "\n";
+}
+vector<vector<int>> threeSum(vector<int> &nums)
+{
+    vector<vector<int>> ans;
+    set<int> visited;
+
+    sort(nums.begin(), nums.end());
+    for (int x = 0; x < nums.size(); x++)
+    {
+        int i = x + 1;
+        int j = nums.size() - 1;
+        if (visited.count(nums[x]))
+            continue;
+        visited.insert(nums[x]);
+        while (i < j)
+        {
+            int sum = (nums[x] + nums[i] + nums[j]);
+            if (sum < 0)
+            {
+                i++;
+            }
+            else if (sum > 0)
+            {
+                j--;
+            }
+            else
+            {
+                ans.push_back({nums[x], nums[i], nums[j]});
+                i++;
+                while (nums[i] == nums[i - 1] && i < j)
+                {
+                    i++;
+                }
+            }
+        }
+    }
+    return ans;
+}
+ll inclusion_exclusion_k_non_prime(vector<int> &coins, ll mid)
+{
+    int sum = 0;
+    for (int msk = 1; msk < (1 << coins.size()); ++msk)
+    {
+        int mult = -1,
+            bits = 0;
+        for (int i = 0; i < (int)coins.size(); ++i)
+        {
+            if (msk & (1 << i))
+            {
+                ++bits;
+                if (mult == -1)
+                    mult = coins[i];
+                else if (mult != -1)
+                {
+                    mult = lcm(mult, coins[i]);
+                }
+            }
+        }
+
+        int cur = mid / mult;
+        if (bits % 2 == 1)
+            sum += cur;
+        else
+            sum -= cur;
+    }
+    return mid - sum;
+    // cout << mid - sum << "\n";
+}
+bool check_find_kth_smallest(long long mid, vector<int> &coins, int k)
+{
+    // (Finding number of elements <= mid ) >= k
+    return inclusion_exclusion_k_non_prime(coins, mid) >= k;
+}
+long long findKthSmallest(vector<int> &coins, int k)
+{
+    ll start = 0;
+    for (ll x = 0; x < coins.size(); x++)
+    {
+        start = min(start, (ll)coins[x]);
+    }
+    ll end = 1e18;
+    ll ans = 0;
+    while (start <= end)
+    {
+        ll mid = (start + (end - start) / 2);
+        if (check_find_kth_smallest(mid, coins, k))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    return ans;
+}
+void inclusion_exclusion_k()
+{
+    int n, r;
+    cin >> n >> r;
+    vector<int> p;
+    for (int i = 2; i * i <= n; ++i)
+        if (n % i == 0)
+        {
+            p.push_back(i);
+            while (n % i == 0)
+                n /= i;
+        }
+    if (n > 1)
+        p.push_back(n);
+
+    int sum = 0;
+    for (int msk = 1; msk < (1 << p.size()); ++msk)
+    {
+        cout << "{ ";
+        int mult = 1,
+            bits = 0;
+        for (int i = 0; i < (int)p.size(); ++i)
+        {
+            if (msk & (1 << i))
+            {
+                cout << p[i] << " ";
+                ++bits;
+                mult *= p[i];
+            }
+        }
+        cout << "} -> mult = " << mult << "\n";
+
+        int cur = r / mult;
+        if (bits % 2 == 1)
+            sum += cur;
+        else
+            sum -= cur;
+    }
+
+    cout << r - sum << "\n";
+}
+bool check_kth_number(ll mid, ll n, ll m, ll k)
+{
+    ll cnt = 0;
+    for (ll x = 1; x <= n; x++)
+    {
+        cnt += min(m, mid / x);
+    }
+    return cnt >= k;
+}
+int findKthNumber(int m, int n, int k)
+{
+    ll start = 1;
+    ll end = 1e18;
+    ll ans = 0;
+    while (start <= end)
+    {
+        ll mid = (start + (end - start) / 2);
+        if (check_kth_number(mid, n, m, k))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    return ans;
+}
+bool check_kth_number(ll mid, vector<vector<int>> &matrix, ll k)
+{
+    ll cnt = 0;
+    for (ll x = 0; x < matrix.size(); x++)
+    {
+        auto it = upper_bound(matrix[x].begin(), matrix[x].end(), mid) - matrix[x].begin();
+        cnt += it;
+    }
+    return cnt >= k;
+}
+int kthSmallest(vector<vector<int>> &matrix, int k)
+{
+    ll start = -1e9;
+    ll end = 1e9;
+    ll ans = 0;
+    while (start <= end)
+    {
+        ll mid = (start + (end - start) / 2);
+        if (check_kth_number(mid, matrix, k))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    return ans;
+}
+bool check_smallest_distance_pair(ll mid, vector<int> &nums, int k)
+{
+    ll cnt = 0;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        auto pos =
+            upper_bound(nums.begin() + x + 1, nums.end(), (mid + nums[x])) -
+            nums.begin();
+        cnt += (pos - x - 1);
+    }
+    return cnt >= k;
+}
+int smallestDistancePair(vector<int> &nums, int k)
+{
+    sort(nums.begin(), nums.end());
+    ll start = 0;
+    ll end = nums[nums.size() - 1] - nums[0];
+    ll ans = 0;
+    while (start <= end)
+    {
+        ll mid = (start + (end - start) / 2);
+        if (check_smallest_distance_pair(mid, nums, k))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    return ans;
+}
+int findRadius(vector<int> &houses, vector<int> &heaters)
+{
+    int ans = INT_MAX;
+    sort(heaters.begin(), heaters.end());
+    for (int x = 0; x < houses.size(); x++)
+    {
+        auto it = lower_bound(heaters.begin(), heaters.end(), houses[x]);
+        if (it == heaters.end())
+        {
+            int local_min = (houses[x] - *heaters.rbegin());
+            ans = max(ans, local_min);
+        }
+        else
+        {
+            int local_min = (*it - houses[x]);
+            if (it != heaters.begin())
+            {
+                it--;
+                local_min = min(local_min, (houses[x] - *it));
+            }
+            ans = max(ans, local_min);
+        }
+    }
+    return ans;
+}
+bool check_max_possible_score(long long mid, vector<int> &start, int d)
+{
+    long long prev = start[0];
+    for (int x = 1; x < start.size(); x++)
+    {
+        // Any value >= mid is valid .
+        // Having 3 cases respectively prev+mid >= start & <= end
+        // prev+mid < start so it will satisfy >= mid so we will take next
+        // start as the newer value and prev+mid > end then it is not
+        // possible .
+        if ((prev + mid) >= start[x] && (prev + mid) <= (start[x] + d))
+        {
+            prev = prev + mid;
+        }
+        else if ((prev + mid) < start[x])
+        {
+            prev = start[x];
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return true;
+}
+int maxPossibleScore(vector<int> &start, int d)
+{
+    long long ans = 0;
+    long long low = 0;
+    long long high = 1e18;
+
+    sort(start.begin(), start.end());
+    while (low <= high)
+    {
+        long long mid = (low + (high - low) / 2);
+        if (check_max_possible_score(mid, start, d))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    return ans;
+}
+bool compute_new_cost(ll k, ll tail, ll head, multiset<ll> &st, vector<ll> &nums)
+{
+    ll curr_mini = *st.begin();
+    ll curr_maxi = *st.rbegin();
+    if (curr_maxi < nums[head])
+    {
+        curr_maxi = nums[head];
+    }
+    if (curr_mini > nums[head])
+    {
+        curr_mini = nums[head];
+    }
+    return ((curr_maxi - curr_mini) * (head - tail + 1)) <= k;
+}
+long long countSubarrays(vector<ll> &nums, long long k)
+{
+
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    multiset<ll> st;
+    while (tail < n)
+    {
+        while ((head + 1) < n && compute_new_cost(k, tail, head, st, nums))
+        {
+            head++;
+            st.insert(nums[head]);
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            tail++;
+            ll curr_mini = *st.begin();
+            ll curr_maxi = *st.rbegin();
+            if (curr_maxi == nums[tail] && curr_mini != nums[tail])
+            {
+                st.erase(st.find(*st.rbegin()));
+            }
+            else if (curr_maxi != nums[tail] && curr_mini == nums[tail])
+            {
+                st.erase(st.find(*st.begin()));
+            }
+            else if (curr_maxi == nums[tail] && curr_mini == nums[tail])
+            {
+                st.erase(st.find(*st.rbegin()));
+            }
+            else
+            {
+                st.erase(st.find(nums[tail]));
+            }
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+// int subarraysWithKDistinct(vector<ll>& v, int k) {
+//     return cnt_distinct_element(v, k) - cnt_distinct_element(v, k - 1);
+// }
+int lengthOfLongestSubstring(string s)
+{
+    int start = 0;
+    int end = 0;
+    string sub = "";
+    int cnt = 0;
+    unordered_map<char, int> m;
+    while (start <= end && end < s.length())
+    {
+        m[s[end]] += 1;
+        sub.push_back(s[end]);
+        if (m[s[end]] > 1)
+        {
+            cnt = max(cnt, (end - start));
+            unordered_map<char, int> m2;
+            m = m2;
+            sub = "";
+            start++;
+            end = start;
+        }
+        else if (m[s[end]] <= 1)
+        {
+            end++;
+            if (end >= s.length())
+            {
+                cnt = max(cnt, (end - start));
+                unordered_map<char, int> m2;
+                m = m2;
+                sub = "";
+                start++;
+                end = start;
+            }
+        }
+    }
+    return cnt;
+}
+int numRescueBoats(vector<int> &people, int limit)
+{
+    sort(people.begin(), people.end());
+    int s = 0;
+    int e = people.size() - 1;
+    int cnt = 0;
+    while (s <= e)
+    {
+        if ((people[s] + people[e]) <= limit)
+        {
+            cnt += 1;
+            s++;
+            e--;
+        }
+        else if ((people[s] + people[e]) > limit)
+        {
+            cnt += 1;
+            e--;
+        }
+    }
+    return cnt;
+}
+int countDistinct(vector<int> &nums, int k, int p)
+{
+    int head = -1;
+    int tail = 0;
+    int ans = 0;
+    int cnt = 0;
+    while (tail < nums.size())
+    {
+        while ((head + 1) < nums.size() && ((cnt < k) || (cnt == k && nums[head + 1] % p != 0)))
+        {
+            head++;
+            if (nums[head] % p == 0)
+                cnt++;
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            if (nums[tail] % p == 0)
+                cnt--;
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    return ans;
+}
+int validSubarraySize(vector<int>& nums, int threshold) {
+    
+}
+
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
