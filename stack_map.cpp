@@ -266,6 +266,12 @@ long long minInversionCount(vector<int> &nums, int k)
 {
     return 1;
 }
+int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
+        /*
+            
+        
+        */
+}   
 void solve()
 {
     // [1,3,6] ---> [0,1,0,0] -----> [1,2,3]

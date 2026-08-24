@@ -8348,10 +8348,328 @@ int countDistinct(vector<int> &nums, int k, int p)
     }
     return ans;
 }
-int validSubarraySize(vector<int>& nums, int threshold) {
+bool compute_subarray(vector<int> &nums, long long k, long long head_pos, long long tail_pos, long long curr_sum)
+{
+    curr_sum += nums[head_pos];
+    return (curr_sum * (head_pos - tail_pos + 1)) <= k;
+}
+long long countSubarrays(vector<int> &nums, long long k)
+{
+    long long head = -1;
+    long long tail = 0;
+    long long ans = 0;
+    long long sum = 0;
+    while (tail < nums.size())
+    {
+        while ((head + 1) < nums.size() && compute_subarray(nums, k, head + 1, tail, sum))
+        {
+            head++;
+            sum += nums[head];
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            sum -= nums[tail];
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    return ans;
+}
+vector<vector<int>> findDisappearedNumbers(vector<int> &nums, int lower,
+                                           int upper)
+{
+    vector<vector<int>> ans;
+    bool start_flag = true;
+    bool end_flag = false;
+    unordered_set<int> st;
+    for (auto it : nums)
+        st.insert(it);
+    for (int x = lower; x <= upper; x++)
+    {
+        if (!st.count(x) && start_flag == true)
+        {
+            ans.push_back({x, -1});
+            end_flag = true;
+            start_flag = false;
+        }
+        if (st.count(x) && end_flag == true)
+        {
+            if (ans.size() != 0)
+            {
+                vector<int> v = ans.back();
+                ans[ans.size() - 1] = {v[0], x - 1};
+            }
+            start_flag = true;
+            end_flag = false;
+        }
+    }
+    if (end_flag == true && ans.size() >= 1 && ans.back()[1] == -1)
+    {
+        vector<int> v = ans.back();
+        ans[ans.size() - 1] = {v[0], upper};
+    }
+
+    return ans;
+}
+int longestSubarray(vector<int> &nums, int k)
+{
+    build_spf(100001);
+    int head = -1;
+    int tail = 0;
+    int ans = 0;
+    int distinct_cnt = 0;
+    unordered_map<int, int> freq_map;
+    while (tail < nums.size())
+    {
+        while ((head + 1) < nums.size())
+        {
+            int curr_num = nums[head + 1];
+            int curr_distinct_cnt = distinct_cnt;
+            unordered_map<ll, ll> curr_num_factors =
+                compute_factors(curr_num);
+            for (auto it : curr_num_factors)
+            {
+                int curr_factor = it.first;
+                if (!freq_map.count(curr_factor))
+                {
+                    curr_distinct_cnt++;
+                }
+            }
+            if (curr_distinct_cnt > k)
+                break;
+            head++;
+            for (auto it : curr_num_factors)
+            {
+                int curr_factor = it.first;
+                if (freq_map.count(curr_factor) == false)
+                {
+                    distinct_cnt++;
+                }
+                freq_map[curr_factor] += it.second;
+            }
+        }
+        ans = max(ans, (head - tail + 1));
+        if (tail <= head)
+        {
+            int curr_num = nums[tail];
+            unordered_map<ll, ll> curr_num_factors =
+                compute_factors(curr_num);
+            for (auto it : curr_num_factors)
+            {
+                int curr_factor = it.first;
+                freq_map[curr_factor] -= it.second;
+                if (freq_map[curr_factor] <= 0)
+                {
+                    distinct_cnt--;
+                    freq_map.erase(curr_factor);
+                }
+            }
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    return ans;
+}
+int longestSubstring(string s, int k)
+{
+    int ans = 0;
+    // Iterating over the fixed number of
+    // unique characters in a string or a substring .
+    for (int x = 1; x <= 26; x++)
+    {
+        // Maximum 1 unique element can exist
+        // so finding all substrings having unique <= 1
+        // and checking each of this unique character has frequency >= k.
+        unordered_map<char, int> freq_map;
+        int curr_unique_cnt = 0;
+        int maximum_unique_cnt = x;
+        int head = -1;
+        int tail = 0;
+        while (tail < s.size())
+        {
+            // Eating as much as you can.
+            while ((head + 1) < s.size() &&
+                   ((curr_unique_cnt < maximum_unique_cnt) ||
+                    curr_unique_cnt == maximum_unique_cnt &&
+                        freq_map.count(s[head + 1])))
+            {
+                head++;
+                if (!freq_map.count(s[head]))
+                {
+                    curr_unique_cnt++;
+                }
+                freq_map[s[head]]++;
+            }
+            // Updating answer on the basis of check.
+            bool check_flag = true;
+            for (auto it : freq_map)
+            {
+                if (it.second < k)
+                {
+                    check_flag = false;
+                    break;
+                }
+            }
+            // Updating ans if condition satisfies .
+            if (check_flag)
+            {
+                ans = max(ans, (head - tail + 1));
+            }
+            // Removing tail element .
+            if (tail <= head)
+            {
+                freq_map[s[tail]]--;
+                if (freq_map[s[tail]] <= 0)
+                {
+                    freq_map.erase(s[tail]);
+                    curr_unique_cnt--;
+                }
+                tail++;
+            }
+            else
+            {
+                tail++;
+                head = tail - 1;
+            }
+        }
+    }
+    return ans;
+}
+bool check(unordered_map<char, int> &m,
+           unordered_map<char, int> &m2,
+           string s, string t, int head_pos)
+{
+    for (auto &[ch, cnt] : m)
+    {
+        if (m2[ch] < cnt)
+            return false;
+    }
+
+    while (head_pos < (int)s.size())
+    {
+        char ch = s[head_pos];
+
+        if (!m.count(ch))
+        {
+            head_pos++;
+        }
+        else if (m2[ch] > m[ch])
+        {
+            m2[ch]--;
+            head_pos++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return true;
+}
+string longestSubsequenceRepeatedK(string s, string t)
+{
+    int head = -1;
+    int tail = 0;
+    int ans_l = -1;
+    int ans_r = -1;
+    int len = INT_MAX;
+    unordered_map<char, int> m;
+    for (auto ch : t)
+    {
+        m[ch]++;
+    }
+    unordered_map<char, int> m2;
+    while (tail < s.size())
+    {
+        // Eating as much as you can.
+        while ((head + 1) < s.size() &&
+               check(m, m2, s, t, head + 1))
+        {
+            head++;
+            m2[s[head]]++;
+        }
+        if ((head - tail + 1) < len)
+        {
+            ans_l = tail;
+            ans_r = head;
+        }
+        // Removing tail element .
+        if (tail <= head)
+        {
+            m2[s[tail]]--;
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    string ans = "";
+    for (int x = ans_l; x <= ans_r; x++)
+    {
+        if (x <= 0 || x >= s.length())
+            return "";
+        ans.push_back(s[x]);
+    }
+    return ans;
+}
+bool check(unordered_map<char, int> &m, unordered_map<char, int> &m2)
+{
+    for (auto &[ch, cnt] : m)
+    {
+        if (m2[ch] < cnt)
+            return false;
+    }
+    return true;
+}
+string minWindow(string s, string t)
+{
+    if (t.size() > s.size())
+        return "";
+    int head = -1;
+    int tail = 0;
+    int ans_l = -1;
+    int len = INT_MAX;
+    unordered_map<char, int> m;
+    for (char ch : t)
+        m[ch]++;
+    unordered_map<char, int> m2;
+    while (tail < (int)s.size())
+    {
+        while (head + 1 < (int)s.size() && !check(m, m2))
+        {
+            head++;
+            m2[s[head]]++;
+        }
+        if (check(m, m2) && head - tail + 1 < len)
+        {
+            len = head - tail + 1;
+            ans_l = tail;
+        }
+
+        m2[s[tail]]--;
+        tail++;
+    }
+    if (ans_l == -1)
+        return "";
+    return s.substr(ans_l, len);
+}
+int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
     
 }
-
+int validSubarraySize(vector<int> &nums, int threshold)
+{
+}
 void solve()
 {
     // Approximated LRU in redis using idle time optimization and LRU clock .
@@ -8365,7 +8683,7 @@ int main()
     // compute_primes();
     // compute_co_prime();
     // O(log log p)
-    // build_spf(1000000);
+    build_spf(1000000);
     // ios_base::sync_with_stdio(false);
     // cin.tie(0);
     // cout.tie(0);
