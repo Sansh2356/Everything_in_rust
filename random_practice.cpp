@@ -8664,8 +8664,161 @@ string minWindow(string s, string t)
         return "";
     return s.substr(ans_l, len);
 }
-int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
-    
+bool compute_robots_cost(int head_pos, vector<int> &chargeTimes, vector<int> &runningCosts, long long budget, long long curr_sum, multiset<long long> &st, int tail_pos)
+{
+    long long curr_element = chargeTimes[head_pos];
+    long long curr_maxi = 0;
+    if (st.empty())
+    {
+        curr_maxi = curr_element;
+    }
+    else
+    {
+        curr_maxi = *st.rbegin();
+    }
+    curr_sum += curr_element;
+    if (curr_element > curr_maxi)
+    {
+        curr_maxi = curr_element;
+    }
+    return curr_maxi + ((head_pos - tail_pos + 1) * curr_sum) <= budget;
+}
+int maximumRobots(vector<int> &chargeTimes, vector<int> &runningCosts, long long budget)
+{
+    int ans = 0;
+    int tail = 0;
+    int head = -1;
+    long long sum = 0;
+    multiset<long long> st;
+    while (tail < runningCosts.size())
+    {
+        while ((head + 1) < runningCosts.size() && compute_robots_cost(head + 1, chargeTimes, runningCosts, budget, sum, st, tail))
+        {
+            head++;
+            st.insert(chargeTimes[head]);
+            sum += runningCosts[head];
+        }
+        ans = max(ans, (head - tail + 1));
+        if (tail <= head)
+        {
+            sum -= runningCosts[tail];
+            st.erase(st.find(runningCosts[tail]));
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    return ans;
+}
+void enough_array()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    ll curr_sum = 0;
+    while (tail < n)
+    {
+        while ((head + 1) < n && (curr_sum + v[head + 1] < k))
+        {
+            head++;
+            curr_sum += v[head];
+        }
+        ans += (n - (head + 1));
+        if (tail <= head)
+        {
+            curr_sum -= v[tail];
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+bool check_sparse_range(set<ll> &st, int head_pos, vector<ll> &v, ll d)
+{
+    ll curr_maxi = *st.rbegin();
+    ll curr_element = v[head_pos];
+    if (curr_maxi < curr_element)
+    {
+        if ((curr_element - curr_maxi) >= d)
+            return true;
+        else
+        {
+            return false;
+        }
+    }
+    auto it = st.upper_bound(v[head_pos]);
+    if (it != st.end())
+    {
+        if (*it - v[head_pos] >= d)
+        {
+            if (it != st.begin())
+            {
+                it--;
+                if (v[head_pos] - *it >= d)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+}
+void sparse_range()
+{
+    ll n, d;
+    cin >> n >> d;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    set<ll> st;
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    while (tail < n)
+    {
+        while ((head + 1) < n && (st.empty() || (st.count(v[head + 1]) == false && check_sparse_range(st, head + 1, v, d))))
+        {
+            head++;
+            st.insert(v[head]);
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            st.erase(st.find(v[tail]));
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+int findMaxValueOfEquation(vector<vector<int>> &points, int k)
+{
 }
 int validSubarraySize(vector<int> &nums, int threshold)
 {

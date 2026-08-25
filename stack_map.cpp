@@ -262,16 +262,11 @@ vector<ll> next_greater_element(vector<ll> v)
 void minimizing_difference()
 {
 }
-long long minInversionCount(vector<int> &nums, int k)
+int findMaxValueOfEquation(vector<vector<int>> &points, int k)
 {
     return 1;
 }
-int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
-        /*
-            
-        
-        */
-}   
+
 void solve()
 {
     // [1,3,6] ---> [0,1,0,0] -----> [1,2,3]
