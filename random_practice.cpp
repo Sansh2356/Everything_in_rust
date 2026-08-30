@@ -8817,6 +8817,731 @@ void sparse_range()
     }
     cout << ans << "\n";
 }
+void cses_sliding_window_sum()
+{
+    ll n, k;
+    cin >> n >> k;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    ll distinct_cnt = 0;
+    map<ll, ll> freq_map;
+    for (ll x = 0; x < n; x++)
+    {
+        if (!freq_map.count(v[x]))
+            distinct_cnt++;
+        freq_map[v[x]]++;
+        if ((x - k) >= 0)
+        {
+            freq_map[v[(x - k)]]--;
+            if (freq_map[v[x - k]] <= 0)
+            {
+                freq_map.erase(freq_map.find(v[x - k]));
+                distinct_cnt--;
+            }
+        }
+        if ((x + 1) >= k)
+        {
+            cout << distinct_cnt << " ";
+        }
+    }
+}
+int seg_tree[100];
+// Segment seg_tree implementation //
+// dividing the complete query range in the form power of 2^n hence making the complete binary seg_tree //
+// if the length is not a power of 2 we will add padding to make it a neareast power of 2//
+// Since the length of seg_tree is 2*n-1 where n is the number of array elements and hence the building
+// time for segment seg_tree comes out to be O(n)
+int seg(int node, int query_left, int query_right, int node_low, int node_high)
+{
+    // check whether the current node interval lies completely within the query interval //
+    if (query_left <= node_low && query_right >= node_high)
+    {
+        return node;
+    }
+    // check whether the current node interval lies completely outside the query interval //
+    if (query_right < node_low || query_left > node_high)
+    {
+        return 0;
+    }
+    // check whether the current node interval lies partially within the query interval //
+    // dividing each of the nodes and alloting them their seperate intervals//
+    int node_last_val = (node_high + node_low) / 2;
+    return seg(2 * node, query_left, query_right, node_low, node_last_val) + seg(2 * node + 1, query_left, query_right, node_last_val + 1, node_high);
+}
+// Iterative updation in segment seg_tree//
+void update(int val, int n, int i)
+{
+    seg_tree[n + i] = val;
+    for (int x = (n + i) / 2; x >= 1; x /= 2)
+    {
+        seg_tree[x / 2] = seg_tree[2 * x] + seg_tree[2 * x + 1];
+    }
+}
+// Recursive updation in segment seg_tree//
+void change(int node, int node_high, int node_low, int v, int query_high, int query_low)
+{
+    if (query_low >= node_low && query_high <= node_high)
+    {
+        // It will happen only in the case of leaf node only hence set the leaf to updated value//
+        seg_tree[node] = v;
+        return;
+    }
+    if (query_high < node_low || query_low > node_high)
+    {
+        return;
+    }
+    int node_last_val = (node_high + node_low) / 2;
+    // move left child //
+    change(2 * node, node_low, node_last_val, v, query_high, query_low);
+    // move right child//
+    change(2 * node + 1, node_last_val + 1, node_high, v, query_high, query_low);
+    // update the nodes values along the ancestors path until root//
+    seg_tree[node] = seg_tree[2 * node] + seg_tree[2 * node + 1];
+    return;
+}
+class SegtreeNode
+{
+public:
+    ll sum;
+    SegtreeNode()
+    {
+        this->sum = 0;
+    }
+};
+SegtreeNode merge(SegtreeNode a, SegtreeNode b)
+{
+    SegtreeNode newNode = SegtreeNode();
+    newNode.sum = a.sum + b.sum;
+    return newNode;
+}
+SegtreeNode segtree[10001];
+void build_seg_tree(ll node, ll left_range, ll right_range)
+{
+    if (left_range == right_range)
+    {
+        segtree[node].sum = 0;
+        return;
+    }
+    ll mid = (left_range + right_range) / 2;
+    build_seg_tree(2 * node, left_range, mid);
+    build_seg_tree(2 * node + 1, mid + 1, right_range);
+    segtree[node] = merge(segtree[2 * node], segtree[2 * node + 1]);
+}
+void update_seg_tree(ll node, ll left_range, ll right_range, ll new_val, ll pos)
+{
+    if (pos < left_range || pos > right_range)
+    {
+        return;
+    }
+    if (left_range == right_range)
+    {
+        segtree[node].sum += new_val;
+        return;
+    }
+    ll mid = (left_range + right_range) / 2;
+    update_seg_tree(2 * node, left_range, mid, new_val, pos);
+    update_seg_tree(2 * node + 1, mid + 1, right_range, new_val, pos);
+    segtree[node] = merge(segtree[2 * node], segtree[2 * node + 1]);
+}
+SegtreeNode query_seg_tree(ll node, ll left_range, ll right_range, ll left_query_range, ll right_query_range)
+{
+    // Fully inclusive .
+    if (left_range >= left_query_range && right_query_range >= right_range)
+    {
+        return segtree[node];
+    }
+    if (right_query_range < left_range || left_query_range > right_range)
+    {
+        return SegtreeNode();
+    }
+    ll mid = (left_range + right_range) / 2;
+    return merge(query_seg_tree(2 * node, left_range, mid, left_query_range, right_query_range), query_seg_tree(2 * node + 1, mid + 1, right_range, left_query_range, right_query_range));
+}
+void range_update_queries_cses()
+{
+    ll n, q;
+    cin >> n >> q;
+    build_seg_tree(1, 0, n - 1);
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    while (q--)
+    {
+        int query_type;
+        cin >> query_type;
+        if (query_type == 1)
+        {
+            ll a, b, u;
+            cin >> a >> b >> u;
+            a--;
+            b--;
+            update_seg_tree(1, 0, n - 1, u, a);
+            update_seg_tree(1, 0, n - 1, -u, b + 1);
+        }
+        else if (query_type == 2)
+        {
+            ll k;
+            cin >> k;
+            k--;
+            SegtreeNode newnode = query_seg_tree(1, 0, n - 1, 1, k);
+            cout << newnode.sum + v[k] << "\n";
+        }
+    }
+}
+void dynamic_range_sum_queries()
+{
+    ll n, q;
+    cin >> n >> q;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    build_seg_tree(1, 0, n - 1, v);
+    while (q--)
+    {
+        int query_type;
+        cin >> query_type;
+        if (query_type == 1)
+        {
+            ll k, u;
+            cin >> k >> u;
+            k--;
+            update_seg_tree(1, 0, n - 1, u, k);
+        }
+        else if (query_type == 2)
+        {
+            ll a, b;
+            cin >> a >> b;
+            a--;
+            b--;
+            cout << query_seg_tree(1, 0, n - 1, a, b).sum << "\n";
+        }
+    }
+}
+void flipping_game()
+{
+    int n;
+    cin >> n;
+
+    vector<int> a(n);
+    for (int &x : a)
+        cin >> x;
+
+    int ans = 0;
+
+    for (int l = 0; l < n; l++)
+    {
+        for (int r = l; r < n; r++)
+        {
+            vector<int> b = a;
+
+            for (int i = l; i <= r; i++)
+                b[i] = 1 - b[i];
+
+            int ones = 0;
+            for (int x : b)
+                ones += x;
+
+            ans = max(ans, ones);
+        }
+    }
+
+    cout << ans << '\n';
+}
+void mike_and_strings()
+{
+    ll n;
+    cin >> n;
+
+    unordered_map<int, vector<pair<string, int>>> m;
+
+    for (int i = 0; i < n; i++)
+    {
+        string s;
+        cin >> s;
+
+        for (int x = 0; x < s.length(); x++)
+        {
+            m[i].push_back({s, x});
+            rotate(s.begin(), s.begin() + 1, s.end());
+        }
+    }
+
+    int ans = INT_MAX;
+
+    for (auto it : m)
+    {
+        for (auto rotation : it.second)
+        {
+            bool local_flag = true;
+            int sum = rotation.second;
+
+            for (auto it_2 : m)
+            {
+                if (it_2.first == it.first)
+                    continue;
+
+                bool flag_2 = false;
+
+                for (auto str : it_2.second)
+                {
+                    if (str.first == rotation.first)
+                    {
+                        flag_2 = true;
+                        sum += str.second;
+                        break;
+                    }
+                }
+
+                if (!flag_2)
+                {
+                    local_flag = false;
+                    break;
+                }
+            }
+
+            if (local_flag)
+                ans = min(ans, sum);
+        }
+    }
+
+    cout << (ans == INT_MAX ? -1 : ans) << '\n';
+}
+int batch_bits(int set_bits)
+{
+    int sum = 0;
+    for (int x = 0; x < set_bits; x++)
+    {
+        sum += pow(2, 7 - x);
+    }
+    return sum;
+}
+void network_mask()
+{
+    int n, k;
+    cin >> n >> k;
+    vector<vector<int>> v(n);
+    for (ll x = 0; x < n; x++)
+    {
+        string s;
+        cin >> s;
+        string sub = "";
+        for (int y = 0; y < s.length(); y++)
+        {
+            if (s[y] == '.')
+            {
+                v[x].push_back(stoi(sub));
+                sub = "";
+                continue;
+            }
+            sub.push_back(s[y]);
+        }
+        v[x].push_back(stoi(sub));
+    }
+    for (ll x = 1; x < 32; x++)
+    {
+        unordered_set<string> st;
+        int set_bits = x;
+        int non_set_bits = 32 - set_bits;
+        int a, b, c, d;
+        a = 0;
+        b = 0;
+        c = 0;
+        d = 0;
+        if (x <= 8)
+        {
+            a = batch_bits(set_bits);
+            b = 0;
+            c = 0;
+            d = 0;
+        }
+        else
+        {
+            int complete_batches = set_bits / 8;
+            a = 0;
+            b = 0;
+            c = 0;
+            d = 0;
+            if (complete_batches == 1)
+            {
+                a = batch_bits(8);
+                int rem_bits = set_bits - 8 * 1;
+                b = batch_bits(rem_bits);
+            }
+            else if (complete_batches == 2)
+            {
+                a = batch_bits(8);
+                b = batch_bits(8);
+                int rem_bits = set_bits - 8 * 2;
+                c = batch_bits(rem_bits);
+            }
+            else if (complete_batches == 3)
+            {
+                a = batch_bits(8);
+                b = batch_bits(8);
+                c = batch_bits(8);
+                int rem_bits = set_bits - 8 * 3;
+                d = batch_bits(rem_bits);
+            }
+            else if (complete_batches == 4)
+            {
+                a = batch_bits(8);
+                b = batch_bits(8);
+                c = batch_bits(8);
+                d = batch_bits(8);
+            }
+        }
+        bool flag = true;
+        for (ll i = 0; i < v.size(); i++)
+        {
+            int e = v[i][0];
+            int f = v[i][1];
+            int g = v[i][2];
+            int h = v[i][3];
+            int j = a & e;
+            int o = b & f;
+            int l = c & g;
+            int m = d & h;
+            string net = "";
+            net += to_string(j);
+            net.push_back('.');
+            net += to_string(o);
+            net.push_back('.');
+            net += to_string(l);
+            net.push_back('.');
+            net += to_string(m);
+            st.insert(net);
+            if (st.size() > k)
+            {
+                flag = false;
+                break;
+            }
+        }
+        if (flag == false)
+            continue;
+        else if (st.size() == k)
+        {
+            string subnet = "";
+            subnet += to_string(a);
+            subnet.push_back('.');
+            subnet += to_string(b);
+            subnet.push_back('.');
+            subnet += to_string(c);
+            subnet.push_back('.');
+            subnet += to_string(d);
+            cout << subnet << "\n";
+            return;
+        }
+    }
+    cout << -1 << "\n";
+}
+string ans = "";
+bool flag = false;
+void rec(int idx, string &curr_string, string s, string target, map<char, int> &freq_map)
+{
+    if (idx >= target.length())
+    {
+        if (ans == "" && curr_string > target)
+        {
+            ans = curr_string;
+        }
+        else
+        {
+            if (ans > target)
+            {
+                ans = min(ans, curr_string);
+            }
+        }
+        return;
+    }
+    for (auto &it : freq_map)
+    {
+        char ch = it.first;
+        int freq = it.second;
+        if (freq > 0 && ((flag == false && ch >= target[idx]) || flag == true))
+        {
+            curr_string.push_back(ch);
+            if (ch > target[idx])
+                flag = true;
+            freq_map[ch]--;
+            rec(idx + 1, curr_string, s, target, freq_map);
+            curr_string.pop_back();
+            freq_map[ch]++;
+            if (flag == true)
+                flag = false;
+        }
+    }
+}
+string lexGreaterPermutation(string s, string target)
+{
+    map<char, int> freq_map;
+    for (auto ch : s)
+        freq_map[ch]++;
+    string c = "";
+    rec(0, c, s, target, freq_map);
+    if (ans <= target)
+        return "";
+    return ans;
+}
+int ans = 0;
+
+bool check(int curr_row, int curr_col, vector<vector<bool>> &board, vector<string> &v)
+{
+    for (int i = curr_row - 1; i >= 0; i--)
+    {
+        if (v[i][curr_col] == '*')
+            continue;
+        if (board[i][curr_col])
+            return false;
+    }
+    for (int i = curr_row - 1, j = curr_col - 1; i >= 0 && j >= 0; i--, j--)
+    {
+        if (v[i][j] == '*')
+            continue;
+        if (board[i][j])
+            return false;
+    }
+    for (int i = curr_row - 1, j = curr_col + 1; i >= 0 && j < 8; i--, j++)
+    {
+        if (v[i][j] == '*')
+            continue;
+        if (board[i][j])
+            return false;
+    }
+    return true;
+}
+int ans_2 = 0;
+void rec(int row, vector<vector<bool>> &visited, vector<string> &v)
+{
+    if (row == 8)
+    {
+        ans_2++;
+        return;
+    }
+
+    for (int x = 0; x < 8; x++)
+    {
+        if (v[row][x] == '.' &&
+            !visited[row][x] &&
+            check(row, x, visited, v))
+        {
+            visited[row][x] = true;
+
+            rec(row + 1, visited, v);
+
+            visited[row][x] = false;
+        }
+    }
+}
+
+void queens_on_chessboard()
+{
+
+    vector<string> v(8);
+    vector<vector<bool>> visited(8, vector<bool>(8, false));
+
+    for (int x = 0; x < 8; x++)
+    {
+        cin >> v[x];
+
+        for (int y = 0; y < 8; y++)
+        {
+            if (v[x][y] == '*')
+                visited[x][y] = true;
+        }
+    }
+
+    rec(0, visited, v);
+
+    cout << ans_2 << "\n";
+}
+vector<vector<int>> permutations;
+void rec(unordered_map<int, int> &freq_map, int n, vector<int> &v)
+{
+    if (v.size() >= n)
+    {
+        permutations.push_back(v);
+        return;
+    }
+    for (auto &it : freq_map)
+    {
+        if (it.second > 0)
+        {
+            v.push_back(it.first);
+            freq_map[it.first]--;
+            rec(freq_map, n, v);
+            v.pop_back();
+            freq_map[it.first]++;
+        }
+    }
+}
+void generate_permutations()
+{
+    int n;
+    cin >> n;
+    vector<int> v(n);
+    unordered_map<int, int> freq_map;
+    for (int x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        freq_map[v[x]]++;
+    }
+    vector<int> v2;
+    rec(freq_map, n, v2);
+    sort(permutations.begin(), permutations.end());
+    for (auto it : permutations)
+    {
+        for (auto num : it)
+        {
+            cout << num << " ";
+        }
+        cout << "\n";
+    }
+}
+void kth_permute(int k, vector<int> &curr_val)
+{
+    k--;
+    ll largest_factorial = 1;
+    int len = curr_val.size();
+    for (int x = 1; x < len; x++)
+    {
+        largest_factorial *= x;
+    }
+    while (1)
+    {
+        {
+            ll batch = k / largest_factorial;
+            cout << curr_val[batch] << " ";
+            curr_val.erase(curr_val.begin() + batch);
+            if (curr_val.empty())
+                break;
+            k -= batch * largest_factorial;
+            largest_factorial /= curr_val.size();
+        }
+    }
+    cout << "\n";
+}
+void rec_kth_permutation(int n, int k)
+{
+    /*
+        Placing 1 fixed and rest (n-1)! to be placed as fixed ways
+        so it will be (n-1) then (n-2) .... 1
+        kth position will lie in which range essentially be (n-1)/(k-1)
+        as many time it is possible .
+        but with an important observation on constraints that only
+        compute of 13 atmost is required .
+    */
+    vector<int> v;
+    if (n > 13)
+    {
+        for (int x = 1; x < n - 12; x++)
+        {
+            cout << x << " ";
+        }
+        for (int x = n - 12; x <= n; x++)
+        {
+            v.push_back(x);
+        }
+        kth_permute(k, v);
+    }
+    else if (n <= 13)
+    {
+        for (int x = 1; x <= n; x++)
+        {
+            v.push_back(x);
+        }
+        kth_permute(k, v);
+    }
+}
+vector<int> lexicographicallySmallestArray(vector<int> &nums, int limit)
+{
+    vector<int> ans;
+    vector<pair<int, int>> temp;
+    unordered_map<int, int> m;
+    unordered_map<int, queue<int>> group_map;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        temp.push_back({nums[x], x});
+    }
+    sort(temp.begin(), temp.end());
+    int cnt = 0;
+    int mini_val = temp[0].first;
+    m[temp[0].second] = cnt;
+    for (int x = 1; x < temp.size(); x++)
+    {
+        auto p = temp[x];
+        int val = p.first;
+        int original_index = p.second;
+        if (abs(val - mini_val) <= limit)
+        {
+            m[original_index] = cnt;
+            mini_val = val;
+        }
+        else if (abs(val - mini_val) > limit)
+        {
+            cnt++;
+            mini_val = val;
+            m[original_index] = cnt;
+        }
+    }
+    for (int x = 0; x < temp.size(); x++)
+    {
+        int original_idx = temp[x].second;
+        int group_num = m[original_idx];
+        group_map[group_num].push(temp[x].first);
+    }
+    for (int x = 0; x < nums.size(); x++)
+    {
+        int group_num = m[x];
+        ans.push_back(group_map[group_num].front());
+        if (group_map[group_num].size() != 0)
+            group_map[group_num].pop();
+    }
+    return ans;
+}
+vector<string> largestString(vector<int> &nums)
+{
+    vector<string> ans;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        int curr_len = nums[x];
+        string curr = "";
+        char suffix_character = 'a';
+        while (curr_len > 1 && suffix_character != 'z')
+        {
+            if (curr_len % 2 == 0)
+            {
+                curr_len /= 2;
+                suffix_character++;
+            }
+            else
+            {
+                curr.push_back(suffix_character);
+                suffix_character++;
+                curr_len /= 2;
+            }
+        }
+        if (suffix_character == 'z')
+        {
+            while (curr_len--)
+            {
+                curr.push_back('z');
+            }
+        }
+        else
+        {
+            curr.push_back(suffix_character);
+        }
+        reverse(curr.begin(), curr.end());
+        ans.push_back(curr);
+    }
+    return ans;
+}
+int primeSubarray(vector<int>& nums, int k) {
+    
+}
 int findMaxValueOfEquation(vector<vector<int>> &points, int k)
 {
 }
@@ -8836,7 +9561,7 @@ int main()
     // compute_primes();
     // compute_co_prime();
     // O(log log p)
-    build_spf(1000000);
+    // build_spf(1000000);
     // ios_base::sync_with_stdio(false);
     // cin.tie(0);
     // cout.tie(0);
@@ -8853,7 +9578,7 @@ int main()
     2 pointers -
 
     1)Form 0 - sliding window .
-    2)Form 1 - dynamic window and L and R --- subarray based and gap minimization problems.
+    2)Form 1 - dynamic window and L and R --- subarray based and gap minimization problems + gap minimizations.
         i)eat as much as possible.
         ii)update ans.
         ii)remove 1 element.
