@@ -9539,8 +9539,465 @@ vector<string> largestString(vector<int> &nums)
     }
     return ans;
 }
-int primeSubarray(vector<int>& nums, int k) {
-    
+bool check_meeting_place(long double maxi_time, vector<ll> &friends, vector<ll> &speeds)
+{
+    vector<pair<long double, long double>> intervals;
+    long double mini_left_range = -1e9;
+    long double maxi_right_range = 1e9;
+
+    for (int x = 0; x < friends.size(); x++)
+    {
+        long double current_pos = friends[x];
+        mini_left_range = max(mini_left_range, current_pos - maxi_time * speeds[x]);
+        maxi_right_range = min(mini_left_range, current_pos + maxi_time * speeds[x]);
+        intervals.push_back({current_pos - maxi_time * speeds[x], current_pos + maxi_time * speeds[x]});
+    }
+    for (int x = 0; x < friends.size(); x++)
+    {
+        long double current_pos = friends[x];
+        if (intervals[x].first <= mini_left_range && intervals[x].second >= maxi_right_range)
+            continue;
+        else
+        {
+            return false;
+        }
+    }
+    return true;
+    /*
+    s = d/t d = s*t so interval will become
+    [current_location-s*t,current_location+s*t] for each of the friend and for all the friends
+    to be present at the same location n all the intervals must intersect at some point .
+    */
+}
+void meeting_place_cannot_be_changed()
+{
+    ll n;
+    cin >> n;
+    vector<ll> speeds(n), friends(n);
+    for (ll x = 0; x < n; x++)
+        cin >> friends[x];
+    for (ll x = 0; x < n; x++)
+        cin >> speeds[x];
+    long double start = 0;
+    long double end = 1e9;
+    while (abs(start - end) >= EPSILON)
+    {
+        long double mid = (start + (end - start) / 2);
+        if (check_meeting_place(mid, friends, speeds))
+        {
+            end = mid;
+        }
+        else
+        {
+            start = mid;
+        }
+    }
+    cout << fixed << setprecision(12) << (start + end) / 2 << "\n";
+}
+int total_ans = 0;
+bool check_rec_s_queen(vector<vector<bool>> &visited, int n, int curr_col, int curr_row)
+{
+    for (int r = curr_row - 1; r >= 0; r--)
+        if (visited[r][curr_col])
+            return false;
+
+    for (int r = curr_row - 1, c = curr_col - 1; r >= 0 && c >= 0; r--, c--)
+        if (visited[r][c])
+            return false;
+
+    for (int r = curr_row - 1, c = curr_col + 1; r >= 0 && c < n; r--, c++)
+        if (visited[r][c])
+            return false;
+
+    int km[8][2] = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};
+    for (auto &m : km)
+    {
+        int r = curr_row + m[0];
+        int c = curr_col + m[1];
+        if (r >= 0 && r < n && c >= 0 && c < n && visited[r][c])
+            return false;
+    }
+
+    return true;
+}
+void rec_s_queen(int row, vector<vector<bool>> &visited, int n)
+{
+    if (row == n)
+    {
+        total_ans++;
+        return;
+    }
+    for (int x = 0; x < n; x++)
+    {
+        if (!visited[row][x] && check_rec_s_queen(visited, n, x, row))
+        {
+            visited[row][x] = true;
+            rec_s_queen(row + 1, visited, n);
+            visited[row][x] = false;
+        }
+    }
+}
+void s_queens()
+{
+    int n;
+    cin >> n;
+    vector<vector<bool>> visited(n, vector<bool>(n));
+    rec_s_queen(0, visited, n);
+    cout << total_ans << "\n";
+}
+vector<string> all_parantheses;
+void generate_parantheses(string op, int open, int close)
+{
+    if (open == 0 && close == 0)
+    {
+        all_parantheses.push_back(op);
+        return;
+    }
+    if (open == close)
+    {
+        string op1 = op;
+        op1.push_back('(');
+        generate_parantheses(op1, open - 1, close);
+    }
+    else if (open == 0)
+    {
+        string op1 = op;
+        op1.push_back(')');
+        generate_parantheses(op1, open, close - 1);
+    }
+    else if (close == 0)
+    {
+        string op1 = op;
+        op1.push_back('(');
+        generate_parantheses(op1, open - 1, close);
+    }
+    else
+    {
+        string op1 = op;
+        string op2 = op;
+        op1.push_back('(');
+        op2.push_back(')');
+        generate_parantheses(op1, open - 1, close);
+        generate_parantheses(op2, open, close - 1);
+    }
+}
+bool make_stack_equal(int mid, vector<int> &inventory, int orders)
+{
+    long long cnt = 0;
+    for (auto inv : inventory)
+    {
+        cnt += max(0, inv - mid);
+    }
+    return cnt <= orders;
+}
+int maxProfit(vector<int> &inventory, int orders)
+{
+    long long start = 0;
+    long long end = 1e9;
+    long long ans = 0;
+    while (start <= end)
+    {
+        long long mid = (start + (end - start) / 2);
+        if (make_stack_equal(mid, inventory, orders))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    long long profit = 0;
+    for (auto inv : inventory)
+    {
+        if (inv > ans)
+        {
+            orders -= (inv - ans);
+            profit += 1LL * (((long long)inv * (long long)(inv + 1)) / 2) - 1LL * (((long long)ans * (long long)(ans + 1)) / 2);
+        }
+    }
+    while (orders--)
+    {
+        profit += ans % MOD;
+    }
+    return profit % MOD;
+}
+bool decimal_rep(ll num)
+{
+    string s = "";
+    while (num >= 1)
+    {
+        ll rem = num % 10;
+        s.push_back(to_string(rem)[0]);
+        num /= 10;
+    }
+    reverse(s.begin(), s.end());
+    return s == to_string(num);
+}
+int sumDecoded(vector<long long> &nums)
+{
+    ll sum = 0;
+    ll inverse_10 = inverse(10, MOD);
+    for (auto num : nums)
+    {
+        ll width_i = num % 10;
+        ll d_i = num / 10;
+        string decimal = "";
+
+        ll x_i = stoll(decimal.substr(0, width_i));
+        ll y_i = stoll(decimal.substr(width_i, decimal.length()));
+
+        ll final_val_i = binpow(x_i, y_i);
+        sum = (sum % MOD + final_val_i % MOD) % MOD;
+    }
+    return sum;
+}
+unordered_map<int, set<int>> divs;
+void find_divisors()
+{
+    for (int x = 1; x <= 1e5; x++)
+    {
+        for (int y = x; y <= 1e5; y += x)
+        {
+            divs[y].insert(x);
+        }
+    }
+}
+void quiz_master()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> smartness(n);
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> smartness[x];
+    }
+    sort(smartness.begin(), smartness.end());
+    ll tail = 0;
+    ll head = -1;
+    ll ans = INT_MAX;
+    map<int, int> divisor_map;
+    ll distinct_divisor_cnt = 0;
+    while (tail < n)
+    {
+        while ((head + 1) < n && distinct_divisor_cnt < m)
+        {
+            head++;
+            for (auto divisor : divs[smartness[head]])
+            {
+                if (divisor <= m)
+                {
+                    if (!divisor_map.count(divisor))
+                        distinct_divisor_cnt++;
+                    divisor_map[divisor]++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        if (distinct_divisor_cnt == m)
+        {
+            ans = min((smartness[head] - smartness[tail]), ans);
+        }
+        if (tail <= head)
+        {
+            for (auto divisor : divs[smartness[tail]])
+            {
+                if (divisor <= m)
+                {
+                    divisor_map[divisor]--;
+                    if (divisor_map[divisor] <= 0)
+                    {
+                        divisor_map.erase(divisor_map.find(divisor));
+                        distinct_divisor_cnt--;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    if (ans == INT_MAX)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+        cout << ans << "\n";
+    }
+}
+ll valid_paths = 0;
+
+bool check(ll curr_row, ll curr_col)
+{
+    if (curr_row >= 7 || curr_row < 0 || curr_col >= 7 || curr_col < 0)
+        return false;
+    return true;
+}
+bool blocked(ll r, ll c, vector<vector<bool>> &visited)
+{
+    return !check(r, c) || visited[r][c];
+}
+
+void rec(ll row, ll col, vector<vector<bool>> &visited, string &path, int idx)
+{
+    // cout << row << " " << col << "\n";
+    if (row == 6 && col == 0)
+    {
+        if (idx == (int)path.size())
+            valid_paths++;
+        return;
+    }
+    if (idx >= path.size())
+    {
+        return;
+    }
+    bool up = blocked(row - 1, col, visited);
+    bool down = blocked(row + 1, col, visited);
+    bool left = blocked(row, col - 1, visited);
+    bool right = blocked(row, col + 1, visited);
+    if ((up && down && !left && !right) || (left && right && !up && !down))
+        return;
+
+    if (path[idx] == 'R' && check(row, col + 1) && visited[row][col + 1] == false)
+    {
+        visited[row][col + 1] = true;
+        rec(row, col + 1, visited, path, idx + 1);
+        visited[row][col + 1] = false;
+    }
+    else if (path[idx] == 'L' && check(row, col - 1) && visited[row][col - 1] == false)
+    {
+        visited[row][col - 1] = true;
+
+        rec(row, col - 1, visited, path, idx + 1);
+        visited[row][col - 1] = false;
+    }
+    else if (path[idx] == 'D' && check(row + 1, col) && visited[row + 1][col] == false)
+    {
+        visited[row + 1][col] = true;
+
+        rec(row + 1, col, visited, path, idx + 1);
+        visited[row + 1][col] = false;
+    }
+    else if (path[idx] == 'U' && check(row - 1, col) && visited[row - 1][col] == false)
+    {
+        visited[row - 1][col] = true;
+
+        rec(row - 1, col, visited, path, idx + 1);
+        visited[row - 1][col] = false;
+    }
+    else if (path[idx] == '?')
+    {
+        if (check(row, col + 1) && visited[row][col + 1] == false)
+        {
+            visited[row][col + 1] = true;
+            rec(row, col + 1, visited, path, idx + 1);
+            visited[row][col + 1] = false;
+        }
+        if (check(row, col - 1) && visited[row][col - 1] == false)
+        {
+            visited[row][col - 1] = true;
+            rec(row, col - 1, visited, path, idx + 1);
+            visited[row][col - 1] = false;
+        }
+        if (check(row + 1, col) && visited[row + 1][col] == false)
+        {
+            visited[row + 1][col] = true;
+            rec(row + 1, col, visited, path, idx + 1);
+            visited[row + 1][col] = false;
+        }
+        if (check(row - 1, col) && visited[row - 1][col] == false)
+        {
+            visited[row - 1][col] = true;
+            rec(row - 1, col, visited, path, idx + 1);
+            visited[row - 1][col] = false;
+        }
+    }
+}
+
+void count_valid_paths()
+{
+    vector<vector<bool>> visited(7, vector<bool>(7, false));
+    string s;
+    cin >> s;
+    visited[0][0] = true;
+    rec(0, 0, visited, s, 0);
+    cout << valid_paths << "\n";
+}
+
+int ans_cnt = 0;
+set<ll> st;
+void generate(int n, string v, ll a, ll b)
+{
+    int halfLen = (n + 1) / 2;
+
+    if (v.size() >= halfLen)
+    {
+        if (v.size() > 0)
+        {
+            string full = v;
+            if (n % 2 == 1)
+            {
+                for (int i = (int)v.size() - 2; i >= 0; i--)
+                    full += v[i];
+            }
+            else
+            {
+                for (int i = (int)v.size() - 1; i >= 0; i--)
+                    full += v[i];
+            }
+
+            ll curr_num = stoll(full);
+            if (!st.count(curr_num))
+            {
+                st.insert(curr_num);
+                if (curr_num >= a && curr_num <= b)
+                {
+                    if (is_prime(curr_num) && decimal_rep(curr_num))
+                    {
+                        ans_cnt++;
+                    }
+                }
+            }
+        }
+        return;
+    }
+    for (int x = 0; x <= 9; x++)
+    {
+        v.push_back(to_string(x)[0]);
+        generate(n, v, a, b);
+        v.pop_back();
+    }
+}
+void solve_segmented_sieve_print()
+{
+    ll a, b;
+    cin >> a >> b;
+    string a_str = to_string(a);
+    string b_str = to_string(b);
+    for (ll x = a_str.length(); x <= b_str.length(); x++)
+    {
+        // Generating all palindrome permutations of
+        // given length/2 and just add other portion as is  .
+        string s = "";
+        generate(x, s, a, b);
+    }
+    cout << ans_cnt << "\n";
+}
+
+int primeSubarray(vector<int> &nums, int k)
+{
 }
 int findMaxValueOfEquation(vector<vector<int>> &points, int k)
 {
@@ -9556,6 +10013,7 @@ void solve()
 int main()
 {
     // O(N)
+    // find_divisors();
     // factorial(MOD);
     // O(log log(n))
     // compute_primes();

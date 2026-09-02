@@ -12,6 +12,7 @@
 #include <stack>
 #include <vector>
 typedef long long ll;
+const int MOD = 1e9 + 7;
 const long double EPSILON = 1e-9; // or 10^-12
 using namespace std;
 class FreqStack
@@ -387,183 +388,109 @@ SegtreeNode query_seg_tree(ll node, ll left_range, ll right_range, ll left_query
     ll mid = (left_range + right_range) / 2;
     return merge(query_seg_tree(2 * node, left_range, mid, left_query_range, right_query_range), query_seg_tree(2 * node + 1, mid + 1, right_range, left_query_range, right_query_range));
 }
-void dynamic_range_minimum_queries()
-{
-    ll n, q;
-    cin >> n >> q;
-    vector<ll> v(n);
-    for (ll x = 0; x < n; x++)
-    {
-        cin >> v[x];
-    }
-    build_seg_tree(1, 0, n - 1, v);
-    while (q--)
-    {
-        int query_type;
-        cin >> query_type;
-        if (query_type == 1)
-        {
-            ll k, u;
-            cin >> k >> u;
-            k--;
-            update_seg_tree(1, 0, n - 1, u, k);
-        }
-        else if (query_type == 2)
-        {
-            ll a, b;
-            cin >> a >> b;
-            a--;
-            b--;
-            cout << query_seg_tree(1, 0, n - 1, a, b).sum << "\n";
-        }
-    }
-}
-void range_xor_queries()
-{
-    ll n, q;
-    cin >> n >> q;
-    vector<ll> v(n);
-    for (ll x = 0; x < n; x++)
-    {
-        cin >> v[x];
-    }
-    build_seg_tree(1, 0, n - 1, v);
-    while (q--)
-    {
-
-        ll a, b;
-        cin >> a >> b;
-        a--;
-        b--;
-        cout << query_seg_tree(1, 0, n - 1, a, b).sum << "\n";
-    }
-}
-int total_ans = 0;
-bool check_rec_s_queen(vector<vector<bool>> &visited, int n, int curr_col, int curr_row)
-{
-    for (int r = curr_row - 1; r >= 0; r--)
-        if (visited[r][curr_col])
-            return false;
-
-    for (int r = curr_row - 1, c = curr_col - 1; r >= 0 && c >= 0; r--, c--)
-        if (visited[r][c])
-            return false;
-
-    for (int r = curr_row - 1, c = curr_col + 1; r >= 0 && c < n; r--, c++)
-        if (visited[r][c])
-            return false;
-
-    int km[8][2] = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}};
-    for (auto &m : km)
-    {
-        int r = curr_row + m[0];
-        int c = curr_col + m[1];
-        if (r >= 0 && r < n && c >= 0 && c < n && visited[r][c])
-            return false;
-    }
-
-    return true;
-}
-void rec_s_queen(int row, vector<vector<bool>> &visited, int n)
-{
-    if (row == n)
-    {
-        total_ans++;
-        return;
-    }
-    for (int x = 0; x < n; x++)
-    {
-        if (!visited[row][x] && check_rec_s_queen(visited, n, x, row))
-        {
-            visited[row][x] = true;
-            rec_s_queen(row + 1, visited, n);
-            visited[row][x] = false;
-        }
-    }
-}
-void s_queens()
-{
-    int n;
-    cin >> n;
-    vector<vector<bool>> visited(n, vector<bool>(n));
-    rec_s_queen(0, visited, n);
-    cout << total_ans << "\n";
-}
-vector<string> all_parantheses;
-void solve(string op, int open, int close)
-{
-    if (open == 0 && close == 0)
-    {
-        all_parantheses.push_back(op);
-        return;
-    }
-    if (open == close)
-    {
-        string op1 = op;
-        op1.push_back('(');
-        solve(op1, open - 1, close);
-    }
-    else if (open == 0)
-    {
-        string op1 = op;
-        op1.push_back(')');
-        solve(op1, open, close - 1);
-    }
-    else if (close == 0)
-    {
-        string op1 = op;
-        op1.push_back('(');
-        solve(op1, open - 1, close);
-    }
-    else
-    {
-        string op1 = op;
-        string op2 = op;
-        op1.push_back('(');
-        op2.push_back(')');
-        solve(op1, open - 1, close);
-        solve(op2, open, close - 1);
-    }
-}
-bool check_meeting_place(long double maxi_time, vector<ll> &friends, vector<ll> &speeds)
-{
-    
-}
-void meeting_place_cannot_be_changed()
-{
-    ll n;
-    cin >> n;
-    vector<ll> speeds(n), friends(n);
-    for (ll x = 0; x < n; x++)
-        cin >> friends[x];
-    for (ll x = 0; x < n; x++)
-        cin >> speeds[x];
-    long double start = 0;
-    long double end = 1e9;
-    while (abs(start - end) >= EPSILON)
-    {
-        long double mid = (start + (end - start) / 2);
-        if (check_meeting_place(mid, friends, speeds))
-        {
-            end = mid;
-        }
-        else
-        {
-            start = mid;
-        }
-    }
-    cout << fixed<<setprecision(12)<<(start + end) / 2 << "\n";
-}
-
-int maxValidSplits(vector<int> &nums)
+int primeSubarray(vector<int> &nums, int k)
 {
     return 1;
 }
-int primeSubarray(vector<int> &nums, int k)
+void android_unlock()
 {
+    int n;
+    cin >> n;
 }
+bool primes_arr[10000001];
+void compute_primes()
+{
+    for (ll x = 2; x <= 10000000; x++)
+    {
+        primes_arr[x] = true;
+    }
+    primes_arr[1] = false;
+    for (ll x = 2; x <= 10000000; x++)
+    {
+        if (primes_arr[x] == true)
+        {
+            for (ll y = x * x; y <= 10000000; y += x)
+            {
+                primes_arr[y] = false;
+            }
+        }
+    }
+}
+// O(root(n)) for all num <= 1e12
+bool is_prime(ll num)
+{
+    for (ll x = 2; x * x <= num; x++)
+    {
+        if (num % x == 0)
+            return false;
+    }
+    return true;
+}
+// b>a and finding primes within the range [a,b]
+// finding in a complexity of O((b-a)log log b)
+vector<ll> segmeneted_sieve(ll a, ll b)
+{
+    // Finding primes within the range of [1,root(b)] using normal sieve
+    // giving out time complexity of O(root(b)log(log(root(b))))
+    vector<ll> local_sieve;
+    for (ll x = 1; x * x <= b; x++)
+    {
+        if (primes_arr[x] == true)
+        {
+            local_sieve.push_back(x);
+        }
+    }
+    // Initially marking every prime within the range as true.
+    vector<bool> res(b - a + 1, true);
+    if (a == 1)
+    {
+        res[0] = false;
+    }
+    // Then for each prime in range of [1,root(b)] we can compute
+    // all its multiples and those will be composite except if the
+    // number within the range if equal to prime itself.
+    for (ll x = 0; x < local_sieve.size(); x++)
+    {
+        ll curr_prime = local_sieve[x];
+        // First multiple of prime > a
+        ll rem = a % curr_prime;
+        ll first_multiple = -1;
+        if (rem == 0)
+        {
+            first_multiple = a;
+        }
+        else
+        {
+            ll temp = (a - rem) + curr_prime;
+            first_multiple = temp;
+        }
+        while (first_multiple <= b)
+        {
+            // Making sure if we are iterating multiples of prime itself then leave
+            if (first_multiple != curr_prime)
+            {
+                // Factor of prime therefore a composite number
+                res[first_multiple - a] = false;
+            }
+            // Moving to next multiple of curr_prime
+            first_multiple += curr_prime;
+        }
+    }
+    vector<ll> v;
+    for (ll x = 0; x < res.size(); x++)
+    {
+        if (res[x] == true)
+        {
+            v.push_back(a + x);
+        }
+    }
+    return v;
+}
+
+
 void solve()
 {
+    // solve_segmented_sieve_print();
     // s_queens();
     // range_xor_queries();
     // dynamic_range_minimum_queries();
