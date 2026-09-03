@@ -9995,7 +9995,248 @@ void solve_segmented_sieve_print()
     }
     cout << ans_cnt << "\n";
 }
-
+vector<vector<int>> permutations_2;
+void rec(unordered_map<int, int> &freq_map, int n, vector<int> &v)
+{
+    if (v.size() >= n)
+    {
+        if (v[0] == 1)
+        {
+            permutations_2.push_back(v);
+        }
+        return;
+    }
+    for (auto &it : freq_map)
+    {
+        if ((it.second > 0 && v.size() <= 0) || ((it.second > 0) && (v.size() > 0 && v.size() + 1 < n && (v[v.size() - 1] + it.first) % 2 != 0 && primes_arr[v[v.size() - 1] + it.first])) || ((it.second > 0 && v.size() > 0 && v.size() + 1 >= n && primes_arr[v[0] + it.first] && (v[v.size() - 1] + it.first) % 2 != 0 && primes_arr[v[v.size() - 1] + it.first])))
+        {
+            v.push_back(it.first);
+            freq_map[it.first]--;
+            rec(freq_map, n, v);
+            v.pop_back();
+            freq_map[it.first]++;
+        }
+    }
+}
+void generate_permutations_2()
+{
+    int n;
+    cin >> n;
+    if (n % 2 != 0)
+    {
+        cout << 0 << "\n";
+        return;
+    }
+    vector<int> v(n);
+    unordered_map<int, int> freq_map;
+    for (int x = 0; x < n; x++)
+    {
+        v[x] = x + 1;
+        freq_map[v[x]]++;
+    }
+    vector<int> v2;
+    rec(freq_map, n, v2);
+    cout << permutations_2.size() << "\n";
+}
+int cnt_2 = 0;
+void rec_random_2(int n, vector<bool> &visited, int idx, vector<int> &v)
+{
+    if (v.size() >= n)
+    {
+        if (primes_arr[v[v.size() - 1] + 1])
+        {
+            cnt_2++;
+        }
+        return;
+    }
+    for (int x = 2; x <= n; x++)
+    {
+        if (idx % 2 == 0 && x % 2 == 0 && visited[x] == false && (v.size() > 0 && primes_arr[v[v.size() - 1] + x]))
+        {
+            visited[x] = true;
+            v.push_back(x);
+            rec_random_2(n, visited, idx + 1, v);
+            v.pop_back();
+            visited[x] = false;
+        }
+        else if (idx % 2 != 0 && x % 2 != 0 && visited[x] == false && (v.size() > 0 && primes_arr[v[v.size() - 1] + x]))
+        {
+            visited[x] = true;
+            v.push_back(x);
+            rec_random_2(n, visited, idx + 1, v);
+            v.pop_back();
+            visited[x] = false;
+        }
+    }
+}
+void random_2()
+{
+    int n;
+    cin >> n;
+    vector<bool> visited(n + 1, false);
+    if (n % 2 != 0)
+    {
+        cout << 0 << "\n";
+        return;
+    }
+    else
+    {
+        vector<int> v;
+        v.push_back(1);
+        visited[1] = true;
+        rec_random_2(n, visited, 0, v);
+        cout << cnt_2 << "\n";
+    }
+}
+bool check_median_of_subarray(ll mid, vector<ll> &v)
+{
+    ll head = -1;
+    ll tail = 0;
+    ll ans = 0;
+    ll curr_sum = 0;
+    while (tail < (ll)v.size())
+    {
+        while ((head + 1) < v.size() && (curr_sum + v[head + 1] <= mid))
+        {
+            head++;
+            curr_sum += v[head];
+        }
+        ans += (head - tail + 1);
+        if (tail <= head)
+        {
+            curr_sum -= v[tail];
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    ll total_subarrays = (v.size() * (v.size() + 1)) / 2;
+    ll median_position = -1;
+    if (total_subarrays % 2 == 0)
+    {
+        median_position = ((total_subarrays + 1) / 2);
+    }
+    else
+    {
+        median_position = ((total_subarrays + 1) / 2);
+    }
+    return ans >= median_position;
+}
+void median_of_subarray_sum()
+{
+    /*
+    Nlogn
+    n*(n+1)/2 ---> odd -----> apart from median there will be exactly k-1/2 > median as sum of each and k-1/2 < median as the sum of subarrays  O(N).
+    n*(n+1)/2 ----> even
+    */
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll sum = 0;
+    ll start = INT_MAX;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        sum += v[x];
+        start = min(start, v[x]);
+    }
+    ll end = sum;
+    ll ans = 0;
+    while (start <= end)
+    {
+        ll mid = (start + (end - start) / 2);
+        if (check_median_of_subarray(mid, v))
+        {
+            ans = mid;
+            end = mid - 1;
+        }
+        else
+        {
+            start = mid + 1;
+        }
+    }
+    cout << ans << "\n";
+}
+void k_odd_number()
+{
+    ll n, k, d;
+    cin >> n >> k >> d;
+    vector<ll> v(n);
+    vector<ll> prefix_arr(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    prefix_arr[0] = v[0];
+    for (ll x = 1; x < n; x++)
+    {
+        prefix_arr[x] = prefix_arr[x - 1] + v[x];
+    }
+    ll head = -1;
+    ll tail = 0;
+    ll ans = LLONG_MIN;
+    ll odd_cnt = 0;
+    multiset<ll> st;
+    while (tail < (ll)v.size())
+    {
+        while ((head + 1) < n && ((odd_cnt < k) || (odd_cnt == k && v[head + 1] % 2 == 0)))
+        {
+            head++;
+            if (v[head] % 2 != 0)
+                odd_cnt++;
+            st.insert(prefix_arr[head]);
+        }
+        // Largest possible subarray containing atmost k odd elements .
+        // Kadane will not work here .
+        // Selecting each l and then prefix_arr[r]-prefix[l-1] <= d
+        // prefix_arr[r] <= d+prefix[l-1] .
+        // prefix_arr[x]-prefix_arr[tail-1] <= d
+        // Current range prefix sum will be (prefix[tail-1]-prefix[x] == sum of v[tail...x)]
+        // so that we don't have to reconstruct a mid-prefix subarray at each iteration .
+        // and then question becomes simply prefix[r]-prefix[l-1] <= d
+        // so prefix[r] <= d+prefix[l-1] and changing signs -prefix[r]+prefix[l-1]>=d
+        // prefix[l-1] >= d+prefix[r] so finding upperbound and since we need maximum sum it should be the maximum possible value.
+        ll a = 0;
+        if (tail > 0)
+        {
+            a = prefix_arr[tail - 1];
+        }
+        auto it = st.upper_bound(a + d);
+        if (it != st.end())
+        {
+            if (it != st.begin())
+            {
+                it--;
+                ans = max(ans, *it - a);
+            }
+        }
+        else if (st.size() > 0)
+        {
+            ans = max(ans, *st.rbegin() - a);
+        }
+        if (tail <= head)
+        {
+            if (v[tail] % 2 != 0)
+                odd_cnt--;
+            st.erase(st.find(prefix_arr[tail]));
+            tail++;
+        }
+        else
+        {
+            tail++;
+            head = tail - 1;
+        }
+    }
+    if (ans == LLONG_MIN)
+    {
+        cout << "IMPOSSIBLE \n";
+    }
+    else
+    {
+        cout << ans << "\n";
+    }
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }

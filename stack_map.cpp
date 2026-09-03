@@ -388,108 +388,10 @@ SegtreeNode query_seg_tree(ll node, ll left_range, ll right_range, ll left_query
     ll mid = (left_range + right_range) / 2;
     return merge(query_seg_tree(2 * node, left_range, mid, left_query_range, right_query_range), query_seg_tree(2 * node + 1, mid + 1, right_range, left_query_range, right_query_range));
 }
-int primeSubarray(vector<int> &nums, int k)
-{
-    return 1;
-}
-void android_unlock()
-{
-    int n;
-    cin >> n;
-}
-bool primes_arr[10000001];
-void compute_primes()
-{
-    for (ll x = 2; x <= 10000000; x++)
-    {
-        primes_arr[x] = true;
-    }
-    primes_arr[1] = false;
-    for (ll x = 2; x <= 10000000; x++)
-    {
-        if (primes_arr[x] == true)
-        {
-            for (ll y = x * x; y <= 10000000; y += x)
-            {
-                primes_arr[y] = false;
-            }
-        }
-    }
-}
-// O(root(n)) for all num <= 1e12
-bool is_prime(ll num)
-{
-    for (ll x = 2; x * x <= num; x++)
-    {
-        if (num % x == 0)
-            return false;
-    }
-    return true;
-}
-// b>a and finding primes within the range [a,b]
-// finding in a complexity of O((b-a)log log b)
-vector<ll> segmeneted_sieve(ll a, ll b)
-{
-    // Finding primes within the range of [1,root(b)] using normal sieve
-    // giving out time complexity of O(root(b)log(log(root(b))))
-    vector<ll> local_sieve;
-    for (ll x = 1; x * x <= b; x++)
-    {
-        if (primes_arr[x] == true)
-        {
-            local_sieve.push_back(x);
-        }
-    }
-    // Initially marking every prime within the range as true.
-    vector<bool> res(b - a + 1, true);
-    if (a == 1)
-    {
-        res[0] = false;
-    }
-    // Then for each prime in range of [1,root(b)] we can compute
-    // all its multiples and those will be composite except if the
-    // number within the range if equal to prime itself.
-    for (ll x = 0; x < local_sieve.size(); x++)
-    {
-        ll curr_prime = local_sieve[x];
-        // First multiple of prime > a
-        ll rem = a % curr_prime;
-        ll first_multiple = -1;
-        if (rem == 0)
-        {
-            first_multiple = a;
-        }
-        else
-        {
-            ll temp = (a - rem) + curr_prime;
-            first_multiple = temp;
-        }
-        while (first_multiple <= b)
-        {
-            // Making sure if we are iterating multiples of prime itself then leave
-            if (first_multiple != curr_prime)
-            {
-                // Factor of prime therefore a composite number
-                res[first_multiple - a] = false;
-            }
-            // Moving to next multiple of curr_prime
-            first_multiple += curr_prime;
-        }
-    }
-    vector<ll> v;
-    for (ll x = 0; x < res.size(); x++)
-    {
-        if (res[x] == true)
-        {
-            v.push_back(a + x);
-        }
-    }
-    return v;
-}
-
 
 void solve()
 {
+    // generate_permutations_2();
     // solve_segmented_sieve_print();
     // s_queens();
     // range_xor_queries();
@@ -506,12 +408,12 @@ void solve()
 }
 int main()
 {
-    // ios_base::sync_with_stdio(false);
-    // cin.tie(0);
-    // cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
     ll t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();
