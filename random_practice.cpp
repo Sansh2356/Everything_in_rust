@@ -10237,6 +10237,380 @@ void k_odd_number()
         cout << ans << "\n";
     }
 }
+int ans_score_words = INT_MIN;
+int curr_score = 0;
+bool check(string word, unordered_map<char, int> &freq_map,
+           unordered_map<char, int> &score_map)
+{
+    unordered_map<char, int> local_freq_map;
+    for (auto i : word)
+    {
+        local_freq_map[i]++;
+    }
+    for (auto it : local_freq_map)
+    {
+        if (freq_map.count(it.first) == false)
+            return false;
+        else if (freq_map[it.first] < it.second)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+void rec(int idx, vector<string> &words,
+         unordered_map<char, int> &score_map,
+         unordered_map<char, int> &freq_map)
+{
+    if (idx >= words.size())
+    {
+        ans_score_words = max(ans_score_words, curr_score);
+        return;
+    }
+    rec(idx + 1, words, score_map, freq_map);
+    if (check(words[idx], freq_map, score_map))
+    {
+        unordered_map<char, int> local_freq_map;
+        for (auto i : words[idx])
+        {
+            local_freq_map[i]++;
+        }
+        for (auto it : local_freq_map)
+        {
+            curr_score += it.second * score_map[it.first];
+            freq_map[it.first] -= it.second;
+        }
+        rec(idx + 1, words, score_map, freq_map);
+        for (auto it : local_freq_map)
+        {
+            curr_score -= it.second * score_map[it.first];
+            freq_map[it.first] += it.second;
+        }
+    }
+    return;
+}
+int maxScoreWords(vector<string> &words, vector<char> &letters,
+                  vector<int> &score)
+{
+    unordered_map<char, int> score_map;
+    unordered_map<char, int> freq_map;
+    for (int x = 0; x < score.size(); x++)
+    {
+        score_map[(char)('a' + x)] = score[x];
+    }
+    for (auto i : letters)
+    {
+        freq_map[i]++;
+    }
+    rec(0, words, score_map, freq_map);
+    return ans_score_words;
+}
+int ans_gold = 0;
+int curr_path_sum = 0;
+
+bool check(int row, int col, int n, int m, vector<vector<int>> &grid)
+{
+    if (row >= 0 && row < n && col >= 0 && col < m && grid[row][col] != 0)
+        return true;
+
+    return false;
+}
+
+bool check_maxi_gold(int row, int col, int n, int m,
+                     vector<vector<int>> &grid)
+{
+    if ((check(row + 1, col, n, m, grid) && grid[row + 1][col] != 0) ||
+        (check(row - 1, col, n, m, grid) && grid[row - 1][col] != 0) ||
+        (check(row, col + 1, n, m, grid) && grid[row][col + 1] != 0) ||
+        (check(row, col - 1, n, m, grid) && grid[row][col - 1] != 0))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void rec(int row, int col, vector<vector<int>> &grid)
+{
+
+    if (check_maxi_gold(row, col, grid.size(), grid[0].size(), grid))
+    {
+        ans_gold = max(ans_gold, curr_path_sum);
+        return;
+    }
+
+    if (check(row, col + 1, grid.size(), grid[0].size(), grid))
+    {
+        int temp = grid[row][col + 1];
+
+        curr_path_sum += temp;
+        grid[row][col + 1] = 0;
+
+        rec(row, col + 1, grid);
+
+        curr_path_sum -= temp;
+        grid[row][col + 1] = temp;
+    }
+
+    if (check(row, col - 1, grid.size(), grid[0].size(), grid))
+    {
+        int temp = grid[row][col - 1];
+
+        curr_path_sum += temp;
+        grid[row][col - 1] = 0;
+
+        rec(row, col - 1, grid);
+
+        curr_path_sum -= temp;
+        grid[row][col - 1] = temp;
+    }
+
+    if (check(row + 1, col, grid.size(), grid[0].size(), grid))
+    {
+        int temp = grid[row + 1][col];
+
+        curr_path_sum += temp;
+        grid[row + 1][col] = 0;
+
+        rec(row + 1, col, grid);
+
+        curr_path_sum -= temp;
+        grid[row + 1][col] = temp;
+    }
+
+    if (check(row - 1, col, grid.size(), grid[0].size(), grid))
+    {
+        int temp = grid[row - 1][col];
+
+        curr_path_sum += temp;
+        grid[row - 1][col] = 0;
+
+        rec(row - 1, col, grid);
+
+        curr_path_sum -= temp;
+        grid[row - 1][col] = temp;
+    }
+}
+
+int getMaximumGold(vector<vector<int>> &grid)
+{
+
+    for (int x = 0; x < grid.size(); x++)
+    {
+        for (int y = 0; y < grid[x].size(); y++)
+        {
+
+            if (grid[x][y] != 0)
+            {
+                int temp = grid[x][y];
+                curr_path_sum = grid[x][y];
+                grid[x][y] = 0;
+                rec(x, y, grid);
+                grid[x][y] = temp;
+                curr_path_sum = 0;
+            }
+        }
+    }
+
+    return ans_gold;
+}
+void random_contest()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    ll cnt_zeros = 0;
+    for (ll x = 0; x < n; x++)
+    {
+        cin >> v[x];
+        if (v[x] == 0)
+            cnt_zeros++;
+    }
+    if (cnt_zeros == 1)
+    {
+        cout << "NO \n";
+        return;
+    }
+    else
+    {
+        if (cnt_zeros == 2)
+        {
+            cout << "YES \n";
+            for (ll x = 0; x < n; x++)
+            {
+                if (v[x] == 0 && cnt_zeros == 2)
+                {
+                    cout << "A";
+                    cnt_zeros--;
+                    continue;
+                }
+                else if (v[x] == 0 && cnt_zeros == 1)
+                {
+                    cout << "B";
+                    cnt_zeros--;
+                    continue;
+                }
+                else
+                {
+                    cout << "C";
+                }
+            }
+            cout << "\n";
+            return;
+        }
+        else if (cnt_zeros == 0)
+        {
+            cout << "YES \n";
+            for (ll x = 0; x < n; x++)
+            {
+                if (cnt_zeros == 0)
+                {
+                    cout << "A";
+                    cnt_zeros--;
+                    continue;
+                }
+                else if (cnt_zeros == -1)
+                {
+                    cout << "B";
+                    cnt_zeros--;
+                    continue;
+                }
+                if (cnt_zeros == -2)
+                    cout << "C";
+            }
+            cout << "\n";
+            return;
+        }
+        else if (cnt_zeros >= 3)
+        {
+            cout << "YES \n";
+            ll cnt = 0;
+            for (ll x = 0; x < n; x++)
+            {
+                if (v[x] == 0)
+                {
+                    cnt++;
+                    if (cnt == 1)
+                        cout << "A";
+                    else if (cnt == 2)
+                        cout << "B";
+                    else
+                        cout << "C";
+                }
+                else if (v[x] == 1)
+                {
+                    cout << "A";
+                }
+                else
+                {
+                    cout << "C";
+                }
+            }
+            cout << "\n";
+            return;
+        }
+    }
+}
+int countRotations(string s, int k)
+{
+    ll cnt = 0;
+    for (ll x = 0; x < (ll)s.length(); x++)
+    {
+        if (s[x] == s[(x + 1) % ((ll)s.length())])
+        {
+            cnt++;
+        }
+    }
+    if (k == cnt)
+        return s.length() - cnt;
+    if (k == (cnt - 1))
+        return cnt;
+    return 0;
+}
+int countGoodRotations(vector<int> &nums)
+{
+    // Using sliding window of length exactly equal = h .
+    ll total_sum = 0;
+    for (auto i : nums)
+        total_sum += i;
+    ll rotated_sum = 0;
+    for (int x = 0; x < (ll)nums.size() / 2; x++)
+        rotated_sum += nums[x];
+    vector<int> temp = nums;
+    ll ans = 0;
+    for (ll x = 0; x < nums.size(); x++)
+    {
+        if ((2 * rotated_sum) > total_sum)
+            ans++;
+        rotated_sum = rotated_sum - (temp[x] + temp[(x + (ll)nums.size() / 2) % nums.size()]);
+    }
+    return ans;
+}
+int countGroups(vector<int> &position, vector<int> &speed, int distance)
+{
+    if (position.size() == 0)
+        return 0;
+    if (position.size() == 1)
+        return 1;
+    vector<ll> left(position.size()), right(position.size());
+    vector<bool> visited(position.size(), true);
+
+    for (ll x = 0; x < position.size() && (x + 1) < position.size(); x++)
+    {
+        left[x] = x - 1;
+        right[x] = x + 1;
+    }
+    right[position.size() - 1] = -1;
+    left[position.size() - 1] = position.size() - 2;
+    vector<pair<ll, ll>> gap;
+    for (ll x = 0; x < position.size(); x++)
+    {
+        gap.push_back({position[x], speed[x]});
+    }
+    priority_queue<pair<long double, pair<ll, ll>>, vector<pair<ll, pair<ll, ll>>>, greater<pair<ll, pair<ll, ll>>>> pq;
+    for (ll x = 0; x < position.size() && (x + 1) < position.size(); x++)
+    {
+        ll initial_gap = gap[x + 1].first - gap[x].first;
+        ll relative_speed = gap[x + 1].second - gap[x].second;
+        if (initial_gap <= distance)
+        {
+            // Already satified must be merged initially
+            pq.push({0, {x, x + 1}});
+        }
+        else if (relative_speed < 0)
+        {
+            pq.push({(long double)(distance - initial_gap) / (long double)relative_speed, {x, x + 1}});
+        }
+    }
+    while (pq.empty() == false)
+    {
+        long double rem = pq.top().first;
+        ll a = pq.top().second.first;
+        ll b = pq.top().second.second;
+        pq.pop();
+        if (visited[a] == false || visited[b] == false || right[a] != b)
+            continue;
+        visited[a] = false;
+        ll l = left[a];
+        if (l >= 0)
+            right[l] = b;
+        left[b] = l;
+        if (l >= 0)
+        {
+            ll ig = gap[b].first - gap[l].first;
+            ll rs = gap[b].second - gap[l].second;
+            if (ig <= distance)
+                pq.push({(long double)0, {l, b}});
+            else if (rs < 0)
+                pq.push({(long double)(distance - ig) / (long double)rs, {l, b}});
+        }
+    }
+    ll ans = 0;
+    for (ll x = 0; x < (ll)position.size(); x++)
+        if (visited[x])
+            ans++;
+    return ans;
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }

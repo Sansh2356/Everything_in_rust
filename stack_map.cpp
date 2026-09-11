@@ -354,7 +354,7 @@ void build_seg_tree(ll node, ll left_range, ll right_range, vector<ll> &v)
         segtree[node].sum = v[left_range];
         return;
     }
-    ll mid = (left_range + right_range) / 2;
+    ll mid = (left_range + right_range) / 2;     
     build_seg_tree(2 * node, left_range, mid, v);
     build_seg_tree(2 * node + 1, mid + 1, right_range, v);
     segtree[node] = merge(segtree[2 * node], segtree[2 * node + 1]);
@@ -388,9 +388,9 @@ SegtreeNode query_seg_tree(ll node, ll left_range, ll right_range, ll left_query
     ll mid = (left_range + right_range) / 2;
     return merge(query_seg_tree(2 * node, left_range, mid, left_query_range, right_query_range), query_seg_tree(2 * node + 1, mid + 1, right_range, left_query_range, right_query_range));
 }
-
 void solve()
 {
+
     // generate_permutations_2();
     // solve_segmented_sieve_print();
     // s_queens();

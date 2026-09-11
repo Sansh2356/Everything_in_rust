@@ -121,9 +121,6 @@ fn minimize_dot_product(mut v: Vec<i32>, mut w: Vec<i32>) -> i32 {
     }
     sum
 }
-fn check(mid: u64) -> bool {
-    true
-}
 fn stack_stimulation(stdin: Stdin) {
     let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
     let w: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
@@ -152,19 +149,7 @@ fn stack_stimulation(stdin: Stdin) {
 fn solve(stdin: Stdin) {
     let n: u64 = InputReader::read_input(Box::from(stdin.lock()));
     let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
-    let mut high: u64 = 0;
-    let mut low: u64 = n;
-    let mut ans = 0;
-    while low <= high {
-        let mid: u64 = (high + low) / 2;
-        if check(mid) == true {
-            ans = mid;
-            high = mid - 1;
-        } else {
-            low = mid + 1;
-        }
-    }
-    println!("{:?}", ans);
+    
 }
 fn main() {
     let std_in_obj = stdin();
