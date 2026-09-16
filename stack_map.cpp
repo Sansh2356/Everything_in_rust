@@ -354,7 +354,7 @@ void build_seg_tree(ll node, ll left_range, ll right_range, vector<ll> &v)
         segtree[node].sum = v[left_range];
         return;
     }
-    ll mid = (left_range + right_range) / 2;     
+    ll mid = (left_range + right_range) / 2;
     build_seg_tree(2 * node, left_range, mid, v);
     build_seg_tree(2 * node + 1, mid + 1, right_range, v);
     segtree[node] = merge(segtree[2 * node], segtree[2 * node + 1]);
@@ -388,9 +388,30 @@ SegtreeNode query_seg_tree(ll node, ll left_range, ll right_range, ll left_query
     ll mid = (left_range + right_range) / 2;
     return merge(query_seg_tree(2 * node, left_range, mid, left_query_range, right_query_range), query_seg_tree(2 * node + 1, mid + 1, right_range, left_query_range, right_query_range));
 }
+// VVIMP a variation of monotonic deque in case of negitive numbers over prefix array .
+int shortestSubarray(vector<int> &nums, int k)
+{
+    /*
+        prefix[r]-prefix[l-1] >= k
+        prefix[l-1] <= prefix[r]-k we can directly find total number of such
+        subarrays .
+
+        Find floor(root(x)) .
+
+        Binary search on an infinite array .
+    */
+}
 void solve()
 {
 
+    // ll n, m;
+    // cin >> n >> m;
+    // vector<ll> v(n);
+    /*
+        m*bm - sigma bi for all i from [1,m-1] .
+        bm will be last term of subsequence taken
+        so all other terms from [1,m-1] will be lesser in index range .
+    */
     // generate_permutations_2();
     // solve_segmented_sieve_print();
     // s_queens();

@@ -10611,6 +10611,446 @@ int countGroups(vector<int> &position, vector<int> &speed, int distance)
             ans++;
     return ans;
 }
+bool check(vector<ll> &students_score, ll mid, ll m, ll s)
+{
+    ll total_operations = m * s;
+    for (int x = 0; x < students_score.size(); x++)
+    {
+        if (students_score[x] < mid)
+        {
+            ll req = mid - students_score[x];
+            if (req > m)
+                return false;
+            total_operations -= req;
+            if (total_operations < 0)
+                return false;
+        }
+    }
+    return true;
+}
+void goo_gol2()
+{
+    ll n, s, m;
+    cin >> n >> s >> m;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    sort(v.begin(), v.end());
+    ll low = v[0];
+    ll high = v[v.size() - 1] + m;
+    ll ans = 0;
+    while (low <= high)
+    {
+        ll mid = (low + (high - low) / 2);
+        if (check(v, mid, m, s))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+    cout << ans << "\n";
+}
+ll curr_sum = 0;
+ll total_cnt = 0;
+void rec(vector<ll> &v, ll target, ll idx, vector<ll> &curr)
+{
+    if (idx >= v.size())
+    {
+        if (curr_sum == target)
+            total_cnt++;
+        return;
+    }
+    // no_take
+    rec(v, target, idx + 1, curr);
+    curr.push_back(v[idx]);
+    curr_sum += v[idx];
+    rec(v, target, idx + 1, curr);
+    curr.pop_back();
+    curr_sum -= v[idx];
+}
+void sum()
+{
+    ll n, target;
+    cin >> n;
+    vector<ll> v(n);
+    for (ll x = 0; x < n; x++)
+        cin >> v[x];
+    cin >> target;
+    vector<ll> curr;
+    rec(v, target, 0, curr);
+    cout << total_cnt << "\n";
+}
+void array_dominance()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> v1(n), v2(m);
+    for (ll x = 0; x < n; x++)
+        cin >> v1[x];
+    for (ll x = 0; x < m; x++)
+        cin >> v2[x];
+    sort(v1.begin(), v1.end());
+    sort(v2.begin(), v2.end());
+    reverse(v2.begin(), v2.end());
+    if (v1[0] >= v2[0])
+    {
+        cout << 0 << "\n";
+        return;
+    }
+    ll ans = 0;
+    if (n == m)
+    {
+        for (int x = 0; x < n; x++)
+        {
+            if (v1[x] >= v2[x])
+            {
+                break;
+            }
+            ans += abs(v1[x] - v2[x]);
+        }
+    }
+    else if (n > m)
+    {
+        for (int x = 0; x < m; x++)
+        {
+            if (v1[x] >= v2[x])
+            {
+                break;
+            }
+            ans += abs(v1[x] - v2[x]);
+        }
+    }
+    else if (m > n)
+    {
+        for (int x = 0; x < n; x++)
+        {
+            if (v1[x] >= v2[x])
+            {
+                break;
+            }
+            ans += abs(v1[x] - v2[x]);
+        }
+    }
+
+    cout << ans << "\n";
+}
+int maxTwoEvents(vector<vector<int>> &events)
+{
+    sort(events.begin(), events.end());
+    vector<int> suffix_max(events.size());
+    reverse(events.begin(), events.end());
+    suffix_max[0] = events[0][2];
+    for (int x = 1; x < events.size(); x++)
+    {
+        suffix_max[x] = max(suffix_max[x - 1], events[x][2]);
+    }
+    reverse(events.begin(), events.end());
+    int ans = suffix_max[suffix_max.size() - 1];
+    for (int x = 0; x < events.size(); x++)
+    {
+        int l = events[x][0];
+        int r = events[x][1];
+        auto it = upper_bound(
+            events.begin(), events.end(), r,
+            [](int x, const vector<int> &a)
+            { return x < a[0]; });
+        if (it != events.end())
+        {
+            int idx = it - events.begin();
+            ans = max(ans,
+                      events[x][2] + suffix_max[events.size() - idx - 1]);
+        }
+    }
+    return ans;
+}
+int countSpecialIntegers(vector<int> &nums)
+{
+    map<int, pair<int, vector<int>>> m;
+    for (int x = 0; x < nums.size(); x++)
+    {
+        int i = nums[x];
+        if (m.count(i))
+        {
+            m[i].second.push_back(x);
+            if (m[i].second.size() == 2)
+            {
+                int diff = (m[i].second.back() - m[i].second[0]);
+                m[i].first = diff;
+            }
+            else if (m[i].second.size() > 2)
+            {
+                int a = (x - m[i].second[m[i].second.size() - 2]);
+                if (a != m[i].first)
+                {
+                    m[i].first = -1;
+                }
+            }
+        }
+        else
+        {
+            m[i].first = 0;
+            m[i].second.push_back(x);
+        }
+    }
+    int cnt = 0;
+    for (auto it : m)
+    {
+        if (it.second.first != -1 && it.second.second.size() >= 3)
+        {
+            cnt++;
+        }
+    }
+    return cnt;
+}
+void time_complexity()
+{
+    string s;
+    cin >> s;
+    unordered_map<string, char> m;
+    m["for"] = '(';
+    m["endfor"] = ')';
+    vector<string> v;
+    string sub = "";
+    int stop = 0;
+    for (int x = 0; x < s.size(); x++)
+    {
+        if (sub.size() == 0)
+        {
+            sub.push_back(s[x]);
+            if (s[x] == 'f')
+                stop = x + 3;
+            else if (s[x] == 'e')
+                stop = x + 6;
+            continue;
+        }
+        else if (x == stop)
+        {
+            v.push_back(sub);
+            sub.clear();
+            sub.push_back(s[x]);
+            if (s[x] == 'f')
+                stop = x + 3;
+            else if (s[x] == 'e')
+                stop = x + 6;
+            continue;
+        }
+        if (sub.size() > 0)
+        {
+            sub.push_back(s[x]);
+        }
+    }
+    v.push_back(sub);
+    stack<char> st;
+    bool flag = false;
+    int depth = 0;
+    map<int, int> m_2;
+    for (auto s : v)
+    {
+        if (flag == false && st.empty() && m[s] == ')')
+        {
+            cout << "Compile Error \n";
+            return;
+        }
+        else if (flag == false && m[s] == '(')
+        {
+            depth++;
+            st.push('(');
+        }
+        else if (flag == false && !st.empty() && m[s] == ')')
+        {
+            if (st.top() != '(')
+            {
+                cout << "Compile Error \n";
+                return;
+            }
+            else
+            {
+                st.pop();
+                flag = true;
+                m_2[depth]++;
+                depth--;
+            }
+        }
+        else if (flag == true && depth == 0)
+        {
+            flag = false;
+            if (m[s] == '(')
+            {
+                depth++;
+                st.push(m[s]);
+            }
+            else
+            {
+                cout << "Compile Error \n";
+                return;
+            }
+        }
+        else if (flag == true && m[s] == '(')
+        {
+            cout << "Compile Error \n";
+            return;
+        }
+        else if (flag == true && m[s] == ')' && st.empty())
+        {
+            cout << "Compile Error \n";
+            return;
+        }
+        else if (flag == true && m[s] == ')' && !st.empty() && depth > 0)
+        {
+            if (st.top() != '(')
+            {
+                cout << "Compile Error \n";
+                return;
+            }
+            else
+            {
+                st.pop();
+                depth--;
+            }
+        }
+    }
+    if (!st.empty())
+    {
+        cout << "Compile Error \n";
+        return;
+    }
+    auto it = m_2.begin();
+    for (auto it = m_2.rbegin(); it != m_2.rend(); ++it)
+    {
+        int power = it->first;
+        int count = it->second;
+
+        string c = "n";
+        if (power != 1)
+            c += "^" + to_string(power);
+
+        if (count > 1)
+            cout << count << c;
+        else
+            cout << c;
+
+        auto temp = it;
+        ++temp;
+        if (temp != m_2.rend())
+            cout << " + ";
+    }
+    cout << "\n";
+}
+vector<vector<int>> cyclicShift(int n, vector<vector<int>> &grid, vector<int> &rowShift, vector<int> &colShift)
+{
+    vector<vector<int>> ans(n, vector<int>(n, 0));
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < n; y++)
+        {
+            int row_shift = rowShift[x];
+            int move = (y - row_shift + n) % n;
+            ans[x][move] = grid[x][y];
+        }
+    }
+    for (int y = 0; y < n; y++)
+    {
+        for (int x = 0; x < n; x++)
+        {
+            int col_shift = colShift[y];
+            int move = (x - col_shift + n) % n;
+            ans[move][y] = grid[x][y];
+        }
+    }
+    return ans;
+}
+set<long long> even_st;
+set<long long> odd_st;
+void generate_sets(int n, string v)
+{
+    int halfLen = (n + 1) / 2;
+    if (v.size() >= halfLen)
+    {
+        if (v.size() > 0)
+        {
+            string full = v;
+            if (n % 2 == 1)
+            {
+                for (int i = (int)v.size() - 2; i >= 0; i--)
+                    full += v[i];
+            }
+            else
+            {
+                for (int i = (int)v.size() - 1; i >= 0; i--)
+                    full += v[i];
+            }
+
+            long long curr_num = stoll(full);
+            if (curr_num % 2 == 0 && !even_st.count(curr_num))
+            {
+                even_st.insert(curr_num);
+            }
+            else if (curr_num % 2 != 0 && !odd_st.count(curr_num))
+            {
+                odd_st.insert(curr_num);
+            }
+        }
+        return;
+    }
+    for (int x = 0; x <= 9; x++)
+    {
+        if (v.size() == 0 && x == 0)
+        {
+            continue;
+        }
+        v.push_back(to_string(x)[0]);
+        generate_sets(n, v);
+        v.pop_back();
+    }
+}
+void generate_palindrome_permutations()
+{
+    for (ll x = 1; x <= 10; x++)
+    {
+        // Generating all palindrome permutations of
+        // given length/2 and just add other portion as is  .
+        string s = "";
+        generate_sets(x, s);
+    }
+}
+long long minOperations(vector<int> &nums)
+{
+    long long ans = 0;
+    for (long long x = 0; x < nums.size(); x++)
+    {
+        if (nums[x] < 10)
+        {
+            continue;
+        }
+        long long local_min = 0;
+        if (nums[x] % 2 == 0)
+        {
+            auto it = even_st.upper_bound(nums[x]);
+            local_min = abs(*it - nums[x]) / 2;
+            if (it != even_st.begin())
+            {
+                it--;
+                local_min = min(local_min, abs(*it - nums[x]) / 2);
+            }
+        }
+        else
+        {
+            auto it = odd_st.upper_bound(nums[x]);
+            local_min = abs(*it - nums[x]) / 2;
+            if (it != odd_st.begin())
+            {
+                it--;
+                local_min = min(local_min, abs(*it - nums[x]) / 2);
+            }
+        }
+        ans += local_min;
+    }
+    return ans;
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
