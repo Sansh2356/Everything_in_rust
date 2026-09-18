@@ -11136,4 +11136,9 @@ int main()
     Finding mean,median and mode related designing questions and TopK pattern.
     Range maintainence ideas .
 
+    Graphs - 
+    1) Where is the graph ?
+    2) Which graph algorithm to apply ?
+    3) Best way to code that solution ? 
+    odd-cycle = bipartite not possible .
     */
