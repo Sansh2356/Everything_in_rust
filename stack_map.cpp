@@ -399,10 +399,383 @@ int shortestSubarray(vector<int> &nums, int k)
         Find floor(root(x)) .
 
         Binary search on an infinite array .
+
+        dijkstra,0-1 bfs,bellman-ford,flloyd-warshall .
     */
+    return 1;
 }
+void bfs(vector<bool> &visited, unordered_map<int, vector<int>> &adj_list)
+{
+    queue<int> q;
+    visited[0] = true;
+    q.push(0);
+    while (!q.empty())
+    {
+        int curr_node = q.front();
+        q.pop();
+        if (visited[curr_node])
+            continue;
+        cout << curr_node << " ";
+        for (auto neighbor : adj_list[curr_node])
+        {
+            if (visited[neighbor])
+            {
+                q.push(neighbor);
+                visited[neighbor] = true;
+            }
+        }
+    }
+    cout << "\n";
+}
+void dfs(int curr_node, int color, unordered_map<int, vector<int>> &adj_list, vector<bool> &visited, vector<int> &node_color)
+{
+    if (visited[curr_node])
+    {
+        return;
+    }
+    visited[curr_node] = true;
+    node_color[curr_node] = color;
+    for (auto neighbor : adj_list[curr_node])
+    {
+        if (!visited[neighbor])
+        {
+            dfs(neighbor, color, adj_list, visited, node_color);
+        }
+    }
+}
+
+vector<int> dx = {1, 1, -1, -1, 2, 2, -2, -2};
+vector<int> dy = {2, -2, 2, -2, 1, -1, 1, -1};
+bool check_islands(int r, int c, vector<vector<int>> &grid)
+{
+    if (r < 0 || c < 0 || r >= grid.size() || c >= grid[0].size())
+    {
+        return false;
+    }
+    return true;
+}
+void bfs(vector<vector<int>> &grid, vector<vector<int>> &visited, int row,
+         int col)
+{
+    queue<pair<int, int>> q;
+    q.push({row, col});
+    visited[row][col] = 1;
+    while (q.empty() != true)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        q.pop();
+        for (int x = 0; x < 4; x++)
+        {
+            int neig_r = r + dx[x];
+            int neig_c = c + dy[x];
+            if (check_islands(neig_r, neig_c, grid) == true &&
+                visited[neig_r][neig_c] == -1)
+            {
+                q.push({neig_r, neig_c});
+                visited[neig_r][neig_c] = 1;
+            }
+        }
+    }
+}
+int KnightWalk(int N, int Sx, int Sy, int Fx, int Fy)
+{
+    vector<vector<int>> visited(N + 1, vector<int>(N + 1, -1));
+    vector<vector<int>> grid(N + 1, vector<int>(N + 1, 0));
+    vector<vector<int>> dist(N + 1, vector<int>(N + 1, 0));
+
+    queue<pair<int, int>> q;
+    q.push({Sx, Sy});
+    visited[Sx][Sy] = 1;
+    while (q.empty() != true)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        q.pop();
+
+        if (r == Fx && c == Fy)
+            return dist[r][c];
+        for (int x = 0; x < dx.size(); x++)
+        {
+            int neig_r = r + dx[x];
+            int neig_c = c + dy[x];
+            if (check_islands(neig_r, neig_c, grid) == true &&
+                visited[neig_r][neig_c] == -1)
+            {
+                q.push({neig_r, neig_c});
+                dist[neig_r][neig_c] = dist[r][c] + 1;
+                visited[neig_r][neig_c] = 1;
+            }
+        }
+    }
+    return -1;
+}
+bool check_random(int x, int y, int n, int m)
+{
+    if (x >= 0 && x < n && y >= 0 && y < m)
+        return true;
+    return false;
+}
+vector<pair<pair<int, int>, ll>> get_neighbors(int x, int y, vector<string> &grid)
+{
+    vector<pair<pair<int, int>, ll>> ans;
+    for (int x = 0; x < 4; x++)
+    {
+        ll new_x = x + dx[x];
+        ll new_y = y + dy[x];
+        if (check_random(new_x, new_y, grid.size(), grid[0].size()))
+        {
+            if (grid[new_x][new_y] == '#')
+            {
+
+                ans.push_back({{new_x, new_y}, 1});
+            }
+            else
+            {
+                ans.push_back({{new_x, new_y}, 0});
+            }
+        }
+    }
+    return ans;
+}
+ll random_question_bfs(vector<string> &grid, ll start_x, ll start_y, ll end_x, ll end_y)
+{
+    vector<vector<ll>> dist(grid.size(), vector<ll>(grid[0].size(), LLONG_MAX));
+    vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+
+    deque<pair<int, int>> dq;
+    dq.push_back({start_x, start_y});
+    while (!dq.empty())
+    {
+        ll curr_node_x = dq.front().first;
+        ll curr_node_y = dq.front().second;
+        dq.pop_front();
+
+        if (visited[curr_node_x][curr_node_y])
+            continue;
+        visited[curr_node_x][curr_node_y] = true;
+
+        for (auto i : get_neighbors(curr_node_x, curr_node_y, grid))
+        {
+            if (!visited[i.first.first][i.first.second] && dist[i.first.first][i.first.second] > dist[curr_node_x][curr_node_y] + i.second)
+            {
+                visited[i.first.first][i.first.second] = true;
+                dist[i.first.first][i.first.second] = dist[curr_node_x][curr_node_y] + i.second;
+                if (i.second == 0)
+                {
+                    dq.push_back({i.first.first, i.first.second});
+                }
+                else
+                {
+
+                    dq.push_front({i.first.first, i.first.second});
+                }
+            }
+        }
+    }
+
+    return dist[end_x][end_y];
+}
+void random_question()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<string> grid;
+    for (ll x = 0; x < m; x++)
+    {
+        string s;
+        cin >> s;
+        grid.push_back(s);
+    }
+    ll start_x, start_y, end_x, end_y;
+    cin >> start_x >> start_y >> end_x >> end_y;
+    random_question_bfs(grid, start_x, start_y, end_x, end_y);
+}
+bool cycle = false;
+void dfs_check_cycle(int curr_node, vector<int> &parents, vector<bool> &visited, unordered_map<int, vector<int>> &adj_list)
+{
+    visited[curr_node] = true;
+    for (auto neig : adj_list[curr_node])
+    {
+        if (visited[neig] == false)
+        {
+            parents[neig] = curr_node;
+            dfs_check_cycle(neig, parents, visited, adj_list);
+        }
+        else if (neig != parents[curr_node])
+        {
+            cycle = true;
+            return;
+        }
+    }
+}
+void check_cycle()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<int> parents(n + 1, -1);
+    vector<bool> visited(n + 1);
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    for (int x = 1; x <= n; x++)
+    {
+        if (visited[x] == false)
+        {
+            dfs_check_cycle(x, parents, visited, adj_list);
+            if (cycle)
+            {
+                cout << "YES \n";
+                return;
+            }
+        }
+    }
+    cout << "NO \n";
+}
+bool is_cycle_present = false;
+vector<int> any_cycle;
+void finding_cycles_dfs(int node, int parent, vector<int> &parents, vector<int> &color, unordered_map<int, vector<int>> &adj_list, vector<bool> &visited)
+{
+
+    color[node] = 2;
+    parents[node] = parent;
+    for (auto neig : adj_list[node])
+    {
+        // if (neig == parents[node])
+        //     continue;
+        if (color[neig] == 1)
+        {
+            // Forward edge .
+            finding_cycles_dfs(neig, node, parents, color, adj_list, visited);
+        }
+        else if (color[neig] == 2)
+        {
+            // Back edge .
+            if (is_cycle_present == false)
+            {
+                int temp = node;
+                while (temp != neig)
+                {
+                    any_cycle.push_back(temp);
+                    temp = parents[temp];
+                }
+
+                any_cycle.push_back(neig);
+                any_cycle.push_back(node);
+                reverse(any_cycle.begin(), any_cycle.end());
+            }
+            is_cycle_present = true;
+        }
+        else if (color[neig] == 3)
+        {
+            // Cross edge .
+        }
+    }
+    color[node] = 3;
+}
+void finding_cycles()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<int> parents(n + 1);
+    vector<int> color(n + 1, 1);
+    vector<bool> visited(n + 1, 0);
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        // adj_list[v].push_back(u);
+    }
+    for (int x = 1; x <= n; x++)
+    {
+        if (color[x] == 1)
+        {
+            finding_cycles_dfs(x, 0, parents, color, adj_list, visited);
+            if (is_cycle_present)
+            {
+                cout << "YES" << "\n";
+                return;
+            }
+        }
+    }
+    cout << "NO \n";
+}
+void kahn()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<int>> adj_list;
+    vector<int> indegree(n + 1, 0);
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        indegree[v]++;
+        adj_list[u].push_back(v);
+    }
+    queue<int> q;
+    for (int x = 1; x <= n; x++)
+    {
+        if (indegree[x] == 0)
+        {
+            q.push(x);
+        }
+    }
+    vector<int> topo_order;
+    while (!q.empty())
+    {
+        int curr_node = q.front();
+        q.pop();
+        topo_order.push_back(curr_node);
+        for (auto nei : adj_list[curr_node])
+        {
+            indegree[nei]--;
+            if (indegree[nei] == 0)
+            {
+                q.push(nei);
+            }
+        }
+    }
+    if (topo_order.size() != n)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+        for (auto i : topo_order)
+        {
+            cout << i << " ";
+        }
+        cout << "\n";
+    }
+}
+
 void solve()
 {
+    
+    // kahn();
+    // finding_cycles();
+    // check_cycle();
+
+    // ll n, m;
+    // cin >> n >> m;
+    // vector<bool> visited(n + 1, false);
+    // unordered_map<int, vector<int>> adj_list;
+    // for (int x = 0; x < m; x++)
+    // {
+    //     int u, v;
+    //     cin >> u >> v;
+    //     adj_list[u].push_back(v);
+    //     adj_list[v].push_back(u);
+    // }
+    // bfs(visited, adj_list);
 
     // ll n, m;
     // cin >> n >> m;

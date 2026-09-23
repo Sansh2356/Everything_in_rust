@@ -11051,6 +11051,475 @@ long long minOperations(vector<int> &nums)
     }
     return ans;
 }
+void dfs(int curr_node, int color, unordered_map<int, vector<int>> &adj_list, vector<bool> &visited, vector<int> &node_color)
+{
+    if (visited[curr_node])
+    {
+        return;
+    }
+    visited[curr_node] = true;
+    node_color[curr_node] = color;
+    for (auto neighbor : adj_list[curr_node])
+    {
+        if (!visited[neighbor])
+        {
+            dfs(neighbor, color, adj_list, visited, node_color);
+        }
+    }
+}
+void easy_graph_queries()
+{
+    ll n, m, q;
+    cin >> n >> m >> q;
+    unordered_map<int, vector<int>> adj_list;
+    vector<bool> visited(n + 1, false);
+    for (int x = 0; x < m; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    vector<int> node_color(n + 1);
+    int num_components = 0;
+    int color = 0;
+    for (int x = 1; x <= n; x++)
+    {
+        if (visited[x] == false)
+        {
+            num_components++;
+            color++;
+            dfs(x, color, adj_list, visited, node_color);
+        }
+    }
+    unordered_map<int, set<int>> components;
+    for (int x = 1; x <= node_color.size(); x++)
+    {
+        components[node_color[x]].insert(x);
+    }
+    while (q--)
+    {
+        ll query_type;
+        cin >> query_type;
+        if (query_type == 1)
+        {
+            ll x;
+            cin >> x;
+            cout << components[node_color[x]].size() << "\n";
+        }
+        else
+        {
+            ll x, y;
+            cin >> x >> y;
+            if (node_color[x] == node_color[y])
+            {
+                cout << "YES \n";
+            }
+            else
+            {
+                cout << "NO \n";
+            }
+        }
+    }
+}
+void one_edge()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<int>> adj_list;
+    vector<bool> visited(n + 1, false);
+    for (int x = 0; x < m; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    vector<int> node_color(n + 1);
+    int num_components = 0;
+    int color = 0;
+    for (int x = 1; x <= n; x++)
+    {
+        if (visited[x] == false)
+        {
+            num_components++;
+            color++;
+            dfs(x, color, adj_list, visited, node_color);
+        }
+    }
+    unordered_map<int, set<int>> components;
+    for (int x = 1; x < node_color.size(); x++)
+    {
+        components[node_color[x]].insert(x);
+    }
+    ll ans = 0;
+    for (auto it : components)
+    {
+        ans += it.second.size() * (n - it.second.size());
+    }
+    cout << ans / 2 << "\n";
+}
+vector<int> dx = {1, -1, 0, 0};
+vector<int> dy = {0, 0, 1, -1};
+int cnt = 0;
+bool check_islands(int r, int c, vector<string> &grid)
+{
+    if (r < 0 || c < 0 || r >= grid.size() || c >= grid[0].size())
+    {
+        return false;
+    }
+    return true;
+}
+void bfs(vector<string> &grid, vector<vector<int>> &visited, int row,
+         int col)
+{
+    queue<pair<int, int>> q;
+    q.push({row, col});
+    visited[row][col] = 1;
+    while (q.empty() != true)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        q.pop();
+        for (int x = 0; x < 4; x++)
+        {
+            int neig_r = r + dx[x];
+            int neig_c = c + dy[x];
+            if (check_islands(neig_r, neig_c, grid) == true &&
+                grid[neig_r][neig_c] == '.' &&
+                visited[neig_r][neig_c] == -1)
+            {
+                q.push({neig_r, neig_c});
+                visited[neig_r][neig_c] = 1;
+            }
+        }
+    }
+}
+int numIslands(vector<string> &grid)
+{
+    vector<vector<int>> visited(grid.size(),
+                                vector<int>(grid[0].size(), -1));
+    for (int x = 0; x < grid.size(); x++)
+    {
+        for (int y = 0; y < grid[0].size(); y++)
+        {
+            if (grid[x][y] == '#' || visited[x][y] == 1)
+                continue;
+            else
+            {
+                bfs(grid, visited, x, y);
+                cnt++;
+            }
+        }
+    }
+    return cnt;
+}
+void color_tree()
+{
+    ll n;
+    cin >> n;
+    unordered_map<int, vector<int>> adj_list;
+    ll ans = LLONG_MIN;
+    vector<ll> degrees(n + 1, 0);
+    for (int x = 0; x < n - 1; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+        degrees[u]++;
+        degrees[v]++;
+        ans = max(ans, max(degrees[u], degrees[v]));
+    }
+    cout << ans + 1 << "\n";
+}
+bool is_cycle_present = false;
+vector<int> any_cycle;
+void finding_cycles_dfs(int node, int parent, vector<int> &parents, vector<int> &color, unordered_map<int, vector<int>> &adj_list, vector<bool> &visited)
+{
+
+    color[node] = 2;
+    parents[node] = parent;
+    for (auto neig : adj_list[node])
+    {
+        if (color[neig] == 1)
+        {
+            // Forward edge .
+            finding_cycles_dfs(neig, parent, parents, color, adj_list, visited);
+        }
+        else if (color[neig] == 2)
+        {
+            // Back edge .
+            if (is_cycle_present == false)
+            {
+                int temp = node;
+                while (temp != neig)
+                {
+                    any_cycle.push_back(temp);
+                    temp = parents[temp];
+                }
+                reverse(any_cycle.begin(), any_cycle.end());
+            }
+            is_cycle_present = true;
+        }
+        else if (color[neig] == 3)
+        {
+            // Cross edge .
+        }
+    }
+    color[node] = 3;
+}
+void finding_cycles()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<int> parents(n + 1);
+    vector<int> color(n + 1);
+    vector<bool> visited(n + 1);
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+    }
+    for (int x = 1; x <= n; x++)
+    {
+        if (!visited[x])
+        {
+            finding_cycles_dfs(x, 0, parents, color, adj_list, visited);
+        }
+    }
+}
+bool dfs_color_flag = false;
+void dfs_color(int curr_node, int parent, vector<int> &color, unordered_map<int, vector<int>> &adj_list)
+{
+    for (auto nei : adj_list[curr_node])
+    {
+        if (color[nei] == -2)
+        {
+            color[nei] = (color[curr_node] * -1);
+            dfs_color(nei, curr_node, color, adj_list);
+        }
+        else if (color[nei] == color[curr_node])
+        {
+            dfs_color_flag = true;
+            return;
+        }
+    }
+}
+void creating_teams()
+{
+    ll n, m;
+    cin >> n >> m;
+    dfs_color_flag = false;
+    unordered_map<int, vector<int>> adj_list;
+    vector<int> color(n + 1, -2);
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    for (int x = 1; x <= n; x++)
+    {
+        if (color[x] == -2)
+        {
+            color[x] = 1;
+            dfs_color(x, 0, color, adj_list);
+            if (dfs_color_flag)
+            {
+                cout << "NO \n";
+                return;
+            }
+        }
+    }
+    cout << "YES \n";
+}
+class ContestWeekly
+{
+public:
+    int countIntersectingIntervals(vector<vector<int>> &intervals)
+    {
+        sort(intervals.begin(), intervals.end());
+        int cnt = 0;
+        for (int x = 0; x < intervals.size(); x++)
+        {
+            auto it =
+                upper_bound(intervals.begin(), intervals.end(), intervals[x][1],
+                            [](int value, const vector<int> &interval)
+                            {
+                                return value < interval[0];
+                            });
+            if (it != intervals.end())
+            {
+                auto idx = it - intervals.begin();
+                cnt += (idx - x);
+            }
+            else
+            {
+                cnt += (intervals.size() - x - 1);
+            }
+        }
+        return cnt;
+    }
+    long long maxValue(vector<int> &nums)
+    {
+        /*
+            [9,7]
+            [9,-7]
+            [9,2]
+            total sum = 2 .
+            {9}
+
+            (9-7) + (9-2)
+
+
+        */
+        multiset<long long> st;
+        vector<long long> prefix_arr(nums.size(), 0);
+        for (int x = 0; x < nums.size(); x++)
+        {
+            if (x % 2)
+                nums[x] = -1 * nums[x];
+        }
+        prefix_arr[0] = nums[0];
+        for (int x = 1; x < nums.size(); x++)
+        {
+            prefix_arr[x] = prefix_arr[x - 1] + nums[x];
+        }
+        long long ans = INT_MIN;
+        long long total_sum = prefix_arr[prefix_arr.size() - 1];
+        st.insert(prefix_arr[0]);
+        for (int x = 1; x < nums.size(); x++)
+        {
+            auto it = st.upper_bound(prefix_arr[x]);
+            if (it != st.end())
+            {
+                long long value_greater = *it;
+                // -1 = (-4+3) = (4-3)+ (4-3) + (6-4+3)
+                // 6+(4-3) = 7 .
+                ans = max(ans, (total_sum + (-1LL * 2LL * (prefix_arr[x] - value_greater))));
+                if (it != st.begin())
+                {
+                    it--;
+                    long long lesser = *it;
+                    ans = max(ans, (total_sum + (-1LL * 2LL * (prefix_arr[x] - lesser))));
+                }
+            }
+            st.insert(prefix_arr[x]);
+        }
+        return ans;
+    }
+};
+void kahn()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<int>> adj_list;
+    vector<int> indegree(n + 1, 0);
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        indegree[v]++;
+        adj_list[u].push_back(v);
+    }
+    priority_queue<int> pq;
+    for (int x = 1; x <= n; x++)
+    {
+        if (indegree[x] == 0)
+        {
+            pq.push(-x);
+        }
+    }
+    vector<int> topo_order;
+    while (!pq.empty())
+    {
+        int curr_node = -1 * pq.top();
+        pq.pop();
+        topo_order.push_back(curr_node);
+        for (auto nei : adj_list[curr_node])
+        {
+            indegree[nei]--;
+            if (indegree[nei] == 0)
+            {
+                pq.push(-nei);
+            }
+        }
+    }
+    if (topo_order.size() != n)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+        for (auto i : topo_order)
+        {
+            cout << i << " ";
+        }
+        cout << "\n";
+    }
+}
+bool check_bricks(vector<ll> &v, ll mid)
+{
+    if (mid <= 1)
+    {
+        return v.size() >= 1;
+    }
+    ll cnt = 1;
+    for (ll i = 1; i < v.size(); i++)
+    {
+        if (v[i] == v[i - 1] + 1)
+        {
+            cnt++;
+        }
+        else
+        {
+            cnt = 1;
+        }
+        if (cnt >= mid)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+void bricks()
+{
+    ll n;
+    cin >> n;
+    vector<ll> v(n);
+    map<ll, ll> freq;
+    for (ll i = 0; i < n; i++)
+    {
+        cin >> v[i];
+        v[i] -= i;
+        freq[v[i]]++;
+    }
+
+    vector<ll> v2;
+    for (auto it : freq)
+    {
+        v2.push_back(it.first);
+    }
+
+    ll low = 1, high = v2.size(), ans = low;
+    while (low <= high)
+    {
+        ll mid = low + (high - low) / 2;
+        if (check_bricks(v2, mid))
+        {
+            ans = mid;
+            low = mid + 1;
+        }
+        else
+            high = mid - 1;
+    }
+
+    cout << ans << '\n';
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
@@ -11136,9 +11605,9 @@ int main()
     Finding mean,median and mode related designing questions and TopK pattern.
     Range maintainence ideas .
 
-    Graphs - 
+    Graphs -
     1) Where is the graph ?
     2) Which graph algorithm to apply ?
-    3) Best way to code that solution ? 
+    3) Best way to code that solution ?
     odd-cycle = bipartite not possible .
     */
