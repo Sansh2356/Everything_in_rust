@@ -2,6 +2,7 @@
 #![feature(btree_cursors)]
 use std::fmt::Debug;
 use std::io::{BufRead, Stdin, stdin};
+use std::range;
 use std::str::FromStr;
 use std::{
     collections::{BTreeMap, VecDeque},
@@ -146,10 +147,50 @@ fn stack_stimulation(stdin: Stdin) {
     let ans: String = stack.iter().collect();
     println!("{ans}");
 }
+fn random_bfs(adj_list: &std::collections::HashMap<u32, Vec<u32>>, n: u64, m: u64) {
+    let mut visited: Vec<bool> = Vec::with_capacity((n + 1) as usize);
+    visited.fill(false);
+
+    let mut queue: std::collections::VecDeque<u32> = VecDeque::new();
+    queue.push_front(1);
+
+    while !queue.is_empty() {
+        if let Some(curr_node) = queue.front() {
+            if let Some(val) = visited.get(*curr_node as usize) {
+                if *val {
+                    continue;
+                } else {
+                    println!("Current node - {:?}", curr_node);
+                    for nei in adj_list.get(curr_node).unwrap().into_iter() {
+                        visited[*nei as usize] = true;
+                        queue.push_front(*nei);
+                    }
+                }
+            }
+        }
+        queue.pop_front();
+    }
+}
 fn solve(stdin: Stdin) {
     let n: u64 = InputReader::read_input(Box::from(stdin.lock()));
-    let v: Vec<i32> = InputReader::read_input_vec(Box::new(stdin.lock()));
-    
+    let m: u64 = InputReader::read_input(Box::from(stdin.lock()));
+
+    let mut adj_list = std::collections::HashMap::<u32, Vec<u32>>::new();
+
+    for i in 1..m {
+        let u: u32 = InputReader::read_input(Box::from(stdin.lock()));
+        let v: u32 = InputReader::read_input(Box::from(stdin.lock()));
+
+        // Pushing edges in case of undirected graph.
+        if let Some(val) = adj_list.get_mut(&u) {
+            *&val.push(v);
+        }
+        if let Some(val) = adj_list.get_mut(&v) {
+            *&val.push(u);
+        }
+    }
+
+    random_bfs(&adj_list, n, m);
 }
 fn main() {
     let std_in_obj = stdin();

@@ -691,7 +691,7 @@ void finding_cycles()
         int u, v;
         cin >> u >> v;
         adj_list[u].push_back(v);
-        // adj_list[v].push_back(u);
+        adj_list[v].push_back(u);
     }
     for (int x = 1; x <= n; x++)
     {
@@ -745,7 +745,7 @@ void kahn()
     }
     if (topo_order.size() != n)
     {
-        cout << -1 << "\n";
+        cout << "IMPOSSIBLE" << "\n";
     }
     else
     {
@@ -756,10 +756,322 @@ void kahn()
         cout << "\n";
     }
 }
+ll component_size = 0;
+bool small_check(int row, int col, int n)
+{
+    if (row < 0 || col < 0 || row >= n || col >= 10)
+    {
+        return false;
+    }
+    return true;
+}
+vector<pair<ll, ll>> vertical_grid(ll start_row, ll start_col, vector<vector<ll>> &grid, vector<vector<ll>> &visited)
+{
+    vector<pair<ll, ll>> cells;
+    queue<pair<pair<ll, ll>, ll>> q;
+    visited[start_row][start_col] = 1;
+    q.push({{start_row, start_col}, grid[start_row][start_col]});
+    while (!q.empty())
+    {
+        ll row = q.front().first.first;
+        ll col = q.front().first.second;
+        ll color = q.front().second;
+        q.pop();
+        component_size++;
+        cells.push_back({row, col});
+        vector<ll> dx = {1, -1, 0, 0};
+        vector<ll> dy = {0, 0, 1, -1};
+        for (ll x = 0; x < 4; x++)
+        {
+            ll nei_row = row + dx[x];
+            ll nei_col = col + dy[x];
+            if (small_check(nei_row, nei_col, grid.size()) && visited[nei_row][nei_col] == -1 && grid[nei_row][nei_col] == color)
+            {
+                visited[nei_row][nei_col] = 1;
+                q.push({{nei_row, nei_col}, color});
+            }
+        }
+    }
+    return cells;
+}
+void zero_one_bfs()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<pair<int, int>>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v, c;
+        cin >> u >> v >> c;
+        adj_list[u].push_back({v, c});
+        adj_list[v].push_back({u, c});
+    }
+    vector<bool> visited(n + 1, false);
+    vector<int> dist(n + 1, INT_MAX);
+    visited[1] = true;
+    deque<pair<int, int>> dq;
+    dq.push_front({1, 0});
+    dist[1] = 0;
+    while (!dq.empty())
+    {
+        int curr_node = dq.front().first;
+        int cost = dq.front().second;
+        dq.pop_front();
+        for (auto &[nei, nei_cost] : adj_list[curr_node])
+        {
+            if (!visited[nei] && dist[nei] > dist[curr_node] + nei_cost)
+            {
+                if (nei_cost == 0)
+                {
+                    dq.push_front({nei, nei_cost});
+                }
+                else
+                {
+                    dq.push_back({nei, nei_cost});
+                }
+                dist[nei] = dist[curr_node] + nei_cost;
+            }
+        }
+    }
+}
+bool check_one_piece(int row, int col, int n, int m)
+{
+    if (row < 0 || col < 0 || col >= m || row >= n)
+    {
+        return false;
+    }
+    return true;
+}
+void one_piece()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<vector<ll>> grid(n, vector<ll>(m, 0));
+    vector<vector<ll>> dist(n, vector<ll>(m, LLONG_MAX));
+    for (ll x = 0; x < n; x++)
+    {
+        for (ll y = 0; y < m; y++)
+        {
+            ll num;
+            cin >> num;
+            grid[x][y] = num;
+        }
+    }
+    deque<pair<int, int>> dq;
+    dist[0][0] = 0;
+    dq.push_front({0, 0});
+    vector<int> dx = {1, -1, 0, 0};
+    vector<int> dy = {0, 0, 1, -1};
+
+    while (!dq.empty())
+    {
+        int curr_node_row = dq.front().first;
+        int curr_node_col = dq.front().second;
+        int symbol = grid[curr_node_row][curr_node_col];
+        dq.pop_front();
+        for (int x = 0; x < dx.size(); x++)
+        {
+            int w = 1;
+            int r1 = curr_node_row + dx[x];
+            int c1 = curr_node_col + dy[x];
+        }
+    }
+    cout << (dist[n - 1][m - 1] == LLONG_MAX ? -1 : dist[n - 1][m - 1]) << "\n";
+}
+void burn_all()
+{
+    long long n, m;
+    cin >> n >> m;
+    vector<long long> dist(n + 1, LLONG_MAX);
+    vector<bool> visited(n + 1, false);
+    unordered_map<long long, vector<pair<long long, long long>>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        long long u, v, d;
+        cin >> u >> v >> d;
+        adj_list[u].push_back({v, d});
+        adj_list[v].push_back({u, d});
+    }
+    long long start_node;
+    cin >> start_node;
+    priority_queue<pair<long long, long long>> pq;
+    pq.push({0, start_node});
+    dist[start_node] = 0;
+    while (!pq.empty())
+    {
+        long long cost = -1 * pq.top().first;
+        long long node = pq.top().second;
+        pq.pop();
+        if (visited[node])
+            continue;
+        visited[node] = true;
+        for (auto i : adj_list[node])
+        {
+            if (!visited[i.first] && dist[i.first] > (dist[node] + i.second))
+            {
+                dist[i.first] = dist[node] + i.second;
+                pq.push({-1 * dist[i.first], i.first});
+            }
+        }
+    }
+    long double ans = 0.0;
+    for (auto it : adj_list)
+    {
+        long long u = it.first;
+        for (auto nei : it.second)
+        {
+            long double t1 = dist[u];
+            long double t2 = dist[nei.first];
+            if (abs(t1 - t2) >= nei.second)
+            {
+                // One of them will already burn it before other end
+                // catches fire .
+                ans = max(ans, (min(t1, t2) + nei.second));
+            }
+            else
+            {
+                // Both ends will meet somewhere in between
+                // the thread at an instance `t` . (x-t1) + (x-t2) = X
+                // 2x = X+t1+t2 x = (X+t1+t2)/2 .
+                ans = max(ans, ((t1 + t2 + nei.second) / 2));
+            }
+        }
+    }
+    cout << (10 * ans) << "\n";
+}
+vector<ll> dist;
+void bellman_ford(vector<vector<ll>> &edges, int n, int start_node)
+{
+    /*
+    As we have discussed earlier that, we need (V - 1) relaxations of all the edges to achieve single source shortest path. If one additional relaxation (Vth) for any edge is possible, it indicates that some edges with overall negative weight has been traversed once more. This indicates the presence of a negative weight cycle in the graph.
+    */
+    dist[start_node] = 0;
+    for (int x = 1; x <= n; x++)
+    {
+        for (auto i : edges)
+        {
+            int u = i[0];
+            int v = i[1];
+            int c = i[2];
+            if (dist[v] > dist[u] + c)
+            {
+                dist[v] = (dist[u] + c);
+            }
+        }
+    }
+    for (auto i : dist)
+    {
+        cout << i << " ";
+    }
+    cout << "\n";
+}
+
 
 void solve()
 {
-    
+    // apsp();
+    // flloyd_warshall();
+    // ll n, m;
+    // cin >> n >> m;
+    // vector<vector<ll>> edges(m);
+    // for (int x = 0; x < m; x++)
+    // {
+    //     ll u, v, c;
+    //     cin >> u >> v >> c;
+    //     edges[x] = {u, v, -c};
+    // }
+    // dist.assign(n + 1, LLONG_MAX);
+    // bellman_ford(edges, n, 1);
+    // vector<ll> temp_dist = dist;
+    // bellman_ford(edges, n, 1);
+    // vector<ll> cycle_nodes;
+    // for (int x = 1; x <= n; x++)
+    // {
+    //     // Positive cycle exists .
+    //     if (temp_dist[x] < dist[x])
+    //     {
+    //         cout << "CYCLE EXISTS \n";
+    //         cycle_nodes.push_back(x);
+    //     }
+    // }
+
+    // cout << -temp_dist[n] << "\n";
+
+    // burn_all();
+    // shortest_path_1();
+    // kahn();
+    // one_piece();
+    // edge_reverse();
+    // dijkstra();
+
+    // ll n, k;
+    // cin >> n >> k;
+    // vector<vector<ll>> grid(n, vector<ll>(10, 0));
+
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     string s;
+    //     cin >> s;
+    //     for (int y = 0; y < s.length(); y++)
+    //     {
+    //         string sub = "";
+    //         sub.push_back(s[y]);
+    //         grid[x][y] = stoi(sub);
+    //     }
+    // }
+    // while (1)
+    // {
+    //     bool flag = false;
+    //     vector<vector<ll>> visited(n, vector<ll>(10, -1));
+    //     for (int x = 0; x < n; x++)
+    //     {
+    //         for (int y = 0; y < 10; y++)
+    //         {
+    //             if (visited[x][y] == -1 && grid[x][y] != 0)
+    //             {
+    //                 component_size = 0;
+    //                 vector<pair<int, int>> cells = vertical_grid(x, y, grid, visited);
+    //                 if (component_size >= k)
+    //                 {
+
+    //                     flag = true;
+    //                     for (auto i : cells)
+    //                     {
+    //                         grid[i.first][i.second] = 0;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if (flag == false)
+    //         break;
+    //     for (int y = 0; y < grid[0].size(); y++)
+    //     {
+    //         int move = 0;
+    //         for (int row = grid.size() - 1; row >= 0; row--)
+    //         {
+    //             if (grid[row][y] == 0)
+    //             {
+    //                 move++;
+    //             }
+    //             else if (grid[row][y] != 0 && move > 0)
+    //             {
+    //                 grid[row + move][y] = grid[row][y];
+    //                 grid[row][y] = 0;
+    //             }
+    //         }
+    //     }
+    // }
+    // for (int x = 0; x < grid.size(); x++)
+    // {
+    //     for (int y = 0; y < grid[0].size(); y++)
+    //     {
+    //         cout << grid[x][y];
+    //     }
+    //     cout << "\n";
+    // }
+    // cout << "\n";
+
     // kahn();
     // finding_cycles();
     // check_cycle();
@@ -806,8 +1118,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();

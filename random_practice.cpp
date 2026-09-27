@@ -11520,6 +11520,501 @@ void bricks()
 
     cout << ans << '\n';
 }
+void topological_labelling()
+{
+
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<int>> adj_list;
+    // Reversing indegree to outdegree and process
+    // similar to indegree .
+    vector<ll> inorder(n + 1, 0);
+    for (int x = 0; x < m; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        // Reverse actual edge for outdegree handling .
+        adj_list[v].push_back(u);
+        inorder[u]++;
+    }
+    priority_queue<int> q;
+    vector<int> ans(n + 1);
+    for (int x = 1; x <= n; x++)
+    {
+        if (inorder[x] == 0)
+        {
+            q.push(x);
+        }
+    }
+    int val = n;
+    while (!q.empty())
+    {
+        int curr_node = q.top();
+        q.pop();
+        ans[curr_node] = val;
+        val--;
+        for (auto nei : adj_list[curr_node])
+        {
+            inorder[nei]--;
+            if (inorder[nei] == 0)
+            {
+                q.push(nei);
+            }
+        }
+    }
+    for (auto i : ans)
+    {
+        if (i == 0)
+            continue;
+        cout << i << " ";
+    }
+    cout << "\n";
+}
+void complete_game()
+{
+
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<int, vector<int>> adj_list;
+    vector<ll> inorder(n + 1, 0);
+    vector<vector<int>> backedge(n + 1);
+    vector<int> dp(n + 1, 0);
+    dp[1] = 1;
+    for (int x = 0; x < m; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        inorder[v]++;
+        backedge[v].push_back(u);
+    }
+    priority_queue<int> q;
+    for (int x = 1; x <= n; x++)
+    {
+        if (inorder[x] == 0)
+        {
+            q.push(-x);
+        }
+    }
+    while (!q.empty())
+    {
+        int curr_node = -1 * q.top();
+        q.pop();
+        for (auto nei : adj_list[curr_node])
+        {
+            inorder[nei]--;
+            if (inorder[nei] == 0)
+            {
+                q.push(-1 * nei);
+            }
+        }
+        for (int prev : backedge[curr_node])
+        {
+            dp[curr_node] = (dp[curr_node] + dp[prev]) % 1000000007;
+        }
+    }
+    cout << dp[n] << "\n";
+}
+void bfs_shortest_cycle(int root_node, vector<vector<int>> &adj_mat, int total_nodes)
+{
+    vector<int> parents(total_nodes, -1);
+    int ans = 0;
+    vector<int> dist(total_nodes, 0);
+    unordered_map<int, bool> visited;
+    queue<pair<int, int>> q;
+    q.push({root_node, 0});
+    visited[root_node] = true;
+    dist[root_node] = 0;
+    while (q.empty() != true)
+    {
+        auto it = q.front();
+        q.pop();
+        int parent_node = it.first;
+        int cost_parent = it.second;
+        for (int x = 0; x < adj_mat[parent_node].size(); x++)
+        {
+            if (visited[adj_mat[parent_node][x]] == false)
+            {
+                visited[adj_mat[parent_node][x]] = true;
+                parents[adj_mat[parent_node][x]] = parent_node;
+                dist[adj_mat[parent_node][x]] = dist[parent_node] + 1;
+                q.push({adj_mat[parent_node][x],
+                        dist[adj_mat[parent_node][x]]});
+            }
+            else if (visited[adj_mat[parent_node][x]] == true &&
+                     parents[parent_node] != adj_mat[parent_node][x])
+            {
+                // cycle exists//
+                ans = min(ans, dist[adj_mat[parent_node][x]] +
+                                   dist[parent_node] + 1);
+                if (dist[adj_mat[parent_node][x]] >= dist[parent_node])
+                {
+                    return;
+                }
+            }
+        }
+    }
+}
+int findShortestCycle(int n, vector<vector<int>> &edges)
+{
+    int ans = 0;
+    vector<vector<int>> adj_mat(n);
+    for (int x = 0; x < edges.size(); x++)
+    {
+        int u = edges[x][0];
+        int v = edges[x][1];
+        adj_mat[u].push_back(v);
+        adj_mat[v].push_back(u);
+    }
+    for (int x = 0; x < n; x++)
+    {
+        bfs_shortest_cycle(x, adj_mat, n);
+    }
+    return ans == INT_MAX ? -1 : ans;
+}
+void edge_reverse()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<ll, vector<pair<ll, ll>>> adj_list;
+    for (ll x = 0; x < m; x++)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj_list[u].push_back({v, 0});
+        adj_list[v].push_back({u, 1});
+    }
+    vector<ll> dist(n + 1, LLONG_MAX);
+    deque<pair<ll, ll>> dq;
+    dq.push_front({1, 0});
+    dist[1] = 0;
+    while (!dq.empty())
+    {
+        ll curr_node = dq.front().first;
+        ll cost = dq.front().second;
+        dq.pop_front();
+        for (auto &[nei, nei_cost] : adj_list[curr_node])
+        {
+            if (dist[nei] > dist[curr_node] + nei_cost)
+            {
+                if (nei_cost == 0)
+                {
+                    dq.push_front({nei, nei_cost});
+                }
+                else
+                {
+                    dq.push_back({nei, nei_cost});
+                }
+                dist[nei] = dist[curr_node] + nei_cost;
+            }
+        }
+    }
+    cout << (dist[n] == LLONG_MAX ? -1 : dist[n]) << "\n";
+}
+void dijkstra()
+{
+    ll n, m;
+    cin >> n >> m;
+    unordered_map<ll, vector<pair<ll, ll>>> adj_list;
+    for (ll x = 0; x < m; x++)
+    {
+        ll u, v, c;
+        cin >> u >> v >> c;
+        adj_list[u].push_back({v, c});
+    }
+    vector<bool> visited(n + 1, false);
+    vector<ll> dist(n + 1, LLONG_MAX);
+    priority_queue<pair<ll, ll>> pq;
+    pq.push({0, 1});
+    dist[1] = 0;
+    while (!pq.empty())
+    {
+        ll cost = -1 * pq.top().first;
+        ll curr_node = pq.top().second;
+        pq.pop();
+        if (visited[curr_node])
+            continue;
+        visited[curr_node] = true;
+        for (auto &[nei, nei_cost] : adj_list[curr_node])
+        {
+            if (!visited[nei] && dist[nei] > (dist[curr_node] + nei_cost))
+            {
+                dist[nei] = dist[curr_node] + nei_cost;
+                pq.push({-1 * dist[nei], nei});
+            }
+        }
+    }
+    for (ll x = 0; x <= n; x++)
+    {
+        if (x >= 1)
+        {
+            cout << dist[x] << " ";
+        }
+    }
+    cout << "\n";
+}
+void print_path(int i, int j, vector<vector<int>> &parents)
+{
+    if (i != j)
+        print_path(i, parents[i][j], parents);
+    cout << j << " ";
+}
+void flloyd_warshall()
+{
+    // APSP
+    ll n, m, q;
+    cin >> n >> m >> q;
+    vector<vector<ll>> dist(n, vector<ll>(n, LLONG_MAX));
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < n; y++)
+        {
+            if (x == y)
+                dist[x][y] = 0;
+        }
+    }
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        ll c;
+        cin >> u >> v >> c;
+        u--;
+        v--;
+        dist[u][v] = min(c, dist[u][v]);
+        dist[v][u] = min(dist[v][u], c);
+    }
+    // Finding all intermediate matrices representing smallest path from (i,j) via 1..k number of nodes.
+    // O(V^3) .
+    for (int k = 0; k < n; k++)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (dist[i][k] == LLONG_MAX && dist[k][j] == 0 || dist[i][k] == LLONG_MAX && dist[k][j] == 0 || dist[i][k] != LLONG_MAX && dist[k][j] != LLONG_MAX)
+                {
+                    dist[i][j] = min(dist[i][j], (dist[i][k] + dist[k][j]));
+                }
+            }
+        }
+    }
+    while (q--)
+    {
+        int a, b;
+        cin >> a >> b;
+        a--;
+        b--;
+        cout << (dist[a][b] >= LLONG_MAX ? -1 : dist[a][b]) << "\n";
+    }
+}
+void bellman_ford(vector<vector<ll>> &edges, int n, int start_node)
+{
+    vector<ll> dist;
+
+    /*
+    As we have discussed earlier that, we need (V - 1) relaxations of all the edges to achieve single source shortest path. If one additional relaxation (Vth) for any edge is possible, it indicates that some edges with overall negative weight has been traversed once more. This indicates the presence of a negative weight cycle in the graph.
+    */
+    dist[start_node] = 0;
+    for (int x = 1; x <= n; x++)
+    {
+        for (auto i : edges)
+        {
+            int u = i[0];
+            int v = i[1];
+            int c = i[2];
+            if (dist[v] > dist[u] + c)
+            {
+                dist[v] = (dist[u] + c);
+            }
+        }
+    }
+    for (auto i : dist)
+    {
+        cout << i << " ";
+    }
+    cout << "\n";
+}
+void burn_all()
+{
+    long long n, m;
+    cin >> n >> m;
+    vector<long long> dist(n + 1, LLONG_MAX);
+    vector<bool> visited(n + 1, false);
+    unordered_map<long long, vector<pair<long long, long long>>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        long long u, v, d;
+        cin >> u >> v >> d;
+        adj_list[u].push_back({v, d});
+        adj_list[v].push_back({u, d});
+    }
+    long long start_node;
+    cin >> start_node;
+    priority_queue<pair<long long, long long>> pq;
+    pq.push({0, start_node});
+    dist[start_node] = 0;
+    while (!pq.empty())
+    {
+        long long cost = -1 * pq.top().first;
+        long long node = pq.top().second;
+        pq.pop();
+        if (visited[node])
+            continue;
+        visited[node] = true;
+        for (auto i : adj_list[node])
+        {
+            if (!visited[i.first] && dist[i.first] > (dist[node] + i.second))
+            {
+                dist[i.first] = dist[node] + i.second;
+                pq.push({-1 * dist[i.first], i.first});
+            }
+        }
+    }
+    long double ans = 0.0;
+    for (auto it : adj_list)
+    {
+        long long u = it.first;
+        for (auto nei : it.second)
+        {
+            long double t1 = dist[u];
+            long double t2 = dist[nei.first];
+            if (abs(t1 - t2) >= nei.second)
+            {
+                // One of them will already burn it before other end
+                // catches fire .
+                ans = max(ans, (min(t1, t2) + nei.second));
+            }
+            else
+            {
+                // Both ends will meet somewhere in between
+                // the thread at an instance `t` . (x-t1) + (x-t2) = X
+                // 2x = X+t1+t2 x = (X+t1+t2)/2 .
+                ans = max(ans, ((t1 + t2 + nei.second) / 2));
+            }
+        }
+    }
+    cout << (10 * ans) << "\n";
+}
+void apsp()
+{
+    // APSP
+    ll n;
+    cin >> n;
+    vector<vector<ll>> dist(n, vector<ll>(n, LLONG_MAX));
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < n; y++)
+        {
+            if (x == y)
+            {
+                dist[x][y] = 0;
+            }
+        }
+    }
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < n; y++)
+        {
+            ll c;
+            cin >> c;
+            dist[x][y] = min(dist[x][y], c);
+        }
+    }
+    vector<ll> vertices_order(n);
+    for (int x = 0; x < n; x++)
+    {
+        cin >> vertices_order[x];
+    }
+    // Finding all intermediate matrices representing smallest path from (i,j) via 1..k number of nodes.
+    // O(V^3) .
+    // Reversal order will actuall be same as adding vertices one by one
+    // in reverse order of removing vertices one by one .
+    vector<ll> ans;
+    for (int k = (n - 1); k >= 0; k--)
+    {
+        ll vert = vertices_order[k];
+        vert--;
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                // Overflow handle .
+                if (dist[i][vert] == LLONG_MAX && dist[vert][j] == 0 || dist[i][vert] == LLONG_MAX && dist[vert][j] == 0 || dist[i][vert] != LLONG_MAX && dist[vert][j] != LLONG_MAX)
+                {
+                    if (dist[i][j] > dist[i][vert] + dist[vert][j])
+                    {
+                        // At each instance we are updating path if possible
+                        // via an intermediate node or directly to go to the next node
+                        // if possible .
+                        dist[i][j] = min(dist[i][j], (dist[i][vert] + dist[vert][j]));
+                    }
+                }
+            }
+        }
+        ll local_ans = 0;
+        // We should take only the current nodes which have been added
+        // to graph which are then nodes from (n-1)th index to kth index .
+        // and not all the nodes because they simply do not exist till this point of time .
+        for (int x = k; x < n; x++)
+        {
+            for (int y = k; y < n; y++)
+            {
+                int b = vertices_order[x] - 1;
+                int c = vertices_order[y] - 1;
+
+                local_ans += dist[b][c];
+            }
+        }
+        ans.push_back(local_ans);
+    }
+    reverse(ans.begin(), ans.end());
+    for (auto i : ans)
+    {
+        cout << i << " ";
+    }
+    cout << "\n";
+}
+void shortest_path_1()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> dist(n + 1, LLONG_MAX);
+    vector<bool> visited(n + 1, false);
+    unordered_map<ll, vector<pair<ll, ll>>> adj_list;
+    for (int x = 0; x < m; x++)
+    {
+        ll u, v, c;
+        cin >> u >> v >> c;
+        adj_list[u].push_back({v, c});
+        adj_list[v].push_back({u, c});
+    }
+    priority_queue<pair<ll, ll>> pq;
+    pq.push({0, 1});
+    dist[1] = 0;
+    while (!pq.empty())
+    {
+        ll cost = -1 * pq.top().first;
+        ll node = pq.top().second;
+        pq.pop();
+        if (visited[node])
+            continue;
+        visited[node] = true;
+        for (auto i : adj_list[node])
+        {
+            if (!visited[i.first] && dist[i.first] > dist[node] + i.second)
+            {
+                dist[i.first] = dist[node] + i.second;
+                pq.push({-1 * dist[i.first], i.first});
+            }
+        }
+    }
+    for (int x = 0; x <= n; x++)
+    {
+        if (x >= 1)
+            cout << dist[x] << " ";
+    }
+    cout << "\n";
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
