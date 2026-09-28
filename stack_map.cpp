@@ -965,10 +965,28 @@ void bellman_ford(vector<vector<ll>> &edges, int n, int start_node)
     }
     cout << "\n";
 }
+void snake_ladders()
+{
+}
+class Solution
+{
+public:
+    vector<int> rearrangeArray(vector<int> &nums)
+    {
+        vector<int> ans;
 
-
+        return ans;
+    }
+};
 void solve()
 {
+    /*
+        1)Skewer.
+        2)Casteling.
+        3)Forking.
+    */
+    // jump_game();
+    // budget_travelling();
     // apsp();
     // flloyd_warshall();
     // ll n, m;

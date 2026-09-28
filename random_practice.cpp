@@ -12015,6 +12015,168 @@ void shortest_path_1()
     }
     cout << "\n";
 }
+void budget_travelling()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<vector<pair<ll, pair<ll, ll>>>> adj_list(n);
+    // Costs required for taking a petrol filling from a city c.
+    for (int x = 0; x < m; x++)
+    {
+        // Undirected graph between (u,v) and
+        // p is petrol needed to go from city u to city v .
+        // and d is the distance between u and v.
+        ll u, v, p;
+        cin >> u >> v >> p;
+        u--,
+            v--;
+        adj_list[u].push_back({v, {p, p}});
+        adj_list[v].push_back({u, {p, p}});
+    }
+    vector<ll> costs(n);
+    for (int x = 0; x < n; x++)
+        cin >> costs[x];
+    // The state for a node will require the petrol taken upto now .
+    // so relaxation can be done from a city u,v via petrol uptil now .
+    // so state will be {node,petrol_available} .
+    int start_node, end_node, k;
+    cin >> start_node >> end_node >> k;
+    start_node--;
+    end_node--;
+    // Required for not revisiting already relaxed state again and
+    // again leading to O(N^2) solution which is sub-optimal and lead to TLE .
+    vector<vector<bool>> visited(n, vector<bool>(1e5, false));
+    // The intermediate updates will be kept in dist matrix representing
+    // the minimum cost required to reach another node with a possible petrol filled .
+    vector<vector<ll>> dist(n, vector<ll>(1e5, LLONG_MAX));
+    // Marking starting node's distance as 0 .
+    priority_queue<pair<ll, pair<ll, ll>>> pq;
+    dist[start_node][0] = 0;
+    pq.push({0, {start_node, 0}});
+    while (!pq.empty())
+    {
+        auto temp = pq.top();
+        pq.pop();
+        ll curr_cost = (-1 * temp.first);
+        ll curr_node = temp.second.first;
+        ll curr_fuel_left = temp.second.second;
+        if (visited[curr_node][curr_fuel_left])
+            continue;
+        visited[curr_node][curr_fuel_left] = true;
+        for (auto nei : adj_list[curr_node])
+        {
+            // If we have the petrol then we can move after checking
+            // the relaxation if possible and updating the cost .
+            if (curr_fuel_left >= nei.second.first)
+            {
+                if (!visited[nei.first][curr_fuel_left - nei.second.first] && dist[nei.first][curr_fuel_left - nei.second.first] > (curr_cost))
+                {
+                    dist[nei.first][curr_fuel_left - nei.second.first] = curr_cost;
+                    pq.push({-dist[nei.first][curr_fuel_left - nei.second.first], {nei.first, curr_fuel_left - nei.second.first}});
+                }
+            }
+        }
+        // We can also have a transition state representing another node that
+        // we can achieve only by refilling the fuel while staying on same node .
+        if (curr_fuel_left < k && !visited[curr_node][curr_fuel_left + 1] && dist[curr_node][curr_fuel_left + 1] > curr_cost + costs[curr_node])
+        {
+            dist[curr_node][curr_fuel_left + 1] = curr_cost + costs[curr_node];
+            pq.push({-dist[curr_node][curr_fuel_left + 1], {curr_node, curr_fuel_left + 1}});
+        }
+    }
+    ll ans = LLONG_MAX;
+    for (auto i : dist[end_node])
+    {
+        ans = min(ans, i);
+    }
+    cout << ans << "\n";
+}
+void dijkstra_jump_game(vector<vector<pair<int, int>>> &adj_mat, int src_node, int n)
+{
+    src_node--;
+    vector<bool> visited(adj_mat.size(), false);
+    vector<ll> dist(adj_mat.size(), LLONG_MAX);
+    priority_queue<pair<ll, ll>> pq;
+    pq.push({0, src_node});
+    dist[src_node] = 0;
+    while (!pq.empty())
+    {
+        ll cost = -1 * pq.top().first;
+        ll curr_node = pq.top().second;
+        pq.pop();
+        if (visited[curr_node])
+            continue;
+        visited[curr_node] = true;
+        for (auto &[nei, nei_cost] : adj_mat[curr_node])
+        {
+            if (!visited[nei] && dist[nei] > (dist[curr_node] + nei_cost))
+            {
+                dist[nei] = dist[curr_node] + nei_cost;
+                pq.push({-1 * dist[nei], nei});
+            }
+        }
+    }
+    for (ll x = 0; x < adj_mat.size(); x++)
+    {
+        if (x >= n)
+            break;
+        cout << dist[x] << " ";
+    }
+    cout << "\n";
+}
+void jump_game()
+{
+    ll n, a, b;
+    cin >> n >> a >> b;
+    vector<int> v(n);
+    for (int x = 0; x < n; x++)
+    {
+        cin >> v[x];
+    }
+    int src;
+    cin >> src;
+    // Assigning pseudo-nodes to the other values which are of same value as
+    // that of other distinctly available values .
+    unordered_map<int, pair<int, int>> m;
+    int distinct_cnt = 0;
+    int temp = n;
+    for (auto i : v)
+    {
+        if (m.count(i))
+        {
+            if (m[i].second == 1)
+            {
+                distinct_cnt++;
+            }
+            m[i].second++;
+        }
+        else
+        {
+            m[i].second = 1;
+            m[i].first = temp;
+            temp++;
+        }
+    }
+    vector<vector<pair<int, int>>> adj_mat(n + distinct_cnt);
+    for (int x = 0; x < n; x++)
+    {
+        if (x > 0)
+        {
+            adj_mat[x].push_back({x - 1, b});
+        }
+        if (x < (n - 1))
+        {
+            adj_mat[x].push_back({x + 1, b});
+        }
+        if (m[v[x]].second > 1)
+        {
+            int val = m[v[x]].first;
+            adj_mat[val].push_back({x, 0});
+            adj_mat[x].push_back({val, a});
+        }
+    }
+    dijkstra_jump_game(adj_mat, src, n);
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
