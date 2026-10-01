@@ -11170,6 +11170,8 @@ bool check_islands(int r, int c, vector<string> &grid)
     }
     return true;
 }
+int local_component_size = 0;
+int local_peri_size = 0;
 void bfs(vector<string> &grid, vector<vector<int>> &visited, int row,
          int col)
 {
@@ -11181,12 +11183,13 @@ void bfs(vector<string> &grid, vector<vector<int>> &visited, int row,
         int r = q.front().first;
         int c = q.front().second;
         q.pop();
+        local_component_size++;
         for (int x = 0; x < 4; x++)
         {
             int neig_r = r + dx[x];
             int neig_c = c + dy[x];
             if (check_islands(neig_r, neig_c, grid) == true &&
-                grid[neig_r][neig_c] == '.' &&
+                grid[neig_r][neig_c] == '#' &&
                 visited[neig_r][neig_c] == -1)
             {
                 q.push({neig_r, neig_c});
@@ -11199,16 +11202,32 @@ int numIslands(vector<string> &grid)
 {
     vector<vector<int>> visited(grid.size(),
                                 vector<int>(grid[0].size(), -1));
+    int maxi_area = INT_MIN;
+    int mini_peri = INT_MAX;
     for (int x = 0; x < grid.size(); x++)
     {
         for (int y = 0; y < grid[0].size(); y++)
         {
-            if (grid[x][y] == '#' || visited[x][y] == 1)
+            if (grid[x][y] == '.' || visited[x][y] == 1)
                 continue;
             else
             {
+                local_component_size = 0;
+                local_peri_size = 0;
                 bfs(grid, visited, x, y);
-                cnt++;
+                if (local_component_size > maxi_area)
+                {
+                    maxi_area = local_component_size;
+                    mini_peri = local_peri_size;
+                }
+                else if (local_component_size == maxi_area)
+                {
+                    if (local_peri_size < mini_peri)
+                    {
+                        maxi_area = local_component_size;
+                        mini_peri = local_peri_size;
+                    }
+                }
             }
         }
     }
@@ -12176,6 +12195,425 @@ void jump_game()
         }
     }
     dijkstra_jump_game(adj_mat, src, n);
+}
+int local_component_size = 0;
+int local_peri_size = 0;
+void bfs_component_perimeter(vector<string> &grid_2, vector<vector<int>> &visited, int row,
+                             int col)
+{
+    queue<pair<int, int>> q;
+    q.push({row, col});
+    visited[row][col] = 1;
+    while (q.empty() != true)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        q.pop();
+        local_component_size++;
+        for (int x = 0; x < 4; x++)
+        {
+            int neig_r = r + dx[x];
+            int neig_c = c + dy[x];
+            if (check_islands(neig_r, neig_c, grid_2) && grid_2[neig_r][neig_c] == '.' || check_islands(neig_r, neig_c, grid_2) == false)
+            {
+                local_peri_size++;
+            }
+            if (check_islands(neig_r, neig_c, grid_2) == true &&
+                grid_2[neig_r][neig_c] == '#' &&
+                visited[neig_r][neig_c] == -1)
+            {
+                q.push({neig_r, neig_c});
+                visited[neig_r][neig_c] = 1;
+            }
+        }
+    }
+}
+bool check_snake_ladders(int row, int n)
+{
+    if (row < n)
+        return true;
+    return false;
+}
+void snake_ladders()
+{
+    unordered_map<int, int> char_map;
+    /*
+        Cost will remain 1 for moving from one node to any other neighbor node
+        so only bfs will also work in this case no need for dijkstra .
+    */
+    int n;
+    cin >> n;
+    for (int x = 0; x < n; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+        char_map[u] = v;
+    }
+    int m;
+    cin >> m;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+        char_map[u] = v;
+    }
+    vector<int> dist(100, INT_MAX);
+    vector<bool> visited(100, false);
+    queue<int> q;
+    q.push(0);
+    dist[0] = 0;
+    while (!q.empty())
+    {
+        int curr_node = q.front();
+        q.pop();
+        if (visited[curr_node])
+            continue;
+        visited[curr_node] = true;
+        for (int x = 1; x <= 6; x++)
+        {
+            int new_node = curr_node + x;
+            if (char_map.count(new_node))
+            {
+                // Either a snake exists or a ladder with a cost 1.
+                new_node = char_map[new_node];
+                if (check_snake_ladders(new_node, 100))
+                {
+                    if (dist[new_node] > dist[curr_node] + 1)
+                    {
+                        dist[new_node] = dist[curr_node] + 1;
+                        q.push(new_node);
+                    }
+                }
+            }
+            else
+            {
+                if (check_snake_ladders(new_node, 100))
+                {
+                    // None exists we simply move to this next node with cost 1 .
+                    if (dist[new_node] > dist[curr_node] + 1)
+                    {
+                        dist[new_node] = dist[curr_node] + 1;
+                        q.push(new_node);
+                    }
+                }
+            }
+        }
+    }
+    cout << dist[99] << "\n";
+}
+bool valid_cell(int n, int m, int row, int col)
+{
+    if (row < 0 || row >= n || col >= m || col < 0)
+        return false;
+    return true;
+}
+vector<int> dx = {1, -1, 0, 0};
+vector<int> dy = {0, 0, 1, -1};
+vector<string> grid;
+vector<vector<pair<int, int>>> parents;
+
+vector<vector<int>> player_bfs(int player_start_row, int player_start_col, vector<pair<int, int>> &monsters, vector<string> &grid)
+{
+    // Player possible shortest distance wrt to each of the ending square.
+    vector<vector<int>> dist(grid.size(), vector<int>(grid[0].size(), INT_MAX));
+    vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+
+    queue<pair<int, int>> q;
+    dist[player_start_row][player_start_col] = 0;
+    q.push({player_start_row, player_start_col});
+    parents[player_start_row][player_start_col] = {-1, -1};
+    while (!q.empty())
+    {
+        auto p = q.front();
+        q.pop();
+        if (visited[p.first][p.second])
+            continue;
+        visited[p.first][p.second] = true;
+        for (int x = 0; x < 4; x++)
+        {
+            int new_x = p.first + dx[x];
+            int new_y = p.second + dy[x];
+            if (valid_cell(grid.size(), grid[0].size(), new_x, new_y) && grid[new_x][new_y] != '#' && dist[new_x][new_y] > dist[p.first][p.second] + 1)
+            {
+                dist[new_x][new_y] = dist[p.first][p.second] + 1;
+                q.push({new_x, new_y});
+                parents[new_x][new_y] = {p.first, p.second};
+            }
+        }
+    }
+    return dist;
+}
+vector<vector<int>> monsters_bfs(vector<pair<int, int>> &monsters, vector<string> &grid)
+{
+    // Getting shortest possible distance of each monster from each of the ending square
+    // via multi source bfs over monsters .
+    vector<vector<int>> dist(grid.size(), vector<int>(grid[0].size(), INT_MAX));
+    vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+
+    queue<pair<int, int>> q;
+    for (auto &[row, col] : monsters)
+    {
+        q.push({row, col});
+        dist[row][col] = 0;
+    }
+    while (!q.empty())
+    {
+        auto p = q.front();
+        q.pop();
+        if (visited[p.first][p.second])
+            continue;
+        visited[p.first][p.second] = true;
+        for (int x = 0; x < 4; x++)
+        {
+            int new_x = p.first + dx[x];
+            int new_y = p.second + dy[x];
+            if (valid_cell(grid.size(), grid[0].size(), new_x, new_y) && grid[new_x][new_y] != '#' && dist[new_x][new_y] > dist[p.first][p.second] + 1)
+            {
+                dist[new_x][new_y] = dist[p.first][p.second] + 1;
+                q.push({new_x, new_y});
+            }
+        }
+    }
+    return dist;
+}
+vector<vector<int>> bfs_infected_people(vector<pair<int, int>> &infected, vector<vector<int>> &grid)
+{
+    vector<vector<int>> dist(grid.size(), vector<int>(grid[0].size(), INT_MAX));
+    vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
+
+    queue<pair<int, int>> q;
+    for (auto &[row, col] : infected)
+    {
+        q.push({row, col});
+        dist[row][col] = 0;
+    }
+    while (!q.empty())
+    {
+        auto p = q.front();
+        q.pop();
+        if (visited[p.first][p.second])
+            continue;
+        visited[p.first][p.second] = true;
+        for (int x = 0; x < 4; x++)
+        {
+            int new_x = p.first + dx[x];
+            int new_y = p.second + dy[x];
+            if (valid_cell(grid.size(), grid[0].size(), new_x, new_y) && grid[new_x][new_y] != 0 && grid[new_x][new_y] != 2 && dist[new_x][new_y] > dist[p.first][p.second] + 1)
+            {
+                dist[new_x][new_y] = dist[p.first][p.second] + 1;
+                q.push({new_x, new_y});
+            }
+        }
+    }
+    return dist;
+}
+void infected_people()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> grid(n, vector<int>(m, -1));
+    vector<pair<int, int>> infected;
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            int num;
+            cin >> num;
+            grid[x][y] = num;
+            if (grid[x][y] == 2)
+            {
+                infected.push_back({x, y});
+            }
+        }
+    }
+    vector<vector<int>> dist = bfs_infected_people(infected, grid);
+    int maxi = 0;
+    bool flag = true;
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            if (dist[x][y] != INT_MAX && grid[x][y] == 1)
+            {
+                maxi = max(maxi, dist[x][y]);
+            }
+            else if (dist[x][y] == INT_MAX && grid[x][y] == 1)
+            {
+                flag = false;
+                break;
+            }
+        }
+        if (flag == false)
+            break;
+    }
+    if (flag == false)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+        cout << maxi << "\n";
+    }
+}
+void save_yourself()
+{
+    int n, m;
+    cin >> n >> m;
+    for (int x = 0; x < n; x++)
+    {
+        string s;
+        cin >> s;
+        grid.push_back(s);
+    }
+    parents.resize(grid.size(), vector<pair<int, int>>(grid[0].size(), {-1, -1}));
+    vector<pair<int, int>> monsters;
+    int player_start_row = -1;
+    int player_start_col = -1;
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            if (grid[x][y] == 'A')
+            {
+                player_start_row = x;
+                player_start_col = y;
+            }
+            if (grid[x][y] == 'M')
+                monsters.push_back({x, y});
+        }
+    }
+    vector<vector<int>> dist_parents = player_bfs(player_start_row, player_start_col, monsters, grid);
+    vector<vector<int>> dist_monsters = monsters_bfs(monsters, grid);
+    int final_x = -1;
+    int final_y = -1;
+    int dist = INT_MAX;
+    // Finding the conditional check of dist_parents[x][y] to any of the end cell > min(dist_monsters[x][y]).
+    for (int x = 0; x < n; x++)
+    {
+        int dist_1 = dist_parents[x][0];
+        int dist_2 = dist_monsters[x][0];
+        if (dist_1 != INT_MAX && dist_1 < dist_2 && dist_1 < dist)
+        {
+            dist = dist_1;
+            final_x = x;
+            final_y = 0;
+        }
+    }
+    for (int x = 0; x < n; x++)
+    {
+        int dist_1 = dist_parents[x][m - 1];
+        int dist_2 = dist_monsters[x][m - 1];
+        if (dist_1 != INT_MAX && dist_1 < dist_2 && dist_1 < dist)
+        {
+            dist = dist_1;
+            final_x = x;
+            final_y = m - 1;
+        }
+    }
+    for (int y = 0; y < m; y++)
+    {
+        int dist_1 = dist_parents[0][y];
+        int dist_2 = dist_monsters[0][y];
+        if (dist_1 != INT_MAX && dist_1 < dist_2 && dist_1 < dist)
+        {
+            dist = dist_1;
+            final_x = 0;
+            final_y = y;
+        }
+    }
+    for (int y = 0; y < m; y++)
+    {
+        int dist_1 = dist_parents[n - 1][y];
+        int dist_2 = dist_monsters[n - 1][y];
+        if (dist_1 != INT_MAX && dist_1 < dist_2 && dist_1 < dist)
+        {
+            dist = dist_1;
+            final_x = n - 1;
+            final_y = y;
+        }
+    }
+
+    if (dist == INT_MAX)
+    {
+        cout << "NO \n";
+    }
+    else
+    {
+        cout << "YES \n";
+        cout << dist << "\n";
+        int temp_x = final_x;
+        int temp_y = final_y;
+        vector<char> path;
+        while (temp_x != -1 && temp_y != -1)
+        {
+            int parent_x = parents[temp_x][temp_y].first;
+            int parent_y = parents[temp_x][temp_y].second;
+            if (temp_x == parent_x && temp_y == parent_y + 1)
+            {
+                path.push_back('R');
+            }
+            else if (temp_x == parent_x && temp_y == parent_y - 1)
+            {
+                path.push_back('L');
+            }
+            else if (temp_y == parent_y && temp_x == parent_x + 1)
+            {
+                path.push_back('D');
+            }
+            else if (temp_y == parent_y && temp_x == parent_x - 1)
+            {
+                path.push_back('U');
+            }
+            temp_x = parent_x;
+            temp_y = parent_y;
+        }
+        reverse(path.begin(), path.end());
+        for (auto ch : path)
+        {
+            cout << ch;
+        }
+        cout << "\n";
+    }
+}
+
+void area_perimeter_components(vector<string> &grid_2)
+{
+    vector<vector<int>> visited(grid_2.size(),
+                                vector<int>(grid_2[0].size(), -1));
+    int maxi_area = INT_MIN;
+    int mini_peri = INT_MAX;
+    for (int x = 0; x < grid_2.size(); x++)
+    {
+        for (int y = 0; y < grid_2[0].size(); y++)
+        {
+            if (grid_2[x][y] == '.' || visited[x][y] == 1)
+                continue;
+            else
+            {
+                local_component_size = 0;
+                local_peri_size = 0;
+                bfs(grid_2, visited, x, y);
+                if (local_component_size > maxi_area)
+                {
+                    maxi_area = local_component_size;
+                    mini_peri = local_peri_size;
+                }
+                else if (local_component_size == maxi_area)
+                {
+                    if (local_peri_size < mini_peri)
+                    {
+                        maxi_area = local_component_size;
+                        mini_peri = local_peri_size;
+                    }
+                }
+            }
+        }
+    }
+    cout << maxi_area << " " << mini_peri << "\n";
 }
 int primeSubarray(vector<int> &nums, int k)
 {
