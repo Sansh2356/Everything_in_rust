@@ -993,18 +993,178 @@ public:
         return ans;
     }
 };
+vector<int>distances;
+vector<int>parents;
+vector<int>subtree_size;
+int leaves = 0;
+int centroid = INT_MAX;
 
+void tree_dfs(int curr_node,int depth,int parent_node,unordered_map<int,vector<int>>&adj_list){
+    // dfs = bfs because of a unique simple path existing between
+    // u and v and that is the reason of not requiring visited because there is no way to arrive at other node without following that unique simple path.
+    distances[curr_node] = depth;
+    parents[curr_node] = parent_node;
+    // Leaf node initialized value .
+    subtree_size[curr_node] = 1;
+    for(auto i:adj_list[curr_node]){
+        if(parent_node != i){
+            tree_dfs(i,depth+1,curr_node,adj_list);
+            subtree_size[curr_node] += subtree_size[i];
+        }
+    }
+    if(subtree_size[curr_node] == 1)leaves++;
+    
+}
+void find_num_diameters(){
+
+}
+void find_centroids(int curr_node,int parent_node,unordered_map<int,vector<int>>&adj_list){
+    bool flag = false;
+    for(auto nei:adj_list[curr_node]){
+        if(nei != parent_node){
+            if(subtree_size[nei] > adj_list.size()/2 ){
+                flag = flag | true;
+                find_centroids(nei,curr_node,adj_list);
+            }
+        }
+    }
+    if(flag == false){
+        centroid = min(centroid,curr_node);
+    }
+    return;
+}
 void solve()
 {
+    int n;
+    cin>>n;
+    unordered_map<int,vector<int>>adj_list;
+    distances.resize(n+1,0);
+    parents.resize(n+1,0);
+    subtree_size.resize(n+1,0);
+            
+    for(int x=0;x<n-1;x++){
+        int u,v;
+        cin>>u>>v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    tree_dfs(1,0,0,adj_list);
+    find_centroids(1,0,adj_list);
+    // cout<<"Centroid of tree is - "<<centroid<<"\n";
+    int diameter = 0 ;
+    int diameter_end = -1;
+    for(int x=1;x<=n;x++){
+        // cout<<"Distance of node "<<x<<" from 1 is "<<distances[x]<<"\n";
+        if(distances[x] > diameter){
+            diameter = distances[x];
+            diameter_end = x;
+        }
+    }
+    // cout<<"One end is - "<<diameter_end<<" ";
+    diameter = 0;
+    // Double dfs .
+    tree_dfs(diameter_end,0,0,adj_list);
+    for(int x=1;x<=n;x++){
+        if(distances[x] > diameter){diameter = distances[x];diameter_end=x;}
+    }
+    // cout<<"Other end is - "<<diameter_end<<"\n";
+    // cout<<"Diameter of tree passing through center is - "<<diameter<<"\n";
+    // for(int x=1;x<=n;x++){
+    //     cout<<"Parent of node "<<x<<" "<<parents[x]<<"\n";
+    // }
+    int diameter_cnt = 0;
+    if(diameter%2==0){
+        // Single center .
+        int center = diameter_end;
+        for(int x=0;x<diameter/2;x++){
+            center = parents[center];
+        }
+        // cout<<"Single center - "<<center<<"\n";
+        vector<int>v;
+        for(auto child_node:adj_list[center]){
+            distances.assign(n+1,0);
+            parents.assign(n+1,0);
+            tree_dfs(child_node,0,center,adj_list);
+            int local_cnt = 0;
+            // cout<<"Distance computed for a single centered tree for subtree rooted at child - "<<child_node<<"\n";
+            for(auto dist:distances){
+                if(dist == diameter/2){
+                    local_cnt++;
+                }
+                // cout<<dist<<" ";
+            }
+            v.push_back(local_cnt);
+            // cout<<"\n";
+        }
+        ll ans = 0;
+        ll prefix_sum = 0;
+
+        for (auto cnt : v) {
+            ans += prefix_sum * cnt;
+            prefix_sum += cnt;
+        }
+    }
+    else{
+        // Double center .
+        int center_one = diameter_end;
+        int center_two = -1;
+
+        for(int x=0;x<diameter/2;x++){
+            center_one = parents[center_one];
+        }
+        center_two = parents[center_one];
+
+        // cout<<"Centers  are - "<<center_one<<" "<<center_two<<"\n";
+        distances.assign(n+1,0);
+        parents.assign(n+1,0);
+        tree_dfs(center_one,0,center_two,adj_list);
+        vector<int>v;
+        int local_cnt = 0;
+        // cout<<"Distance of nodes from center - "<<center_one<<" \n";
+        for(auto dist:distances){
+            if(dist == diameter/2){
+                local_cnt++;
+            }
+            // cout<<dist<<" ";
+        }
+        v.push_back(local_cnt);
+        local_cnt = 0;
+        distances.assign(n+1,0);
+        parents.assign(n+1,0);
+        tree_dfs(center_two,0,center_one,adj_list);
+        // cout<<" \n Distance of nodes from center two - "<<center_two<<" \n";
+        for(auto dist:distances){
+            if(dist == diameter/2){
+                local_cnt++;
+            }
+            // cout<<dist<<" ";
+        }
+        v.push_back(local_cnt);
+        cout<<v[0]*v[1]<<"\n";
+    }
+    /*
+        Centroid is a node which when made the root all the subtrees are <= n/2 .
+        a unique centroid either 1 or 2 at max and center != centroid in all cases. 
+    */
+
+    // for(int x=1;x<=n;x++){
+    //     cout<<"Subtree size for the given node "<<x<<" is "<<subtree_size[x]<<"\n";
+    // }
+    // /*
+    //     Edge based contribution, ancestor based computation and re-rooting,binary-lifting
+    //     and path based and prefix and partial sum over trees .
+    // */
+    // ll total_cnt = 0;
+    // for(ll x=1;x<=n;x++){
+    //     ll s = subtree_size[x];
+    //     ll v = n-s;
+    //     total_cnt += s*v;
+    // }
+    
     // area_perimeter_components(grid_2);
     // infected_people();
     // save_yourself();
     // snake_ladders();
-    /*
-        1)Skewer.
-        2)Casteling.
-        3)Forking.
-    */
     // jump_game();
     // budget_travelling();
     // apsp();
