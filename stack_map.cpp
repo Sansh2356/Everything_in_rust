@@ -1015,6 +1015,49 @@ void tree_dfs(int curr_node, int parent_node, unordered_map<int, vector<int>> &a
         }
     }
 }
+const int n = 1e6;
+vector<int> prime_numbers;
+bool flag = false;
+class Solution {
+public:
+    void sieve() {
+        vector<bool> is_prime(n + 1, true);
+        is_prime[0] = is_prime[1] = false;
+        for (int i = 2; i <= n; i++) {
+            if (is_prime[i] && (long long)i * i <= n) {
+                for (int j = i * i; j <= n; j += i)
+                {
+                    is_prime[j] = false;
+                }
+               
+            }
+        }
+        for(int x=2;x<is_prime.size();x++){
+            if(is_prime[x]==true){
+                prime_numbers.push_back(x);
+            }
+        }
+    }
+    vector<int> maxPrimes(int n, int s) {
+        if (flag == false) {
+            sieve();
+            flag = true;
+        }
+        long long sum = 0;
+        vector<int> ans;
+        for (int x = 0; x < prime_numbers.size(); x++) {
+            if (prime_numbers[x] > n)
+                break;
+            if ((sum + prime_numbers[x]) <= s) {
+                sum += prime_numbers[x];
+                ans.push_back(prime_numbers[x]);
+            } else {
+                return ans;
+            }
+        }
+        return ans;
+    }
+};
 void solve()
 {
     int n;
