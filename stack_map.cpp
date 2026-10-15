@@ -191,18 +191,6 @@ vector<ll> next_greater_equal_element(vector<ll> v)
             nge[x] = nge[nge[x]];
         }
     }
-    //     for (ll x = 0; x < n; x++)
-    // {
-    //     if (nge[x] == n)
-    //     {
-    //         cout << "No element which is next greater than or equal to" << v[x] << " exists \n";
-    //     }
-    //     else
-    //     {
-    //         cout << "Element greater than or equal to" << v[x] << " is " << v[nge[x]]<<" " <<nge[x] <<"\n";
-    //     }
-    // }
-    // cout << "\n";
     return nge;
 }
 vector<ll> previous_greater_element(vector<ll> v)
@@ -454,517 +442,6 @@ bool perimeter_check(int r, int c, vector<string> &grid)
     }
     return true;
 }
-// void bfs(vector<vector<int>> &grid, vector<vector<int>> &visited, int row,
-//          int col)
-// {
-//     queue<pair<int, int>> q;
-//     q.push({row, col});
-//     visited[row][col] = 1;
-//     while (q.empty() != true)
-//     {
-//         int r = q.front().first;
-//         int c = q.front().second;
-//         q.pop();
-//         for (int x = 0; x < 4; x++)
-//         {
-//             int neig_r = r + dx[x];
-//             int neig_c = c + dy[x];
-//             if (check_islands(neig_r, neig_c, grid) == true &&
-//                 visited[neig_r][neig_c] == -1)
-//             {
-//                 q.push({neig_r, neig_c});
-//                 visited[neig_r][neig_c] = 1;
-//             }
-//         }
-//     }
-// }
-// int KnightWalk(int N, int Sx, int Sy, int Fx, int Fy)
-// {
-//     vector<vector<int>> visited(N + 1, vector<int>(N + 1, -1));
-//     vector<vector<int>> grid(N + 1, vector<int>(N + 1, 0));
-//     vector<vector<int>> dist(N + 1, vector<int>(N + 1, 0));
-
-//     queue<pair<int, int>> q;
-//     q.push({Sx, Sy});
-//     visited[Sx][Sy] = 1;
-//     while (q.empty() != true)
-//     {
-//         int r = q.front().first;
-//         int c = q.front().second;
-//         q.pop();
-
-//         if (r == Fx && c == Fy)
-//             return dist[r][c];
-//         for (int x = 0; x < dx.size(); x++)
-//         {
-//             int neig_r = r + dx[x];
-//             int neig_c = c + dy[x];
-//             if (check_islands(neig_r, neig_c, grid) == true &&
-//                 visited[neig_r][neig_c] == -1)
-//             {
-//                 q.push({neig_r, neig_c});
-//                 dist[neig_r][neig_c] = dist[r][c] + 1;
-//                 visited[neig_r][neig_c] = 1;
-//             }
-//         }
-//     }
-//     return -1;
-// }
-// bool check_random(int x, int y, int n, int m)
-// {
-//     if (x >= 0 && x < n && y >= 0 && y < m)
-//         return true;
-//     return false;
-// }
-// vector<pair<pair<int, int>, ll>> get_neighbors(int x, int y, vector<string> &grid)
-// {
-//     vector<pair<pair<int, int>, ll>> ans;
-//     for (int x = 0; x < 4; x++)
-//     {
-//         ll new_x = x + dx[x];
-//         ll new_y = y + dy[x];
-//         if (check_random(new_x, new_y, grid.size(), grid[0].size()))
-//         {
-//             if (grid[new_x][new_y] == '#')
-//             {
-
-//                 ans.push_back({{new_x, new_y}, 1});
-//             }
-//             else
-//             {
-//                 ans.push_back({{new_x, new_y}, 0});
-//             }
-//         }
-//     }
-//     return ans;
-// }
-// ll random_question_bfs(vector<string> &grid, ll start_x, ll start_y, ll end_x, ll end_y)
-// {
-//     vector<vector<ll>> dist(grid.size(), vector<ll>(grid[0].size(), LLONG_MAX));
-//     vector<vector<bool>> visited(grid.size(), vector<bool>(grid[0].size(), false));
-
-//     deque<pair<int, int>> dq;
-//     dq.push_back({start_x, start_y});
-//     while (!dq.empty())
-//     {
-//         ll curr_node_x = dq.front().first;
-//         ll curr_node_y = dq.front().second;
-//         dq.pop_front();
-
-//         if (visited[curr_node_x][curr_node_y])
-//             continue;
-//         visited[curr_node_x][curr_node_y] = true;
-
-//         for (auto i : get_neighbors(curr_node_x, curr_node_y, grid))
-//         {
-//             if (!visited[i.first.first][i.first.second] && dist[i.first.first][i.first.second] > dist[curr_node_x][curr_node_y] + i.second)
-//             {
-//                 visited[i.first.first][i.first.second] = true;
-//                 dist[i.first.first][i.first.second] = dist[curr_node_x][curr_node_y] + i.second;
-//                 if (i.second == 0)
-//                 {
-//                     dq.push_back({i.first.first, i.first.second});
-//                 }
-//                 else
-//                 {
-
-//                     dq.push_front({i.first.first, i.first.second});
-//                 }
-//             }
-//         }
-//     }
-
-//     return dist[end_x][end_y];
-// }
-// void random_question()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     vector<string> grid;
-//     for (ll x = 0; x < m; x++)
-//     {
-//         string s;
-//         cin >> s;
-//         grid.push_back(s);
-//     }
-//     ll start_x, start_y, end_x, end_y;
-//     cin >> start_x >> start_y >> end_x >> end_y;
-//     random_question_bfs(grid, start_x, start_y, end_x, end_y);
-// }
-// bool cycle = false;
-// void dfs_check_cycle(int curr_node, vector<int> &parents, vector<bool> &visited, unordered_map<int, vector<int>> &adj_list)
-// {
-//     visited[curr_node] = true;
-//     for (auto neig : adj_list[curr_node])
-//     {
-//         if (visited[neig] == false)
-//         {
-//             parents[neig] = curr_node;
-//             dfs_check_cycle(neig, parents, visited, adj_list);
-//         }
-//         else if (neig != parents[curr_node])
-//         {
-//             cycle = true;
-//             return;
-//         }
-//     }
-// }
-// void check_cycle()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     vector<int> parents(n + 1, -1);
-//     vector<bool> visited(n + 1);
-//     unordered_map<int, vector<int>> adj_list;
-//     for (int x = 0; x < m; x++)
-//     {
-//         int u, v;
-//         cin >> u >> v;
-//         adj_list[u].push_back(v);
-//         adj_list[v].push_back(u);
-//     }
-//     for (int x = 1; x <= n; x++)
-//     {
-//         if (visited[x] == false)
-//         {
-//             dfs_check_cycle(x, parents, visited, adj_list);
-//             if (cycle)
-//             {
-//                 cout << "YES \n";
-//                 return;
-//             }
-//         }
-//     }
-//     cout << "NO \n";
-// }
-// bool is_cycle_present = false;
-// vector<int> any_cycle;
-// void finding_cycles_dfs(int node, int parent, vector<int> &parents, vector<int> &color, unordered_map<int, vector<int>> &adj_list, vector<bool> &visited)
-// {
-
-//     color[node] = 2;
-//     parents[node] = parent;
-//     for (auto neig : adj_list[node])
-//     {
-//         // if (neig == parents[node])
-//         //     continue;
-//         if (color[neig] == 1)
-//         {
-//             // Forward edge .
-//             finding_cycles_dfs(neig, node, parents, color, adj_list, visited);
-//         }
-//         else if (color[neig] == 2)
-//         {
-//             // Back edge .
-//             if (is_cycle_present == false)
-//             {
-//                 int temp = node;
-//                 while (temp != neig)
-//                 {
-//                     any_cycle.push_back(temp);
-//                     temp = parents[temp];
-//                 }
-
-//                 any_cycle.push_back(neig);
-//                 any_cycle.push_back(node);
-//                 reverse(any_cycle.begin(), any_cycle.end());
-//             }
-//             is_cycle_present = true;
-//         }
-//         else if (color[neig] == 3)
-//         {
-//             // Cross edge .
-//         }
-//     }
-//     color[node] = 3;
-// }
-// void finding_cycles()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     vector<int> parents(n + 1);
-//     vector<int> color(n + 1, 1);
-//     vector<bool> visited(n + 1, 0);
-//     unordered_map<int, vector<int>> adj_list;
-//     for (int x = 0; x < m; x++)
-//     {
-//         int u, v;
-//         cin >> u >> v;
-//         adj_list[u].push_back(v);
-//         adj_list[v].push_back(u);
-//     }
-//     for (int x = 1; x <= n; x++)
-//     {
-//         if (color[x] == 1)
-//         {
-//             finding_cycles_dfs(x, 0, parents, color, adj_list, visited);
-//             if (is_cycle_present)
-//             {
-//                 cout << "YES" << "\n";
-//                 return;
-//             }
-//         }
-//     }
-//     cout << "NO \n";
-// }
-// void kahn()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     unordered_map<int, vector<int>> adj_list;
-//     vector<int> indegree(n + 1, 0);
-//     for (int x = 0; x < m; x++)
-//     {
-//         int u, v;
-//         cin >> u >> v;
-//         indegree[v]++;
-//         adj_list[u].push_back(v);
-//     }
-//     queue<int> q;
-//     for (int x = 1; x <= n; x++)
-//     {
-//         if (indegree[x] == 0)
-//         {
-//             q.push(x);
-//         }
-//     }
-//     vector<int> topo_order;
-//     while (!q.empty())
-//     {
-//         int curr_node = q.front();
-//         q.pop();
-//         topo_order.push_back(curr_node);
-//         for (auto nei : adj_list[curr_node])
-//         {
-//             indegree[nei]--;
-//             if (indegree[nei] == 0)
-//             {
-//                 q.push(nei);
-//             }
-//         }
-//     }
-//     if (topo_order.size() != n)
-//     {
-//         cout << "IMPOSSIBLE" << "\n";
-//     }
-//     else
-//     {
-//         for (auto i : topo_order)
-//         {
-//             cout << i << " ";
-//         }
-//         cout << "\n";
-//     }
-// }
-// ll component_size = 0;
-// bool small_check(int row, int col, int n)
-// {
-//     if (row < 0 || col < 0 || row >= n || col >= 10)
-//     {
-//         return false;
-//     }
-//     return true;
-// }
-// vector<pair<ll, ll>> vertical_grid(ll start_row, ll start_col, vector<vector<ll>> &grid, vector<vector<ll>> &visited)
-// {
-//     vector<pair<ll, ll>> cells;
-//     queue<pair<pair<ll, ll>, ll>> q;
-//     visited[start_row][start_col] = 1;
-//     q.push({{start_row, start_col}, grid[start_row][start_col]});
-//     while (!q.empty())
-//     {
-//         ll row = q.front().first.first;
-//         ll col = q.front().first.second;
-//         ll color = q.front().second;
-//         q.pop();
-//         component_size++;
-//         cells.push_back({row, col});
-//         vector<ll> dx = {1, -1, 0, 0};
-//         vector<ll> dy = {0, 0, 1, -1};
-//         for (ll x = 0; x < 4; x++)
-//         {
-//             ll nei_row = row + dx[x];
-//             ll nei_col = col + dy[x];
-//             if (small_check(nei_row, nei_col, grid.size()) && visited[nei_row][nei_col] == -1 && grid[nei_row][nei_col] == color)
-//             {
-//                 visited[nei_row][nei_col] = 1;
-//                 q.push({{nei_row, nei_col}, color});
-//             }
-//         }
-//     }
-//     return cells;
-// }
-// void zero_one_bfs()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     unordered_map<int, vector<pair<int, int>>> adj_list;
-//     for (int x = 0; x < m; x++)
-//     {
-//         int u, v, c;
-//         cin >> u >> v >> c;
-//         adj_list[u].push_back({v, c});
-//         adj_list[v].push_back({u, c});
-//     }
-//     vector<bool> visited(n + 1, false);
-//     vector<int> dist(n + 1, INT_MAX);
-//     visited[1] = true;
-//     deque<pair<int, int>> dq;
-//     dq.push_front({1, 0});
-//     dist[1] = 0;
-//     while (!dq.empty())
-//     {
-//         int curr_node = dq.front().first;
-//         int cost = dq.front().second;
-//         dq.pop_front();
-//         for (auto &[nei, nei_cost] : adj_list[curr_node])
-//         {
-//             if (!visited[nei] && dist[nei] > dist[curr_node] + nei_cost)
-//             {
-//                 if (nei_cost == 0)
-//                 {
-//                     dq.push_front({nei, nei_cost});
-//                 }
-//                 else
-//                 {
-//                     dq.push_back({nei, nei_cost});
-//                 }
-//                 dist[nei] = dist[curr_node] + nei_cost;
-//             }
-//         }
-//     }
-// }
-// bool check_one_piece(int row, int col, int n, int m)
-// {
-//     if (row < 0 || col < 0 || col >= m || row >= n)
-//     {
-//         return false;
-//     }
-//     return true;
-// }
-// void one_piece()
-// {
-//     ll n, m;
-//     cin >> n >> m;
-//     vector<vector<ll>> grid(n, vector<ll>(m, 0));
-//     vector<vector<ll>> dist(n, vector<ll>(m, LLONG_MAX));
-//     for (ll x = 0; x < n; x++)
-//     {
-//         for (ll y = 0; y < m; y++)
-//         {
-//             ll num;
-//             cin >> num;
-//             grid[x][y] = num;
-//         }
-//     }
-//     deque<pair<int, int>> dq;
-//     dist[0][0] = 0;
-//     dq.push_front({0, 0});
-//     vector<int> dx = {1, -1, 0, 0};
-//     vector<int> dy = {0, 0, 1, -1};
-
-//     while (!dq.empty())
-//     {
-//         int curr_node_row = dq.front().first;
-//         int curr_node_col = dq.front().second;
-//         int symbol = grid[curr_node_row][curr_node_col];
-//         dq.pop_front();
-//         for (int x = 0; x < dx.size(); x++)
-//         {
-//             int w = 1;
-//             int r1 = curr_node_row + dx[x];
-//             int c1 = curr_node_col + dy[x];
-//         }
-//     }
-//     cout << (dist[n - 1][m - 1] == LLONG_MAX ? -1 : dist[n - 1][m - 1]) << "\n";
-// }
-// void burn_all()
-// {
-//     long long n, m;
-//     cin >> n >> m;
-//     vector<long long> dist(n + 1, LLONG_MAX);
-//     vector<bool> visited(n + 1, false);
-//     unordered_map<long long, vector<pair<long long, long long>>> adj_list;
-//     for (int x = 0; x < m; x++)
-//     {
-//         long long u, v, d;
-//         cin >> u >> v >> d;
-//         adj_list[u].push_back({v, d});
-//         adj_list[v].push_back({u, d});
-//     }
-//     long long start_node;
-//     cin >> start_node;
-//     priority_queue<pair<long long, long long>> pq;
-//     pq.push({0, start_node});
-//     dist[start_node] = 0;
-//     while (!pq.empty())
-//     {
-//         long long cost = -1 * pq.top().first;
-//         long long node = pq.top().second;
-//         pq.pop();
-//         if (visited[node])
-//             continue;
-//         visited[node] = true;
-//         for (auto i : adj_list[node])
-//         {
-//             if (!visited[i.first] && dist[i.first] > (dist[node] + i.second))
-//             {
-//                 dist[i.first] = dist[node] + i.second;
-//                 pq.push({-1 * dist[i.first], i.first});
-//             }
-//         }
-//     }
-//     long double ans = 0.0;
-//     for (auto it : adj_list)
-//     {
-//         long long u = it.first;
-//         for (auto nei : it.second)
-//         {
-//             long double t1 = dist[u];
-//             long double t2 = dist[nei.first];
-//             if (abs(t1 - t2) >= nei.second)
-//             {
-//                 // One of them will already burn it before other end
-//                 // catches fire .
-//                 ans = max(ans, (min(t1, t2) + nei.second));
-//             }
-//             else
-//             {
-//                 // Both ends will meet somewhere in between
-//                 // the thread at an instance `t` . (x-t1) + (x-t2) = X
-//                 // 2x = X+t1+t2 x = (X+t1+t2)/2 .
-//                 ans = max(ans, ((t1 + t2 + nei.second) / 2));
-//             }
-//         }
-//     }
-//     cout << (10 * ans) << "\n";
-// }
-// vector<ll> dist;
-// void bellman_ford(vector<vector<ll>> &edges, int n, int start_node)
-// {
-//     /*
-//     As we have discussed earlier that, we need (V - 1) relaxations of all the edges to achieve single source shortest path. If one additional relaxation (Vth) for any edge is possible, it indicates that some edges with overall negative weight has been traversed once more. This indicates the presence of a negative weight cycle in the graph.
-//     */
-//     dist[start_node] = 0;
-//     for (int x = 1; x <= n; x++)
-//     {
-//         for (auto i : edges)
-//         {
-//             int u = i[0];
-//             int v = i[1];
-//             int c = i[2];
-//             if (dist[v] > dist[u] + c)
-//             {
-//                 dist[v] = (dist[u] + c);
-//             }
-//         }
-//     }
-//     for (auto i : dist)
-//     {
-//         cout << i << " ";
-//     }
-//     cout << "\n";
-// }
 class Solution
 {
 public:
@@ -1018,47 +495,54 @@ void tree_dfs(int curr_node, int parent_node, unordered_map<int, vector<int>> &a
 const int n = 1e6;
 vector<int> prime_numbers;
 bool flag = false;
-class Solution {
-public:
-    void sieve() {
-        vector<bool> is_prime(n + 1, true);
-        is_prime[0] = is_prime[1] = false;
-        for (int i = 2; i <= n; i++) {
-            if (is_prime[i] && (long long)i * i <= n) {
-                for (int j = i * i; j <= n; j += i)
-                {
-                    is_prime[j] = false;
-                }
-               
-            }
-        }
-        for(int x=2;x<is_prime.size();x++){
-            if(is_prime[x]==true){
-                prime_numbers.push_back(x);
+void sieve()
+{
+    vector<bool> is_prime(n + 1, true);
+    is_prime[0] = is_prime[1] = false;
+    for (int i = 2; i <= n; i++)
+    {
+        if (is_prime[i] && (long long)i * i <= n)
+        {
+            for (int j = i * i; j <= n; j += i)
+            {
+                is_prime[j] = false;
             }
         }
     }
-    vector<int> maxPrimes(int n, int s) {
-        if (flag == false) {
-            sieve();
-            flag = true;
+    for (int x = 2; x < is_prime.size(); x++)
+    {
+        if (is_prime[x] == true)
+        {
+            prime_numbers.push_back(x);
         }
-        long long sum = 0;
-        vector<int> ans;
-        for (int x = 0; x < prime_numbers.size(); x++) {
-            if (prime_numbers[x] > n)
-                break;
-            if ((sum + prime_numbers[x]) <= s) {
-                sum += prime_numbers[x];
-                ans.push_back(prime_numbers[x]);
-            } else {
-                return ans;
-            }
-        }
-        return ans;
     }
-};
-void solve()
+}
+vector<int> maxPrimes(int n, int s)
+{
+    if (flag == false)
+    {
+        sieve();
+        flag = true;
+    }
+    long long sum = 0;
+    vector<int> ans;
+    for (int x = 0; x < prime_numbers.size(); x++)
+    {
+        if (prime_numbers[x] > n)
+            break;
+        if ((sum + prime_numbers[x]) <= s)
+        {
+            sum += prime_numbers[x];
+            ans.push_back(prime_numbers[x]);
+        }
+        else
+        {
+            return ans;
+        }
+    }
+    return ans;
+}
+void tree_based_question()
 {
     int n;
     cin >> n;
@@ -1164,7 +648,307 @@ void solve()
             cout << " ------------------------------------ \n";
         }
     }
+}
+class BusBooking
+{
+public:
+    /*
+        Size of (n*4) seat matrix where n are rows and 4 are seats A,B,C,D
+        in each row.
+        Booking a middle seat ("B" or "C") always takes 1 second.
+        Booking a window seat ("A" or "D") takes 1 second if its adjacent middle
+       seat is not booked, or 3 seconds (an extra delay of 2 seconds) if its
+       adjacent middle seat is already booked.
+    */
+    vector<vector<int>> grid;
+    vector<vector<int>> costs;
+    map<char, int> m;
+    multiset<pair<int, int>> window_seats;
+    multiset<pair<int, int>> middle_seats;
+    int cost_till_now;
 
+    BusBooking(int n)
+    {
+        // cout << "BusBooking: rows = " << n << "\n";
+        cost_till_now = 0;
+        grid.resize(n, vector<int>(4, -1));
+        costs.resize(n, vector<int>(4, 0));
+        m['A'] = 0;
+        m['B'] = 1;
+        m['C'] = 2;
+        m['D'] = 3;
+        // cout << "Initial total time = " << cost_till_now << "\n";
+    }
+    void toggle(string seat)
+    {
+        // cout << "toggle: seat = " << seat << "\n";
+        int seat_idx = this->m[seat[0]];
+        int row_num = stoi(seat.substr(1, seat.size())) - 1;
+        // cout << "Row index = " << row_num << ", seat index = " << seat_idx
+        //      << "\n";
+        // Not booked then we will add the cost of booking .
+        if (grid[row_num][seat_idx] == -1)
+        {
+            // cout << "Booking seat " << seat << "\n";
+            grid[row_num][seat_idx] = 1;
+
+            if (seat_idx == 0 || seat_idx == 3)
+            {
+                // Window seat .
+                window_seats.insert({row_num, seat_idx});
+                if (seat_idx == 0)
+                {
+                    if (grid[row_num][1] == 1)
+                    {
+                        cost_till_now += 3;
+                        costs[row_num][seat_idx] = 3;
+                        // cout
+                        // << "Adjacent middle seat booked: added 3 seconds\n";
+                    }
+                    else
+                    {
+                        cost_till_now++;
+                        costs[row_num][seat_idx] = 1;
+                        // cout << "Adjacent middle seat free: added 1 second\n";
+                    }
+                }
+                else
+                {
+                    if (grid[row_num][2] == 1)
+                    {
+                        cost_till_now += 3;
+                        costs[row_num][seat_idx] = 3;
+                        // cout
+                        // << "Adjacent middle seat booked: added 3 seconds\n";
+                    }
+                    else
+                    {
+                        cost_till_now++;
+                        costs[row_num][seat_idx] = 1;
+                        // cout << "Adjacent middle seat free: added 1 second\n";
+                    }
+                }
+            }
+            else
+            {
+                middle_seats.insert({row_num, seat_idx});
+                costs[row_num][seat_idx] = 1;
+                cost_till_now++;
+                // cout << "Middle seat: added 1 second\n";
+            }
+        }
+        // Already booked then we will make it free and no cost is added.
+        else if (grid[row_num][seat_idx] == 1)
+        {
+            // cout << "Freeing seat " << seat << ": added 0 seconds\n";
+            grid[row_num][seat_idx] = -1;
+            if (seat_idx == 0 || seat_idx == 3)
+            {
+                // Window seat unallocation.
+                window_seats.erase(window_seats.find({row_num, seat_idx}));
+                cost_till_now -= costs[row_num][seat_idx];
+            }
+            else
+            {
+                // Middle seat unallocation .
+                middle_seats.erase(middle_seats.find({row_num, seat_idx}));
+                cost_till_now -= costs[row_num][seat_idx];
+            }
+            costs[row_num][seat_idx] = 0;
+        }
+        // cout << "Total time = " << cost_till_now << "\n";
+        // cout << "Booked window seats = " << window_seats.size()
+        //      << ", booked middle seats = " << middle_seats.size() << "\n";
+    }
+
+    int getTotalTime()
+    {
+        // cout << "getTotalTime: " << cost_till_now << "\n";
+        return cost_till_now;
+    }
+    // Booking the window seat before any middle seat of each row that will
+    // allow us to get minimum cost.
+    int getMinTime()
+    {
+        // cout << "getMinTime: "
+        //      << (int)window_seats.size() + (int)middle_seats.size() << "\n";
+        return (int)window_seats.size() + (int)middle_seats.size();
+    }
+};
+int resilientSubarray(vector<int> &nums, int k)
+{
+}
+// Constructing the binary lifting data structure being used to
+// compute the ancestore afterwards stored upto logn powers for each node.
+vector<vector<int>> ancestors;
+vector<int> parent_nodes;
+vector<int> distances;
+void dfs_binary_lifting(int node, int parent_node, int dist, unordered_map<int, vector<int>> &adj_list)
+{
+    parent_nodes[node] = parent_node;
+    distances[node] = dist;
+    ancestors[node][0] = parent_node;
+    // Upto 2^19 .
+    for (int x = 1; x <= 19; x++)
+    {
+        // Splitting 2^jth ancestor  = 2^j-1th and then that ancestors 2^jth ancestor .
+        ancestors[node][x] = ancestors[ancestors[node][x - 1]][x - 1];
+    }
+    for (auto nei : adj_list[node])
+    {
+        if (nei != parent_node)
+        {
+            dfs_binary_lifting(nei, node, dist + 1, adj_list);
+        }
+    }
+}
+/*
+    1) Bringing all the nodes onto the same level/depth.
+    2) Then apply the jth binary lifting .
+    3) Finding lca and then finding combined query across simple paths
+        such as finding minima,maxima,gcd etc  coming under the category of path aggregates.
+    4) Prefix sum on trees.
+    5) Partial sums on trees .
+    6) More ideas on binary lifting .
+*/
+int binary_lifting_lca()
+{
+    // Finding kth instance of a previously precomputed values by
+    // splitting it in powers of such that the jth power can be computed
+    // by (j-1)th and (j-1)th power respectively .
+    int n;
+    cin >> n;
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    // Finding LCA the trivial method to find is
+    // to trace path to root node from each pair of (u,v) and
+    // iterating longest suffix array for each ancestors path will give use the answer .
+    // but here we will use the binaray lifting on ancestor by firstly
+    // getting both at same level and then iterating in powers of 2 until the node becomes none .
+    dfs_binary_lifting(1, 0, 0, adj_list);
+    // Pair between lca has to be found .
+    int u, v;
+    cin >> u >> v;
+    // We consider that uth node is at a lower depth or higher level and v is at greater depth but
+    // lower level .
+    if (distances[v] > distances[u])
+    {
+        swap(u, v);
+    }
+    // Bringing both the nodes to same level .
+    int k = distances[v] - distances[u];
+    for (int x = 19; x >= 1; x--)
+    {
+        // Taking each set bit and moving the lower node by 2^jth ancestor .
+        // checking if set bit .
+        if (k & (1 << x))
+        {
+            u = ancestors[u][x];
+        }
+    }
+    for (int x = 19; x >= 1; x--)
+    {
+        if (u != v)
+        {
+            u = ancestors[u][x];
+            v = ancestors[v][x];
+        }
+    }
+    return ancestors[u][0];
+}
+
+int gcd(int a, int b)
+{
+    if (a == 1)
+        return 1;
+    return gcd(b % a, a);
+}
+vector<vector<int>> ancestors_gcd;
+vector<vector<int>> ancestors;
+
+void dfs_gcd_binary_lifting(int node, int parent_node, int dist, unordered_map<int, vector<int>> &adj_list)
+{
+    parent_nodes[node] = parent_node;
+    distances[node] = dist;
+    ancestors_gcd[node][0] = node;
+    ancestors[node][0] = parent_node;
+    // Upto 2^19 .
+    for (int x = 1; x <= 19; x++)
+    {
+        // Splitting 2^jth ancestor  = 2^j-1th and then that ancestors_gcd 2^jth ancestor .
+        ancestors[node][x] = ancestors[ancestors[node][x - 1]][x - 1];
+        ancestors_gcd[node][x] = gcd(ancestors_gcd[ancestors[node][x - 1]][x - 1], ancestors_gcd[node][x - 1]);
+    }
+    for (auto nei : adj_list[node])
+    {
+        if (nei != parent_node)
+        {
+            dfs_binary_lifting(nei, node, dist + 1, adj_list);
+        }
+    }
+}
+int finding_gcd_tree_simple_path()
+{
+    int n;
+    cin >> n;
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    dfs_binary_lifting(1, 0, 0, adj_list);
+    // Pair between lca has to be found .
+    int u, v;
+    cin >> u >> v;
+    // We consider that uth node is at a lower depth or higher level and v is at greater depth but
+    // lower level .
+    if (distances[v] > distances[u])
+    {
+        swap(u, v);
+    }
+    // Bringing both the nodes to same level .
+    int k = distances[v] - distances[u];
+    int ans = 0;
+    for (int x = 19; x >= 1; x--)
+    {
+        // Taking each set bit and moving the lower node by 2^jth ancestor .
+        // checking if set bit .
+        if (k & (1 << x))
+        {
+            u = ancestors[u][x];
+            ans = ancestors_gcd[u][x];
+        }
+    }
+    if (u == v)
+    {
+        return ans;
+    }
+    for (int x = 19; x >= 1; x--)
+    {
+        if (u != v)
+        {
+            ans = gcd(ans, ancestors_gcd[u][x]);
+            ans = gcd(ans, ancestors_gcd[v][x]);
+            u = ancestors[u][x];
+            v = ancestors[v][x];
+        }
+    }
+    ans = gcd(u, ans);
+    ans = gcd(v, ans);
+    ans = gcd(parent_nodes[u], ans);
+    return ans;
+}
+void solve()
+{
     // area_perimeter_components(grid_2);
     // infected_people();
     // save_yourself();
