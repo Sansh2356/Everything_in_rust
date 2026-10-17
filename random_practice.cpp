@@ -13106,6 +13106,29 @@ public:
         component_size--;
         return component_size;
     }
+    int merge_3(int node_x, int node_y)
+    {
+        int root_x = find(node_x, parents[node_x]);
+        int root_y = find(node_y, parents[node_y]);
+        if (root_x == root_y)
+            return -1;
+        int rank_x = rank[root_x];
+        int rank_y = rank[root_y];
+        // Rank compression merging smaller component onto the larger one .
+        if (rank[root_x] >= rank[root_y])
+        {
+            parents[root_y] = root_x;
+            rank[root_x] += rank[root_y];
+        }
+        else if (rank[root_x] < rank[root_y])
+        {
+            parents[root_x] = root_y;
+            rank[root_y] += rank[root_x];
+        }
+        component_size--;
+        // The component sizes after merging of the nodes .
+        return rank_x * rank_y;
+    }
 };
 void simple_disjoint_union()
 {
@@ -13247,6 +13270,35 @@ void kruskal()
         cout << total_cost << "\n";
     }
 }
+void min_edge_wt()
+{
+    int n;
+    cin >> n;
+    vector<pair<int, pair<int, int>>> edges;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--;
+        v--;
+        edges.push_back({w, {u, v}});
+    }
+    sort(edges.begin(), edges.end());
+    reverse(edges.begin(), edges.end());
+    ll ans = 0;
+    DSU *new_obj = new DSU(n);
+    for (int x = 0; x < edges.size(); x++)
+    {
+        int wt = edges[x].first;
+        int u = edges[x].second.first;
+        int v = edges[x].second.second;
+        ll val = new_obj->merge_2(u, v);
+        ans += val * wt;
+    }
+
+    cout << ans << "\n";
+}
+
 int primeSubarray(vector<int> &nums, int k)
 {
 }

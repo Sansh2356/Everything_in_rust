@@ -474,9 +474,9 @@ public:
 int resilientSubarray(vector<int> &nums, int k)
 {
 }
-
 void solve()
 {
+    // min_edge_wt();
     // kruskal();
     // remove_edges();
     // area_perimeter_components(grid_2);
@@ -634,8 +634,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    // cin >> t;
-    t = 1;
+    cin >> t;
+    // t = 1;
     while (t--)
     {
         solve();
