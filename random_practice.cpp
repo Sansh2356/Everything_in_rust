@@ -12615,6 +12615,638 @@ void area_perimeter_components(vector<string> &grid_2)
     }
     cout << maxi_area << " " << mini_peri << "\n";
 }
+// Constructing the binary lifting data structure being used to
+// compute the ancestore afterwards stored upto logn powers for each node.
+vector<vector<int>> ancestors;
+vector<int> parent_nodes;
+vector<int> distances;
+void dfs_binary_lifting(int node, int parent_node, int dist, unordered_map<int, vector<int>> &adj_list)
+{
+    parent_nodes[node] = parent_node;
+    distances[node] = dist;
+    ancestors[node][0] = parent_node;
+    // Upto 2^19 .
+    for (int x = 1; x <= 19; x++)
+    {
+        // Splitting 2^jth ancestor  = 2^j-1th and then that ancestors 2^jth ancestor .
+        ancestors[node][x] = ancestors[ancestors[node][x - 1]][x - 1];
+    }
+    for (auto nei : adj_list[node])
+    {
+        if (nei != parent_node)
+        {
+            dfs_binary_lifting(nei, node, dist + 1, adj_list);
+        }
+    }
+}
+/*
+1) Bringing all the nodes onto the same level/depth.
+2) Then apply the jth binary lifting .
+3) Finding lca and then finding combined query across simple paths
+such as finding minima,maxima,gcd etc  coming under the category of path aggregates.
+4) Prefix sum on trees.
+5) Partial sums on trees .
+6) More ideas on binary lifting .
+*/
+vector<vector<int>> ancestors_gcd;
+vector<vector<int>> ancestors;
+int binary_lifting_lca()
+{
+    // Finding kth instance of a previously precomputed values by
+    // splitting it in powers of such that the jth power can be computed
+    // by (j-1)th and (j-1)th power respectively .
+    int n;
+    cin >> n;
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    // Finding LCA the trivial method to find is
+    // to trace path to root node from each pair of (u,v) and
+    // iterating longest suffix array for each ancestors path will give use the answer .
+    // but here we will use the binaray lifting on ancestor by firstly
+    // getting both at same level and then iterating in powers of 2 until the node becomes none .
+    dfs_binary_lifting(1, 0, 0, adj_list);
+    // Pair between lca has to be found .
+    int u, v;
+    cin >> u >> v;
+    // We consider that uth node is at a lower depth or higher level and v is at greater depth but
+    // lower level .
+    if (distances[v] > distances[u])
+    {
+        swap(u, v);
+    }
+    // Bringing both the nodes to same level .
+    int k = distances[v] - distances[u];
+    for (int x = 19; x >= 1; x--)
+    {
+        // Taking each set bit and moving the lower node by 2^jth ancestor .
+        // checking if set bit .
+        if (k & (1 << x))
+        {
+            u = ancestors[u][x];
+        }
+    }
+    for (int x = 19; x >= 1; x--)
+    {
+        if (u != v)
+        {
+            u = ancestors[u][x];
+            v = ancestors[v][x];
+        }
+    }
+    return ancestors[u][0];
+}
+
+void dfs_gcd_binary_lifting(int node, int parent_node, int dist, unordered_map<int, vector<int>> &adj_list)
+{
+    parent_nodes[node] = parent_node;
+    distances[node] = dist;
+    ancestors_gcd[node][0] = node;
+    ancestors[node][0] = parent_node;
+    // Upto 2^19 .
+    for (int x = 1; x <= 19; x++)
+    {
+        // Splitting 2^jth ancestor  = 2^j-1th and then that ancestors_gcd 2^jth ancestor .
+        ancestors[node][x] = ancestors[ancestors[node][x - 1]][x - 1];
+        ancestors_gcd[node][x] = gcd(ancestors_gcd[ancestors[node][x - 1]][x - 1], ancestors_gcd[node][x - 1]);
+    }
+    for (auto nei : adj_list[node])
+    {
+        if (nei != parent_node)
+        {
+            dfs_binary_lifting(nei, node, dist + 1, adj_list);
+        }
+    }
+}
+int finding_gcd_tree_simple_path()
+{
+    int n;
+    cin >> n;
+    unordered_map<int, vector<int>> adj_list;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    dfs_binary_lifting(1, 0, 0, adj_list);
+    // Pair between lca has to be found .
+    int u, v;
+    cin >> u >> v;
+    // We consider that uth node is at a lower depth or higher level and v is at greater depth but
+    // lower level .
+    if (distances[v] > distances[u])
+    {
+        swap(u, v);
+    }
+    // Bringing both the nodes to same level .
+    int k = distances[v] - distances[u];
+    int ans = 0;
+    for (int x = 19; x >= 1; x--)
+    {
+        // Taking each set bit and moving the lower node by 2^jth ancestor .
+        // checking if set bit .
+        if (k & (1 << x))
+        {
+            u = ancestors[u][x];
+            ans = ancestors_gcd[u][x];
+        }
+    }
+    if (u == v)
+    {
+        return ans;
+    }
+    for (int x = 19; x >= 1; x--)
+    {
+        if (u != v)
+        {
+            ans = gcd(ans, ancestors_gcd[u][x]);
+            ans = gcd(ans, ancestors_gcd[v][x]);
+            u = ancestors[u][x];
+            v = ancestors[v][x];
+        }
+    }
+    ans = gcd(u, ans);
+    ans = gcd(v, ans);
+    ans = gcd(parent_nodes[u], ans);
+    return ans;
+}
+class BusBooking
+{
+public:
+    /*
+        Size of (n*4) seat matrix where n are rows and 4 are seats A,B,C,D
+        in each row.
+        Booking a middle seat ("B" or "C") always takes 1 second.
+        Booking a window seat ("A" or "D") takes 1 second if its adjacent middle
+       seat is not booked, or 3 seconds (an extra delay of 2 seconds) if its
+       adjacent middle seat is already booked.
+    */
+    vector<vector<int>> grid;
+    vector<vector<int>> costs;
+    map<char, int> m;
+    multiset<pair<int, int>> window_seats;
+    multiset<pair<int, int>> middle_seats;
+    int cost_till_now;
+
+    BusBooking(int n)
+    {
+        // cout << "BusBooking: rows = " << n << "\n";
+        cost_till_now = 0;
+        grid.resize(n, vector<int>(4, -1));
+        costs.resize(n, vector<int>(4, 0));
+        m['A'] = 0;
+        m['B'] = 1;
+        m['C'] = 2;
+        m['D'] = 3;
+        // cout << "Initial total time = " << cost_till_now << "\n";
+    }
+    void toggle(string seat)
+    {
+        // cout << "toggle: seat = " << seat << "\n";
+        int seat_idx = this->m[seat[0]];
+        int row_num = stoi(seat.substr(1, seat.size())) - 1;
+        // cout << "Row index = " << row_num << ", seat index = " << seat_idx
+        //      << "\n";
+        // Not booked then we will add the cost of booking .
+        if (grid[row_num][seat_idx] == -1)
+        {
+            // cout << "Booking seat " << seat << "\n";
+            grid[row_num][seat_idx] = 1;
+
+            if (seat_idx == 0 || seat_idx == 3)
+            {
+                // Window seat .
+                window_seats.insert({row_num, seat_idx});
+                if (seat_idx == 0)
+                {
+                    if (grid[row_num][1] == 1)
+                    {
+                        cost_till_now += 3;
+                        costs[row_num][seat_idx] = 3;
+                        // cout
+                        // << "Adjacent middle seat booked: added 3 seconds\n";
+                    }
+                    else
+                    {
+                        cost_till_now++;
+                        costs[row_num][seat_idx] = 1;
+                        // cout << "Adjacent middle seat free: added 1 second\n";
+                    }
+                }
+                else
+                {
+                    if (grid[row_num][2] == 1)
+                    {
+                        cost_till_now += 3;
+                        costs[row_num][seat_idx] = 3;
+                        // cout
+                        // << "Adjacent middle seat booked: added 3 seconds\n";
+                    }
+                    else
+                    {
+                        cost_till_now++;
+                        costs[row_num][seat_idx] = 1;
+                        // cout << "Adjacent middle seat free: added 1 second\n";
+                    }
+                }
+            }
+            else
+            {
+                middle_seats.insert({row_num, seat_idx});
+                costs[row_num][seat_idx] = 1;
+                cost_till_now++;
+                // cout << "Middle seat: added 1 second\n";
+            }
+        }
+        // Already booked then we will make it free and no cost is added.
+        else if (grid[row_num][seat_idx] == 1)
+        {
+            // cout << "Freeing seat " << seat << ": added 0 seconds\n";
+            grid[row_num][seat_idx] = -1;
+            if (seat_idx == 0 || seat_idx == 3)
+            {
+                // Window seat unallocation.
+                window_seats.erase(window_seats.find({row_num, seat_idx}));
+                cost_till_now -= costs[row_num][seat_idx];
+            }
+            else
+            {
+                // Middle seat unallocation .
+                middle_seats.erase(middle_seats.find({row_num, seat_idx}));
+                cost_till_now -= costs[row_num][seat_idx];
+            }
+            costs[row_num][seat_idx] = 0;
+        }
+        // cout << "Total time = " << cost_till_now << "\n";
+        // cout << "Booked window seats = " << window_seats.size()
+        //      << ", booked middle seats = " << middle_seats.size() << "\n";
+    }
+    vector<int> distance_list;
+    vector<int> parent_list;
+
+    // No need of visited since in tree there will never be a backedge.
+    void tree_dfs(int curr_node, int parent_node, unordered_map<int, vector<int>> &adj_list, int dist)
+    {
+        // updating the new distance to the child node by the previously added
+        // distance of 1 unit by parent node .
+        cout << curr_node << " " << parent_node << " " << dist << "\n";
+        distance_list[curr_node] = dist;
+        for (auto nei : adj_list[curr_node])
+        {
+            if (nei != parent_node)
+            {
+                // being a tree it will always be reachable from
+                // parent by extending distance by unit 1 due to which both dfs and bfs produces the single unique simple path that can exist
+                // between a pair of nodes .
+                parent_list[nei] = curr_node;
+                tree_dfs(nei, curr_node, adj_list, dist + 1);
+            }
+        }
+    }
+    void tree_based_question()
+    {
+        int n;
+        cin >> n;
+        distance_list.resize(n + 1, 0);
+        parent_list.resize(n + 1, 0);
+        unordered_map<int, vector<int>> adj_list;
+        for (int x = 1; x <= n - 1; x++)
+        {
+            int u, v;
+            cin >> u >> v;
+            adj_list[u].push_back(v);
+            adj_list[v].push_back(u);
+        }
+        tree_dfs(1, 0, adj_list, 0);
+        for (int x = 2; x <= n; x++)
+        {
+            cout << "Shortest possible distance existing between 1 and " << x << " is " << distance_list[x] << "\n";
+        }
+
+        // Finding the longest possible shortest path will give us the diameter of a tree .
+        // either we can go around on each vertice and apply dfs and then iterate over distance and update
+        // the maximum value or we can also use double dfs approach by applying that x ----> y and then y ----> z
+        // this will maximize the distance between any 2 nodes in a tree and thus the diameter .
+        int maxi_dist_node = 0;
+        int maxi_dist = 0;
+        for (int x = 1; x < distance_list.size(); x++)
+        {
+            if (distance_list[x] > maxi_dist)
+            {
+                maxi_dist = distance_list[x];
+                maxi_dist_node = x;
+            }
+        }
+        tree_dfs(maxi_dist_node, 0, adj_list, 0);
+        int diameter = 0;
+        for (int x = 1; x < distance_list.size(); x++)
+        {
+            if (distance_list[x] > diameter)
+                diameter = distance_list[x];
+        }
+        cout << "Diameter for the given tree is - " << diameter << "\n";
+
+        // Finding center of tree that will be atmost 2 in case of odd length
+        // and in case of even length of diameter will be a single center that can be found out
+        // by iterating by middle point node .
+        for (int x = 1; x < parent_list.size(); x++)
+        {
+            cout << parent_list[x];
+        }
+        cout << "\n";
+        cout << maxi_dist_node << "\n";
+        int center_node = 0;
+        if (diameter % 2)
+        {
+            for (int x = 0; x < diameter / 2; x++)
+            {
+                center_node = parent_list[maxi_dist_node];
+                maxi_dist_node = center_node;
+            }
+            cout << center_node << parent_list[center_node] << "\n";
+            int c1 = center_node;
+            int c2 = parent_list[center_node];
+            distance_list.assign(n + 1, 0);
+            tree_dfs(c1, c2, adj_list, 0);
+            for (int x = 1; x <= n; x++)
+            {
+                if (distance_list[x] == diameter / 2)
+                {
+                    cout << distance_list[x] << " " << x << " ";
+                }
+            }
+            cout << " ------------------------------------ \n";
+            distance_list.assign(n + 1, 0);
+            tree_dfs(c2, c1, adj_list, 0);
+            for (int x = 1; x <= n; x++)
+            {
+                if (distance_list[x] == diameter / 2)
+                {
+                    cout << distance_list[x] << " " << x << " ";
+                }
+            }
+            cout << " ------------------------------------ \n";
+        }
+        else
+        {
+            for (int x = 0; x < diameter / 2; x++)
+            {
+                center_node = parent_list[maxi_dist_node];
+                maxi_dist_node = center_node;
+            }
+            cout << center_node << '\n';
+            for (auto child : adj_list[center_node])
+            {
+                distance_list.assign(n + 1, 0);
+                tree_dfs(child, center_node, adj_list, 0);
+                for (int x = 1; x <= n; x++)
+                {
+                    if (distance_list[x] == diameter / 2)
+                    {
+                        cout << distance_list[x] << " " << x << " ";
+                    }
+                }
+                cout << " ------------------------------------ \n";
+            }
+        }
+    }
+    int getTotalTime()
+    {
+        // cout << "getTotalTime: " << cost_till_now << "\n";
+        return cost_till_now;
+    }
+    // Booking the window seat before any middle seat of each row that will
+    // allow us to get minimum cost.
+    int getMinTime()
+    {
+        // cout << "getMinTime: "
+        //      << (int)window_seats.size() + (int)middle_seats.size() << "\n";
+        return (int)window_seats.size() + (int)middle_seats.size();
+    }
+};
+// DSU + union find
+class DSU
+{
+public:
+    int sz;
+    vector<int> rank;
+    vector<int> parents;
+    int component_size;
+    DSU(int n)
+    {
+        this->component_size = n;
+        this->sz = n;
+        rank.resize(n);
+        parents.resize(n);
+        for (int x = 0; x < sz; x++)
+        {
+            rank[x] = 1;
+            parents[x] = x;
+        }
+    }
+
+    // Finding root of the given node's component using path compression.
+    // this will again reduce the complexity by restricting the tree height to logn .
+    int find(int node, int parent_node)
+    {
+        // if(node == parent_node)return node;
+        // find(parent_node,parents[parent_node]);
+        // Applying path compression here .
+        if (node != parent_node)
+            return parents[node] = find(parent_node, parents[parent_node]);
+        return node;
+    }
+    // Merging node_x and node_y into each other component
+    // depending on their ranks that will be used for optimizing
+    // the height of tree thus making it efficient
+    // at O(log n) being the complexity with logn the atmost height of tree termed as rank compression.
+    void merge(int node_x, int node_y)
+    {
+        int root_x = find(node_x, parents[node_x]);
+        int root_y = find(node_y, parents[node_y]);
+        if (root_x == root_y)
+            return;
+        // Rank compression merging smaller component onto the larger one .
+        if (rank[root_x] >= rank[root_y])
+        {
+            parents[root_y] = root_x;
+            rank[root_x] += rank[root_y];
+        }
+        else if (rank[root_x] < rank[root_y])
+        {
+            parents[root_x] = root_y;
+            rank[root_y] += rank[root_x];
+        }
+        component_size--;
+    }
+    int merge_2(int node_x, int node_y)
+    {
+        int root_x = find(node_x, parents[node_x]);
+        int root_y = find(node_y, parents[node_y]);
+        if (root_x == root_y)
+            return -1;
+        // Rank compression merging smaller component onto the larger one .
+        if (rank[root_x] >= rank[root_y])
+        {
+            parents[root_y] = root_x;
+            rank[root_x] += rank[root_y];
+        }
+        else if (rank[root_x] < rank[root_y])
+        {
+            parents[root_x] = root_y;
+            rank[root_y] += rank[root_x];
+        }
+        component_size--;
+        return component_size;
+    }
+};
+void simple_disjoint_union()
+{
+    int n, q;
+    cin >> n >> q;
+    DSU *new_obj = new DSU(n);
+    while (q--)
+    {
+        int node_x, node_y;
+        int s;
+        cin >> s >> node_x >> node_y;
+        ;
+        if (s == 1)
+        {
+            int root_x = new_obj->find(node_x, new_obj->parents[node_x]);
+            int root_y = new_obj->find(node_y, new_obj->parents[node_y]);
+            if (root_x == root_y)
+            {
+                cout << 1 << "\n";
+                continue;
+            }
+            else
+            {
+                cout << "0 \n";
+            }
+        }
+        else if (s == 0)
+        {
+            new_obj->merge(node_x, node_y);
+        }
+    }
+}
+
+void remove_edges()
+{
+    int n, m, q;
+    cin >> n >> m >> q;
+    vector<pair<int, int>> edges;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+        edges.push_back({u, v});
+    }
+    DSU *new_obj = new DSU(n);
+    vector<pair<int, int>> queries;
+    vector<bool> edges_visited(m, false);
+    while (q--)
+    {
+        int s;
+        cin >> s;
+        if (s == 1)
+        {
+            int edge_idx;
+            cin >> edge_idx;
+            edge_idx--;
+            edges_visited[edge_idx] = true;
+            queries.push_back({1, edge_idx});
+        }
+        else if (s == 2)
+        {
+            queries.push_back({2, -1});
+        }
+    }
+    for (int x = 0; x < edges_visited.size(); x++)
+    {
+        if (edges_visited[x] == false)
+        {
+            auto p = edges[x];
+            new_obj->merge(p.first, p.second);
+        }
+    }
+    vector<int> ans;
+    for (int x = queries.size() - 1; x >= 0; x--)
+    {
+        int a = queries[x].first;
+        int b = queries[x].second;
+
+        if (a == 2)
+        {
+            ans.push_back(new_obj->component_size);
+        }
+        else if (a == 1)
+        {
+            auto edge = edges[b];
+            new_obj->merge(edge.first, edge.second);
+        }
+    }
+    for (int x = ans.size() - 1; x >= 0; x--)
+    {
+        cout << ans[x] << "\n";
+    }
+}
+void kruskal()
+{
+    int n, m;
+    cin >> n >> m;
+    priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;
+    for (int x = 0; x < m; x++)
+    {
+        int u, v, c;
+        cin >> u >> v >> c;
+        u--;
+        v--;
+        pq.push({c, {u, v}});
+    }
+    long long total_cost = 0;
+    int cnt = 0;
+    DSU *new_obj = new DSU(n);
+    while (!pq.empty())
+    {
+        int c = pq.top().first;
+        int u = pq.top().second.first;
+        int v = pq.top().second.second;
+        pq.pop();
+        int a = new_obj->merge_2(u, v);
+        a == -1 ? total_cost += 0 : total_cost += c;
+        if (a != -1)
+        {
+            cnt++;
+        }
+    }
+    // for (int x = 0; x < new_obj->parents.size() - 1; x++)
+    // {
+    //     if (new_obj->parents[x] != new_obj->parents[x + 1])
+    //     {
+    //         cout << "IMPOSSIBLE \n";
+    //         return;
+    //     }
+    // }
+    if (cnt != n - 1)
+    {
+        cout << "IMPOSSIBLE \n";
+    }
+    else
+    {
+        cout << total_cost << "\n";
+    }
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
