@@ -474,8 +474,16 @@ public:
 int resilientSubarray(vector<int> &nums, int k)
 {
 }
+// Same as alien dictionary by forming graph aroun the given
+// rank and finding if any cyclic dependency exists or not .
+void pappu_and_words()
+{
+}
+
 void solve()
 {
+    // 1 = . and 0 = #
+    // vivek_and_clicks();
     // min_edge_wt();
     // kruskal();
     // remove_edges();

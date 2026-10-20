@@ -13298,7 +13298,238 @@ void min_edge_wt()
 
     cout << ans << "\n";
 }
+vector<int> values_nodes;
+vector<int> tree_size;
 
+// No need of visited since in tree there will never be a backedge.
+void tree_dfs_contest(int curr_node, int parent_node, unordered_map<int, vector<int>> &adj_list, int dist, int cnt, vector<int> &node_val, int curr_maxi)
+{
+    // updating the new distance to the child node by the previously added
+    // distance of 1 unit by parent node .
+    distance_list[curr_node] = dist;
+    parent_list[curr_node] = parent_node;
+    values_nodes[curr_node] = max(curr_maxi, cnt);
+    curr_maxi = max(curr_maxi, cnt);
+    tree_size[curr_node] = 1;
+
+    for (auto nei : adj_list[curr_node])
+    {
+        if (nei != parent_node)
+        {
+            if (node_val[nei] == 0)
+            {
+                tree_dfs_contest(nei, curr_node, adj_list, dist + 1, 0, node_val, curr_maxi);
+                tree_size[curr_node] += tree_size[nei];
+            }
+            else
+            {
+                tree_dfs_contest(nei, curr_node, adj_list, dist + 1, cnt + 1, node_val, curr_maxi);
+                tree_size[curr_node] += tree_size[nei];
+            }
+        }
+    }
+}
+vector<int> distance_list;
+vector<int> parent_list;
+
+void contest_graphs()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<int> node_val(n);
+    distance_list.assign(n, 0);
+    parent_list.assign(n, 0);
+    values_nodes.assign(n, 0);
+    tree_size.assign(n, 0);
+
+    for (int x = 0; x < n; x++)
+    {
+        cin >> node_val[x];
+    }
+    unordered_map<int, vector<int>> adj_list;
+    vector<pair<int, int>> edges;
+    for (int x = 1; x <= n - 1; x++)
+    {
+        int u, v;
+        cin >> u >> v;
+        edges.push_back({u, v});
+        u--;
+        v--;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    tree_dfs_contest(0, -1, adj_list, 0, node_val[0] == 1 ? 1 : 0, node_val, 0);
+    int ans = 0;
+    for (int x = 0; x < n; x++)
+    {
+        if (tree_size[x] == 1 && values_nodes[x] <= m)
+        {
+            ans++;
+        }
+    }
+
+    cout << ans << "\n";
+}
+bool check_vivek_and_clicks(int r, int c, int n, int m)
+{
+    if (r < 0 || c < 0 || r >= n || c >= m)
+        return false;
+    return true;
+}
+int current_component_number;
+int component_size;
+void bfs_vivek_and_clicks(int row, int col, vector<vector<bool>> &visited, vector<vector<int>> &grid, int n, int m, vector<vector<int>> &cell_mapping)
+{
+    queue<pair<int, int>> q;
+    q.push({row, col});
+    visited[row][col] = true;
+    while (q.empty() == false)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        vector<int> dx = {1, -1, 0, 0};
+        vector<int> dy = {0, 0, 1, -1};
+        component_size++;
+        cell_mapping[r][c] = current_component_number;
+        q.pop();
+        for (int x = 0; x < dx.size(); x++)
+        {
+            int new_r = dx[x] + r;
+            int new_c = dy[x] + c;
+
+            if (check_vivek_and_clicks(new_r, new_c, n, m) && grid[new_r][new_c] == 1 && visited[new_r][new_c] == false)
+            {
+                visited[new_r][new_c] = true;
+                q.push({new_r, new_c});
+            }
+        }
+    }
+}
+void vivek_and_clicks()
+{
+    int n, m, q;
+    cin >> n >> m >> q;
+    current_component_number = 0;
+    vector<vector<bool>> visited(n, vector<bool>(m, false));
+    vector<vector<int>> grid(n, vector<int>(m, 0));
+    vector<vector<int>> cell_mapping(n, vector<int>(m, 0));
+    unordered_map<int, int> component_size_mapping;
+    set<int> visited_components;
+    int total_white_cells = 0;
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            cin >> grid[x][y];
+            if (grid[x][y] == 1)
+                total_white_cells++;
+        }
+    }
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            if (visited[x][y] == false && grid[x][y] == 1)
+            {
+                current_component_number++;
+                component_size = 0;
+                bfs_vivek_and_clicks(x, y, visited, grid, n, m, cell_mapping);
+                component_size_mapping[current_component_number] = component_size;
+            }
+        }
+    }
+    while (q--)
+    {
+        int u, v;
+        cin >> u >> v;
+        u--;
+        v--;
+        // Black cell
+        if (grid[u][v] == 0)
+        {
+            cout << total_white_cells << "\n";
+        }
+        // White cell
+        else
+        {
+            int cp = cell_mapping[u][v];
+            int cp_size = component_size_mapping[cp];
+            if (visited_components.count(cp) == false)
+            {
+                total_white_cells -= cp_size;
+                visited_components.insert(cp);
+            }
+            cout << total_white_cells << "\n";
+        }
+    }
+}
+bool check_minimum_time(int r, int c, int n, int m)
+{
+    if (r < 0 || c < 0 || r >= n || c >= m)
+        return false;
+    return true;
+}
+void bfs_minimum_time()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> grid(n, vector<int>(m, 0));
+    vector<vector<bool>> visited(n, vector<bool>(m, false));
+    vector<vector<bool>> dist(n, vector<bool>(m, INT_MAX));
+
+    for (int x = 0; x < n; x++)
+    {
+        for (int y = 0; y < m; y++)
+        {
+            char ch;
+            cin >> ch;
+            if (ch == '.')
+            {
+                grid[x][y] = 1;
+            }
+            else
+            {
+                grid[x][y] = 0;
+            }
+        }
+    }
+    int u, v, a, b;
+    cin >> u >> v >> a >> b;
+    queue<pair<int, int>> q;
+    vector<vector<int>> dist(n, vector<int>(m, INT_MAX));
+    q.push({u, v});
+    dist[u][v] = 0;
+    while (q.empty() == false)
+    {
+        int r = q.front().first;
+        int c = q.front().second;
+        if (visited[r][c])
+            continue;
+        visited[r][c] = true;
+        vector<int> dx = {1, -1, 0, 0, 1, 1, -1, -1};
+        vector<int> dy = {0, 0, 1, -1, -1, 1, -1, 1};
+        q.pop();
+        for (int x = 0; x < dx.size(); x++)
+        {
+            int new_r = dx[x] + r;
+            int new_c = dy[x] + c;
+
+            if (check_minimum_time(new_r, new_c, n, m) && grid[new_r][new_c] == 1 && visited[new_r][new_c] == false && dist[new_r][new_c] > dist[r][c] + 1)
+            {
+                dist[new_r][new_c] = dist[r][c] + 1;
+                q.push({new_r, new_c});
+            }
+        }
+    }
+    if (dist[a][b] == INT_MAX)
+    {
+        cout << -1 << "\n";
+    }
+    else
+    {
+        cout << dist[a][b] << "\n";
+    }
+}
 int primeSubarray(vector<int> &nums, int k)
 {
 }
