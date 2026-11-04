@@ -3,6 +3,7 @@
 #include <climits>
 #include <set>
 #include <map>
+#include <bitset>
 #include <queue>
 #include <list>
 #include <algorithm>
@@ -479,9 +480,72 @@ int resilientSubarray(vector<int> &nums, int k)
 void pappu_and_words()
 {
 }
-
+class BitOperation
+{
+public:
+    bitset<60> st;
+    BitOperation()
+    {
+    }
+};
 void solve()
 {
+    int q;
+    cin >> q;
+    BitOperation *new_obj = new BitOperation();
+    
+    while (q--)
+    {
+        int q_type;
+        cin >> q_type;
+        if (q_type == 1)
+        {
+            int i;
+            cin >> i;
+            cout << new_obj->st.test(i) << "\n";
+        }
+        else if (q_type == 2)
+        {
+            int i;
+            cin >> i;
+            new_obj->st.set(i);
+        }
+        else if (q_type == 3)
+        {
+            int i;
+            cin >> i;
+            int v = new_obj->st[i];
+            if (v == 1)
+                new_obj->st.flip(i);
+        }
+        else if (q_type == 4)
+        {
+            int i;
+            cin >> i;
+            new_obj->st.flip(i);
+        }
+        else if (q_type == 5)
+        {
+            cout << (new_obj->st.all() == true ? 1 : 0) << "\n";
+        }
+        else if (q_type == 6)
+        {
+            cout << (new_obj->st.any() == true ? 1 : 0) << "\n";
+        }
+        else if (q_type == 7)
+        {
+            cout << (new_obj->st.none() == true ? 1 : 0) << "\n";
+        }
+        else if (q_type == 8)
+        {
+            cout << new_obj->st.count() << "\n";
+        }
+        else
+        {
+            cout << new_obj->st.to_ulong()<< "\n";
+        }
+    }
+
     // 1 = . and 0 = #
     // vivek_and_clicks();
     // min_edge_wt();
@@ -642,8 +706,8 @@ int main()
     cin.tie(0);
     cout.tie(0);
     ll t;
-    cin >> t;
-    // t = 1;
+    // cin >> t;
+    t = 1;
     while (t--)
     {
         solve();
