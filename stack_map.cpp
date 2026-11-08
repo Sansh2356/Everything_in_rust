@@ -471,7 +471,95 @@ public:
         return ans;
     }
 };
-
+/*
+    1) Form .
+    2) State.
+    3) Transition.
+    4) TL check  = number of states*(1+number of transitions).
+    5) Moving to implementation after TL check .
+*/
+int rec_3(int level, int sum_till_now, int target, vector<ll> &arr, vector<vector<ll>> &dp)
+{
+    // pruning
+    if (sum_till_now > target)
+    {
+        return 1e9;
+    }
+    // base case
+    if (level >= arr.size())
+    {
+        // Invalid sum since we only want exactly equal to target.
+        if (sum_till_now != target)
+        {
+            // No valid selection of integers .
+            return 1e9;
+        }
+        // One valid way .
+        return 0;
+    }
+    // cache check
+    if (dp[level][sum_till_now] != -1)
+        return dp[level][sum_till_now];
+    // compute
+    int ans = 0;
+    // take
+    ans = min(1 + rec_3(level + 1, sum_till_now + arr[level], target, arr, dp), rec_3(level + 1, sum_till_now, target, arr, dp));
+    // save_return
+    return dp[level][sum_till_now] = ans;
+}
+int rec_2(int level, int sum_till_now, int target, vector<int> &arr, vector<vector<ll>> &dp)
+{
+    // pruning
+    if (sum_till_now > target)
+    {
+        return 0;
+    }
+    // base case
+    if (level >= arr.size())
+    {
+        // Invalid sum since we only want exactly equal to target.
+        if (sum_till_now != target)
+        {
+            // No valid selection of integers .
+            return 0;
+        }
+        // One valid way .
+        return 1;
+    }
+    // cache check
+    if (dp[level][sum_till_now] != -1)
+        return dp[level][sum_till_now];
+    // compute
+    int ans = 0;
+    // take
+    ans += rec_2(level + 1, sum_till_now + arr[level], target, arr, dp);
+    // no take
+    ans += rec_2(level + 1, sum_till_now, target, arr, dp);
+    // save_return
+    return dp[level][sum_till_now] = ans;
+}
+ll rec(ll level, ll sum_till_now, ll capacity, vector<pair<ll, ll>> values, vector<vector<ll>> &dp)
+{
+    // pruning
+    if (sum_till_now > capacity)
+    {
+        return -1e9;
+    }
+    // base case
+    if (level >= values.size())
+    {
+        return 0;
+    }
+    // caching values
+    if (dp[level][sum_till_now] != -1)
+        return dp[level][sum_till_now];
+    // compute
+    ll ans = 0;
+    // Transitions will only be 2 so taken and not taken.
+    ans = max(values[level].second + rec(level + 1, sum_till_now + values[level].first, capacity, values, dp), rec(level + 1, sum_till_now, capacity, values, dp));
+    // save and return
+    return dp[level][sum_till_now] = ans;
+}
 int resilientSubarray(vector<int> &nums, int k)
 {
 }
@@ -480,71 +568,28 @@ int resilientSubarray(vector<int> &nums, int k)
 void pappu_and_words()
 {
 }
-class BitOperation
-{
-public:
-    bitset<60> st;
-    BitOperation()
-    {
-    }
-};
 void solve()
 {
-    int q;
-    cin >> q;
-    BitOperation *new_obj = new BitOperation();
-    
-    while (q--)
+    ll n, w;
+    cin >> n >> w;
+    vector<ll> arr(n);
+    for (ll x = 0; x < n; x++)
     {
-        int q_type;
-        cin >> q_type;
-        if (q_type == 1)
-        {
-            int i;
-            cin >> i;
-            cout << new_obj->st.test(i) << "\n";
-        }
-        else if (q_type == 2)
-        {
-            int i;
-            cin >> i;
-            new_obj->st.set(i);
-        }
-        else if (q_type == 3)
-        {
-            int i;
-            cin >> i;
-            int v = new_obj->st[i];
-            if (v == 1)
-                new_obj->st.flip(i);
-        }
-        else if (q_type == 4)
-        {
-            int i;
-            cin >> i;
-            new_obj->st.flip(i);
-        }
-        else if (q_type == 5)
-        {
-            cout << (new_obj->st.all() == true ? 1 : 0) << "\n";
-        }
-        else if (q_type == 6)
-        {
-            cout << (new_obj->st.any() == true ? 1 : 0) << "\n";
-        }
-        else if (q_type == 7)
-        {
-            cout << (new_obj->st.none() == true ? 1 : 0) << "\n";
-        }
-        else if (q_type == 8)
-        {
-            cout << new_obj->st.count() << "\n";
-        }
-        else
-        {
-            cout << new_obj->st.to_ulong()<< "\n";
-        }
+        cin >> arr[x];
     }
+    vector<vector<ll>> dp(1001, vector<ll>(1e5 + 1, -1));
+    cout << rec_3(0, 0, w, arr, dp) << "\n";
+    // ll n, w;
+    // cin >> n >> w;
+    // vector<pair<ll, ll>> arr(n);
+    // for (ll x = 0; x < n; x++)
+    // {
+    //     ll u, v;
+    //     cin >> u >> v;
+    //     arr[x] = {u, v};
+    // }
+    // vector<vector<ll>> dp(1001, vector<ll>(1e5 + 1, -1));
+    // cout << rec(0, 0, w, arr, dp) << "\n";
 
     // 1 = . and 0 = #
     // vivek_and_clicks();
@@ -723,4 +768,11 @@ int main()
     7) Ancestral states based question + data structures.
     8) Rerooting .
     9) DSU .
+
+    Dynamic programming -:
+    1) Presence of pure functions .
+    2) Form 1 - subset or lccm --- states and transitions and TL check.
+        for TL check  - #state(1 + average # of T) + code.
+        pruning,base-case,compute,cache-check and save and return .
+
 */
